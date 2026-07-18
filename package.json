@@ -1,0 +1,11 @@
+{
+  "name": "lilotop-sarl-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static corporate website for LILOTOP SARL.",
+  "scripts": {
+    "build": "node build-site.js",
+    "start": "python -m http.server 4173",
+    "check:links": "node audit-links.js"
+  }
+}

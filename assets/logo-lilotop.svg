@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 92" role="img" aria-labelledby="title desc">
+  <title id="title">Logo LILOTOP SARL</title>
+  <desc id="desc">Identite visuelle professionnelle pour LILOTOP SARL</desc>
+  <rect width="330" height="92" fill="none"/>
+  <g>
+    <rect x="4" y="4" width="84" height="84" fill="#17202a"/>
+    <rect x="13" y="13" width="66" height="66" fill="none" stroke="#f1c95b" stroke-width="4"/>
+    <path d="M32 24h13v33h23v11H32z" fill="#f1c95b"/>
+    <path d="M61 25h7v7h-7zM61 37h7v7h-7z" fill="#b96d35"/>
+  </g>
+  <g fill="#ffffff">
+    <text x="106" y="43" font-family="Arial, Helvetica, sans-serif" font-size="31" font-weight="800" letter-spacing="1">LILOTOP</text>
+    <text x="108" y="66" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="5" fill="#f1c95b">SARL</text>
+  </g>
+  <path d="M108 75h155" stroke="#b96d35" stroke-width="3"/>
+</svg>
