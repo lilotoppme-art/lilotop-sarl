@@ -41,7 +41,7 @@ if (header && toggle && nav) {
 const revealItems = document.querySelectorAll(".reveal");
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-revealItems.forEach((item, index) => {
+revealItems.forEach((item) => {
   const group = item.parentElement ? Array.from(item.parentElement.querySelectorAll(".reveal")) : [];
   const groupIndex = Math.max(group.indexOf(item), 0);
   item.style.setProperty("--reveal-delay", `${Math.min(groupIndex * 55, 220)}ms`);
@@ -66,7 +66,6 @@ const animateCounter = (node) => {
   const label = node.textContent;
   const target = Number(node.dataset.counter);
   if (!target || label.includes("/")) return;
-  let start = 0;
   const duration = 900;
   const started = performance.now();
   const tick = (now) => {
@@ -110,20 +109,63 @@ if (parallaxHero && !reduceMotion) {
 
 const quoteForm = document.querySelector("[data-quote-form]");
 if (quoteForm) {
-  quoteForm.addEventListener("submit", (event) => {
+  const status = quoteForm.querySelector("[data-form-status]");
+  const submitButton = quoteForm.querySelector('button[type="submit"]');
+  const initialButtonText = submitButton ? submitButton.textContent : "";
+  const isEnglish = document.documentElement.lang === "en";
+
+  const setStatus = (type, message) => {
+    if (!status) return;
+    status.className = `form-status ${type ? `is-${type}` : ""}`.trim();
+    status.textContent = message || "";
+  };
+
+  quoteForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    setStatus("", "");
+
+    if (!quoteForm.checkValidity()) {
+      quoteForm.reportValidity();
+      setStatus("error", isEnglish ? "Please complete all required fields before sending." : "Veuillez compléter tous les champs obligatoires avant l'envoi.");
+      return;
+    }
+
     const form = new FormData(quoteForm);
-    const subject = encodeURIComponent(`Demande de devis - ${form.get("company") || form.get("name") || "LILOTOP"}`);
-    const body = encodeURIComponent([
-      `Nom: ${form.get("name") || ""}`,
-      `Organisation: ${form.get("company") || ""}`,
-      `Email: ${form.get("email") || ""}`,
-      `Téléphone / WhatsApp: ${form.get("phone") || ""}`,
-      `Type de besoin: ${form.get("need") || ""}`,
-      "",
-      "Message:",
-      form.get("message") || "",
-    ].join("\n"));
-    window.location.href = `mailto:contact@lilotopsarl.com?subject=${subject}&body=${body}`;
+    if (form.get("website")) return;
+
+    const payload = Object.fromEntries(form.entries());
+    payload.consent = form.get("consent") === "on";
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = isEnglish ? "Sending..." : "Envoi en cours...";
+    }
+
+    try {
+      const response = await fetch(quoteForm.dataset.endpoint || "/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.ok) {
+        const configMissing = result.code === "EMAIL_SERVICE_NOT_CONFIGURED";
+        throw new Error(configMissing ? "config" : "send");
+      }
+
+      quoteForm.reset();
+      setStatus("success", isEnglish ? "Thank you. Your inquiry has been sent to LILOTOP SARL." : "Merci. Votre demande a bien été envoyée à LILOTOP SARL.");
+    } catch (error) {
+      const message = error.message === "config"
+        ? (isEnglish ? "The email service is not configured yet. Please contact us by email or WhatsApp." : "Le service d'envoi n'est pas encore configuré. Merci de nous contacter par e-mail ou WhatsApp.")
+        : (isEnglish ? "The message could not be sent. Please try again or contact us by email." : "Le message n'a pas pu être envoyé. Merci de réessayer ou de nous contacter par e-mail.");
+      setStatus("error", message);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = initialButtonText;
+      }
+    }
   });
 }

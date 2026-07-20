@@ -440,6 +440,13 @@ svg {
   box-shadow: var(--shadow-soft);
 }
 
+.button.is-disabled,
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+  transform: none;
+}
+
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
@@ -1519,6 +1526,35 @@ blockquote cite {
   font-weight: 900;
 }
 
+.credibility-card {
+  margin: 0;
+}
+
+.credibility-card span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(201, 154, 46, 0.28);
+  background: rgba(216, 170, 61, 0.1);
+  color: var(--gold-500);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.credibility-card h3 {
+  margin-bottom: 14px;
+  color: var(--navy-900);
+  font-size: 22px;
+}
+
+.credibility-card p {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
 .quote-band {
   position: relative;
   overflow: hidden;
@@ -1620,6 +1656,7 @@ blockquote cite {
     image-set(url("assets/infrastructure-projects.webp") type("image/webp"), url("assets/infrastructure-projects.png") type("image/png"));
 }
 
+.page-solutions .page-hero,
 .page-products .page-hero {
   background-image:
     linear-gradient(90deg, rgba(5, 13, 24, 0.96), rgba(5, 13, 24, 0.8) 48%, rgba(5, 13, 24, 0.42)),
@@ -1666,6 +1703,75 @@ blockquote cite {
 .page-hero .reveal {
   opacity: 1;
   transform: none;
+}
+
+.solutions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.solution-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.42fr) minmax(0, 1fr);
+  min-height: 330px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: var(--shadow-soft);
+}
+
+.solution-card picture,
+.solution-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.solution-card img {
+  object-fit: cover;
+  filter: saturate(0.92) contrast(1.08);
+}
+
+.solution-card > div {
+  padding: clamp(24px, 3vw, 34px);
+}
+
+.solution-card span {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--gold-500);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.solution-card h3 {
+  max-width: 520px;
+  margin: 0 0 18px;
+  color: var(--navy-900);
+  font-size: clamp(22px, 2.8vw, 32px);
+}
+
+.solution-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.solution-card li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.solution-card li svg {
+  margin-top: 2px;
+  color: var(--gold-500);
 }
 
 .product-panel {
@@ -1801,12 +1907,39 @@ blockquote cite {
   color: var(--muted);
 }
 
+.form .form-note {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.form-hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .form label {
   display: grid;
   gap: 7px;
   color: var(--navy-900);
   font-size: 13px;
   font-weight: 900;
+}
+
+.form .consent-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.form .consent-field input {
+  width: auto;
+  margin-top: 3px;
 }
 
 .form input,
@@ -1818,6 +1951,20 @@ blockquote cite {
   color: var(--ink);
   font: inherit;
   padding: 13px 14px;
+}
+
+.form-status {
+  min-height: 22px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.form-status.is-success {
+  color: var(--green);
+}
+
+.form-status.is-error {
+  color: #b42318;
 }
 
 .contact-card {
@@ -2053,8 +2200,17 @@ blockquote cite {
   .contact-layout,
   .product-layout,
   .hse-grid,
+  .solutions-grid,
   .split-heading {
     grid-template-columns: 1fr;
+  }
+
+  .solution-card {
+    grid-template-columns: 1fr;
+  }
+
+  .solution-card picture {
+    height: 230px;
   }
 
   .service-grid,
@@ -2063,7 +2219,9 @@ blockquote cite {
   .project-grid,
   .news-grid,
   .testimonial-grid,
+  .solutions-grid,
   .visual-grid,
+  .solutions-grid,
   .strategic-grid,
   .impact-grid,
   .premium-reasons,

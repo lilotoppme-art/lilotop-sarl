@@ -31,22 +31,28 @@
         <span></span><span></span><span></span>
       </button>
       <nav class="nav" data-nav>
-        <a href="index.html">Home</a><a href="about.html">Company</a><a href="sectors.html">Markets</a><a href="products.html">Solutions</a><a href="partners.html">Partnerships</a><a href="projects.html">Projects</a><a href="news.html">Insights</a><a href="contact.html" aria-current="page">Contact</a>
+        <a href="index.html">Home</a><a href="about.html">Company</a><a href="sectors.html">Markets</a><a href="solutions.html">Solutions</a><a href="partners.html">Partnerships</a><a href="projects.html">Projects</a><a href="news.html">Insights</a><a href="contact.html" aria-current="page">Contact</a>
         <a class="nav-cta" href="contact.html">Submit inquiry</a>
         <a class="lang-switch" href="../contact.html" hreflang="fr">FR</a>
       </nav>
     </header>
     <main id="contenu"><section class="page-hero corporate-hero"><div class="container reveal"><p class="section-kicker">Contact</p><h1>Quote request, tender, partnership or supplier file.</h1><p>Contact LILOTOP SARL for quotes, tenders, supplier files, partnerships or logistics requests in DRC.</p></div></section>
   <section class="section contact-page"><div class="container contact-layout">
-    <div class="quote-form reveal"><form class="form" data-quote-form>
+    <div class="quote-form reveal"><form class="form" data-quote-form data-endpoint="/api/contact" novalidate>
     <div><p class="section-kicker">Request a quote</p><h2>Request a quote</h2><p>Send your specifications, expected timeline and available documents. The LILOTOP team will contact you to qualify the requirement.</p></div>
     <label>Full name<input name="name" autocomplete="name" required></label>
-    <label>Organization<input name="company" autocomplete="organization"></label>
+    <label>Organization<input name="company" autocomplete="organization" required></label>
     <label>Business email<input type="email" name="email" autocomplete="email" required></label>
-    <label>Phone / WhatsApp<input name="phone" autocomplete="tel"></label>
-    <label>Requirement type<select name="need"><option>Mining supply</option><option>Logistics / Import-export</option><option>Infrastructure</option><option>Odoo / Digital solutions</option><option>Partnership</option></select></label>
-    <label>Your request<textarea name="message" rows="6" required></textarea></label>
-    <button class="button primary" type="submit">Prepare inquiry email<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+    <label>Phone / WhatsApp<input name="phone" autocomplete="tel" required></label>
+    <label>Country<input name="country" autocomplete="country-name" required></label>
+    <label>Request subject<input name="subject" required></label>
+    <label>Sector of interest<select name="sector" required><option value="">Select a sector</option><option value="Produits chimiques et réactifs miniers">Chemical products and mining reagents</option><option value="Billes de broyage">Grinding media</option><option value="Lubrifiants et carburants">Lubricants and fuels</option><option value="Fournitures industrielles">Industrial supplies</option><option value="Infrastructures">Infrastructure</option><option value="Conseil stratégique">Strategic advisory</option><option value="Partenariat">Partnership</option><option value="Appel d'offres">Tender</option><option value="Autre">Other</option></select></label>
+    <label>Your request<textarea name="message" rows="6" minlength="10" required></textarea></label>
+    <label class="form-hp" aria-hidden="true" tabindex="-1">Website<input name="website" autocomplete="off" tabindex="-1"></label>
+    <label class="consent-field"><input type="checkbox" name="consent" required><span>I agree that LILOTOP SARL may use this information to process my request in accordance with the privacy policy.</span></label>
+    <p class="form-note">Your request will be sent to contact@lilotopsarl.com. LILOTOP uses this information only to process your request.</p>
+    <div class="form-status" data-form-status role="status" aria-live="polite"></div>
+    <button class="button primary" type="submit">Send inquiry<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
   </form></div>
     <div class="contact-side reveal">
       <address class="contact-card premium-card">
@@ -66,7 +72,7 @@
         <img class="footer-logo" src="../assets/logo-lilotop.svg" alt="LILOTOP SARL" width="160" height="44">
         <p>Strategic partner in mining supply, logistics, infrastructure and digital solutions.</p>
       </div>
-      <div><h2>Navigation</h2><a href="index.html">Home</a><a href="about.html">Company</a><a href="sectors.html">Markets</a><a href="products.html">Solutions</a><a href="partners.html">Partnerships</a><a href="projects.html">Projects</a><a href="news.html">Insights</a><a href="contact.html">Contact</a></div>
+      <div><h2>Navigation</h2><a href="index.html">Home</a><a href="about.html">Company</a><a href="sectors.html">Markets</a><a href="solutions.html">Solutions</a><a href="partners.html">Partnerships</a><a href="projects.html">Projects</a><a href="news.html">Insights</a><a href="contact.html">Contact</a></div>
       <div><h2>Capabilities</h2><span>Mining Supply</span><span>Logistics</span><span>Infrastructure</span><span>Odoo & AI</span></div>
       <div><h2>Contact</h2><a href="tel:+243800982436">+243 800 982 436</a><a href="mailto:contact@lilotopsarl.com">contact@lilotopsarl.com</a><span>RDC • Lubumbashi • Kinshasa</span></div>
     </div>

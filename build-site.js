@@ -8,6 +8,8 @@ const site = {
   email: "contact@lilotopsarl.com",
   whatsapp: "https://wa.me/243800982436?text=Bonjour%20LILOTOP%20SARL%2C%20je%20souhaite%20obtenir%20un%20devis.",
   address: "2266 Avenue des Aviateurs, quartier Tshangalele, Lubumbashi; Boulevard du 30 Juin, n°144, Immeuble Didi, 3ème niveau, Kinshasa/Gombe",
+  brochureFile: "assets/documents/LILOTOP-SARL-Corporate-Profile.pdf",
+  brochureAvailable: false,
 };
 
 let activeLang = "fr";
@@ -24,7 +26,8 @@ const pages = [
   { slug: "index", file: "index.html", enFile: "en/index.html", fr: "Accueil", en: "Home" },
   { slug: "about", file: "a-propos.html", enFile: "en/about.html", fr: "Société", en: "Company" },
   { slug: "sectors", file: "secteurs.html", enFile: "en/sectors.html", fr: "Activités", en: "Markets" },
-  { slug: "products", file: "produits.html", enFile: "en/products.html", fr: "Solutions", en: "Solutions" },
+  { slug: "solutions", file: "solutions.html", enFile: "en/solutions.html", fr: "Solutions", en: "Solutions" },
+  { slug: "products", file: "produits.html", enFile: "en/products.html", fr: "Produits", en: "Products", hidden: true },
   { slug: "partners", file: "partenaires.html", enFile: "en/partners.html", fr: "Partenariats", en: "Partnerships" },
   { slug: "projects", file: "projets.html", enFile: "en/projects.html", fr: "Projets", en: "Projects" },
   { slug: "news", file: "actualites.html", enFile: "en/news.html", fr: "Insights", en: "Insights" },
@@ -135,10 +138,10 @@ const data = {
       ["Capacité de partenariat", "Représentant local, partenaire commercial, facilitateur, coordinateur logistique ou membre d'un groupement."],
     ],
     documents: ["RCCM", "Identification nationale", "Numéro d'impôt", "Documents fiscaux", "Statuts de la société", "Attestation ARSP", "Identité bancaire", "Profil société", "États financiers", "CV et profils d'experts ou partenaires", "Politique HSE", "Politique anticorruption", "Documents commerciaux et techniques selon les projets"],
-    testimonials: [
-      ["Direction achats, secteur minier", "LILOTOP comprend les contraintes de terrain et structure les demandes avec une discipline documentaire appréciable."],
-      ["Partenaire international", "Un interlocuteur local capable de traduire les standards internationaux en actions opérationnelles en RDC."],
-      ["Client industriel", "Réactivité, clarté des échanges et capacité à coordonner plusieurs parties prenantes."],
+    credibility: [
+      ["Discipline documentaire", "Chaque demande est structurée avec les éléments techniques, commerciaux et logistiques nécessaires à une décision claire."],
+      ["Conformité opérationnelle", "Les dossiers sont préparés avec une attention particulière aux exigences ARSP, HSE, fiscales et administratives."],
+      ["Coordination terrain", "LILOTOP relie les besoins des opérations aux fournisseurs, transporteurs et partenaires capables d'exécuter en RDC."],
     ],
     news: [
       ["Approvisionnement minier", "Comment réduire le risque de rupture sur les réactifs et consommables critiques."],
@@ -152,9 +155,12 @@ const data = {
       company: "Organisation",
       email: "Email professionnel",
       phone: "Téléphone / WhatsApp",
-      need: "Type de besoin",
+      country: "Pays",
+      subject: "Objet de la demande",
+      sector: "Secteur d'intérêt",
       message: "Votre demande",
-      submit: "Préparer l'email de demande",
+      consent: "J'accepte que LILOTOP SARL utilise ces informations pour traiter ma demande conformément à la politique de confidentialité.",
+      submit: "Envoyer la demande",
     },
   },
   en: {
@@ -248,10 +254,10 @@ const data = {
       ["Partnership capacity", "Local representative, commercial partner, facilitator, logistics coordinator or consortium member."],
     ],
     documents: ["RCCM", "National identification", "Tax number", "Tax documents", "Company statutes", "ARSP certificate", "Bank identity", "Company profile", "Financial statements", "Expert or partner profiles", "HSE policy", "Anti-corruption policy", "Commercial and technical documents by project"],
-    testimonials: [
-      ["Procurement leadership, mining sector", "LILOTOP understands field constraints and structures requests with valuable documentation discipline."],
-      ["International partner", "A local counterpart able to translate international standards into operational action in DRC."],
-      ["Industrial client", "Responsiveness, clarity and the ability to coordinate multiple stakeholders."],
+    credibility: [
+      ["Document discipline", "Each request is structured with the technical, commercial and logistics inputs required for a clear decision."],
+      ["Operational compliance", "Files are prepared with close attention to ARSP, HSE, tax and administrative requirements."],
+      ["Field coordination", "LILOTOP connects operational needs with suppliers, transporters and partners able to execute in DRC."],
     ],
     news: [
       ["Mining procurement", "How to reduce disruption risk on critical reagents and consumables."],
@@ -265,9 +271,12 @@ const data = {
       company: "Organization",
       email: "Business email",
       phone: "Phone / WhatsApp",
-      need: "Requirement type",
+      country: "Country",
+      subject: "Request subject",
+      sector: "Sector of interest",
       message: "Your request",
-      submit: "Prepare inquiry email",
+      consent: "I agree that LILOTOP SARL may use this information to process my request in accordance with the privacy policy.",
+      submit: "Send inquiry",
     },
   },
 };
@@ -583,14 +592,14 @@ function visualAssetFor(title, index = 0, context = "") {
   if (key.includes("gold") || key.includes("d'or")) return "underground-mining";
   if (key.includes("cuivre") || key.includes("cobalt") || key.includes("copper")) return "hero-industrial-drc";
   if (key.includes("logistics") || key.includes("logistique") || key.includes("supply chain") || key.includes("transport") || key.includes("coordinator")) return "heavy-transport";
-  if (key.includes("reagent") || key.includes("rÃ©actif") || key.includes("chemical") || key.includes("chimique") || key.includes("sensitive") || key.includes("acid") || key.includes("acide") || key.includes("chaux") || key.includes("flocul") || key.includes("coagul") || key.includes("charbon") || key.includes("extract") || key.includes("sulfate")) return "chemical-reactives-lab";
+  if (key.includes("reagent") || key.includes("reactif") || key.includes("réactif") || key.includes("chemical") || key.includes("chimique") || key.includes("sensitive") || key.includes("acid") || key.includes("acide") || key.includes("chaux") || key.includes("flocul") || key.includes("coagul") || key.includes("charbon") || key.includes("extract") || key.includes("sulfate")) return "chemical-reactives-lab";
   if (key.includes("billes") || key.includes("grinding") || key.includes("pump") || key.includes("pompe") || key.includes("valve") || key.includes("vanne") || key.includes("piping") || key.includes("tuyaut") || key.includes("spare") || key.includes("rechange") || key.includes("ppe") || key.includes("epi") || key.includes("protection")) return "mining-supply-premium";
   if (key.includes("processing") || key.includes("traitement") || key.includes("consommables")) return "mineral-processing-plant";
-  if (key.includes("documentation") || key.includes("traceability") || key.includes("traÃ§abilit") || key.includes("quality") || key.includes("qualit") || key.includes("compliance") || key.includes("conformit")) return "quality-inspection";
+  if (key.includes("documentation") || key.includes("traceability") || key.includes("tracabilit") || key.includes("traçabilit") || key.includes("quality") || key.includes("qualit") || key.includes("compliance") || key.includes("conformit")) return "quality-inspection";
   if (key.includes("warehouse") || key.includes("procurement") || key.includes("approvisionnement") || key.includes("supply") || key.includes("fournisseur")) return "industrial-warehouse";
   if (key.includes("import") || key.includes("export") || key.includes("transit")) return "ports-containers";
   if (key.includes("infrastructure") || key.includes("routes") || key.includes("chantier") || key.includes("site") || key.includes("camp")) return "infrastructure-projects";
-  if (key.includes("energy") || key.includes("Ã©nergie") || key.includes("energie")) return "energy-industrial";
+  if (key.includes("energy") || key.includes("énergie") || key.includes("energie")) return "energy-industrial";
   if (key.includes("odoo") || key.includes("digital") || key.includes("pme") || key.includes("sme") || key.includes("dashboard")) return "digital-operations";
   if (key.includes("partner") || key.includes("partenaire") || key.includes("banks") || key.includes("banques") || key.includes("institution") || key.includes("represent") || key.includes("commercial") || key.includes("groupement") || key.includes("consortium")) return "international-partnerships";
   if (key.includes("terrain") || key.includes("local") || key.includes("engagement")) return "field-engineering-team";
@@ -609,6 +618,14 @@ function cardGrid(items, klass = "service-grid") {
     const visual = visualAssetFor(title, i, klass);
     return `<article class="service-card reveal has-card-media"><picture class="card-media"><source srcset="${assetPrefix()}assets/${visual}.webp" type="image/webp"><img src="${assetPrefix()}assets/${visual}.png" alt="${visualAltFor(title, currentLang())}" loading="lazy"></picture><div class="card-body"><span class="card-icon">${svg || String(i + 1).padStart(2, "0")}</span><h3>${title}</h3><p>${text}</p></div></article>`;
   }).join("")}</div>`;
+}
+
+function brochureButton(lang, extraClass = "secondary") {
+  if (site.brochureAvailable) {
+    const href = asset(lang, site.brochureFile);
+    return `<a class="button ${extraClass}" href="${href}" download data-track="brochure-download">${lang === "fr" ? "Télécharger la brochure" : "Download brochure"}</a>`;
+  }
+  return `<span class="button ${extraClass} is-disabled" aria-disabled="true" title="${lang === "fr" ? "La brochure officielle sera ajoutée après validation." : "The official brochure will be added after validation."}">${lang === "fr" ? "Brochure en préparation" : "Brochure in preparation"}</span>`;
 }
 
 function methodSection(lang, compact = false) {
@@ -640,8 +657,8 @@ function testimonials(lang) {
   const t = data[lang];
   return `<section class="section testimonials">
     <div class="container">
-      <div class="section-heading split-heading reveal"><div><p class="section-kicker">${lang === "fr" ? "Crédibilité" : "Credibility"}</p><h2>${lang === "fr" ? "Un positionnement pensé pour les mines, banques, institutions et partenaires internationaux." : "A positioning built for mining companies, banks, institutions and international partners."}</h2></div><p>${lang === "fr" ? "Les témoignages ci-dessous sont formulés comme références éditoriales et doivent être remplacés par des citations validées lorsque disponibles." : "The testimonials below are editorial placeholders and should be replaced with validated client quotes when available."}</p></div>
-      <div class="testimonial-grid">${t.testimonials.map(([name, quote]) => `<blockquote class="reveal"><p>“${quote}”</p><cite>${name}</cite></blockquote>`).join("")}</div>
+      <div class="section-heading split-heading reveal"><div><p class="section-kicker">${lang === "fr" ? "Crédibilité" : "Credibility"}</p><h2>${lang === "fr" ? "Un positionnement pensé pour les mines, banques, institutions et partenaires internationaux." : "A positioning built for mining companies, banks, institutions and international partners."}</h2></div><p>${lang === "fr" ? "Des engagements concrets pour travailler avec des environnements industriels, financiers et institutionnels exigeants." : "Concrete commitments for working with demanding industrial, financial and institutional environments."}</p></div>
+      <div class="testimonial-grid">${t.credibility.map(([name, text], i) => `<article class="credibility-card reveal"><span>${String(i + 1).padStart(2, "0")}</span><h3>${name}</h3><p>${text}</p></article>`).join("")}</div>
     </div>
   </section>`;
 }
@@ -657,6 +674,7 @@ function quoteBand(lang) {
       <div class="quote-action-panel">
         <ul>${points.map((point) => `<li>${icon.check}<span>${point}</span></li>`).join("")}</ul>
         <a class="button primary" href="${hrefFor(lang, "contact")}">${t.quoteCta}${icon.arrow}</a>
+        ${brochureButton(lang)}
       </div>
     </div>
   </section>`;
@@ -672,6 +690,42 @@ function aboutPage(lang) {
   <section class="section"><div class="container"><div class="section-heading reveal"><p class="section-kicker">${lang === "fr" ? "Avantages" : "Advantages"}</p><h2>${lang === "fr" ? "Pourquoi travailler avec LILOTOP SARL." : "Why work with LILOTOP SARL."}</h2></div>${cardGrid(t.advantages, "why-grid")}</div></section>
   ${quoteBand(lang)}`;
   return layout(lang, "about", title, desc, body, { solidHeader: true });
+}
+
+function solutionsPage(lang) {
+  const title = lang === "fr" ? "Solutions intégrées | LILOTOP SARL" : "Integrated Solutions | LILOTOP SARL";
+  const desc = lang === "fr"
+    ? "Solutions intégrées pour approvisionnement minier, réactifs chimiques, consommables, lubrifiants, infrastructures et conseil stratégique en RDC."
+    : "Integrated solutions for mining procurement, chemical reagents, consumables, lubricants, infrastructure and strategic advisory in DRC.";
+  const intro = lang === "fr"
+    ? "LILOTOP combine approvisionnement, connaissance du terrain congolais, coordination logistique et accompagnement stratégique pour structurer des réponses adaptées aux opérations industrielles, minières et infrastructurelles."
+    : "LILOTOP combines procurement, knowledge of Congolese field realities, logistics coordination and strategic support to structure responses suited to industrial, mining and infrastructure operations.";
+  const solutions = lang === "fr" ? [
+    ["Approvisionnement minier et industriel", ["Identification des besoins", "Sourcing international", "Négociation fournisseurs", "Coordination logistique", "Livraison et suivi"]],
+    ["Réactifs chimiques pour les opérations minières", ["Acide sulfurique", "Chaux vive", "Floculants", "Charbon actif", "Extractants SX", "Sulfate de sodium", "Autres produits selon cahier des charges"]],
+    ["Billes de broyage et consommables d'usine", ["Sélection selon les équipements", "Optimisation de la consommation", "Contrôle de qualité", "Coordination avec les fabricants"]],
+    ["Lubrifiants, carburants et fluides industriels", ["Huiles hydrauliques", "Graisses industrielles", "Lubrifiants moteurs", "Diesel et autres produits selon disponibilité et réglementation"]],
+    ["Infrastructures et solutions routières", ["Produits et technologies routières", "Accompagnement de projets", "Coordination avec partenaires techniques", "Solutions adaptées aux matériaux et conditions locales"]],
+    ["Conseil stratégique et développement d'affaires", ["Structuration de partenariats", "Accès au marché", "Préparation d'offres", "Développement de projets", "Mise en relation institutionnelle et commerciale"]],
+    ["Transformation industrielle et projets", ["Études préliminaires", "Recherche de partenaires", "Structuration technique et financière", "Accompagnement jusqu'à la mise en œuvre"]],
+  ] : [
+    ["Mining and industrial procurement", ["Needs identification", "International sourcing", "Supplier negotiation", "Logistics coordination", "Delivery and follow-up"]],
+    ["Chemical reagents for mining operations", ["Sulfuric acid", "Quicklime", "Flocculants", "Activated carbon", "SX extractants", "Sodium sulfate", "Other products according to specifications"]],
+    ["Grinding media and plant consumables", ["Selection according to equipment", "Consumption optimization", "Quality control", "Coordination with manufacturers"]],
+    ["Lubricants, fuels and industrial fluids", ["Hydraulic oils", "Industrial greases", "Engine lubricants", "Diesel and other products according to availability and regulation"]],
+    ["Infrastructure and road solutions", ["Road products and technologies", "Project support", "Coordination with technical partners", "Solutions adapted to local materials and conditions"]],
+    ["Strategic advisory and business development", ["Partnership structuring", "Market access", "Offer preparation", "Project development", "Institutional and commercial connection"]],
+    ["Industrial transformation and projects", ["Preliminary studies", "Partner search", "Technical and financial structuring", "Support through implementation"]],
+  ];
+  const method = lang === "fr"
+    ? ["Analyse du besoin", "Sélection de la solution", "Consultation des partenaires", "Proposition technique et commerciale", "Livraison et suivi"]
+    : ["Needs analysis", "Solution selection", "Partner consultation", "Technical and commercial proposal", "Delivery and follow-up"];
+  const body = `${subHero(lang, lang === "fr" ? "Solutions" : "Solutions", lang === "fr" ? "Des solutions intégrées pour les opérations industrielles, minières et infrastructurelles" : "Integrated solutions for industrial, mining and infrastructure operations", desc)}
+  <section class="section"><div class="container intro-grid"><div class="reveal"><p class="section-kicker">${lang === "fr" ? "Approche intégrée" : "Integrated approach"}</p><h2>${lang === "fr" ? "Une réponse structurée, du besoin terrain au suivi opérationnel." : "A structured response from field requirement to operational follow-up."}</h2></div><div class="intro-copy reveal"><p>${intro}</p><p>${lang === "fr" ? "Chaque solution est présentée sans promesse non vérifiée: la faisabilité, les fournisseurs et les conditions sont confirmés dossier par dossier." : "Each solution is presented without unverified claims: feasibility, suppliers and conditions are confirmed file by file."}</p></div></div></section>
+  <section class="section section-band"><div class="container"><div class="section-heading split-heading reveal"><div><p class="section-kicker">${lang === "fr" ? "Solutions principales" : "Core solutions"}</p><h2>${lang === "fr" ? "Des blocs d'intervention adaptés aux besoins industriels." : "Work blocks tailored to industrial requirements."}</h2></div><p>${lang === "fr" ? "Ces domaines structurent les échanges avec les clients, fournisseurs, banques, partenaires techniques et institutions." : "These domains structure discussions with clients, suppliers, banks, technical partners and institutions."}</p></div><div class="solutions-grid">${solutions.map(([name, points], i) => { const visual = visualAssetFor(name, i, "solutions"); return `<article class="solution-card reveal"><picture><source srcset="${assetPrefix()}assets/${visual}.webp" type="image/webp"><img src="${assetPrefix()}assets/${visual}.png" alt="${visualAltFor(name, lang)}" loading="lazy"></picture><div><span>${String(i + 1).padStart(2, "0")}</span><h3>${name}</h3><ul>${points.map((point) => `<li>${icon.check}<span>${point}</span></li>`).join("")}</ul></div></article>`; }).join("")}</div></div></section>
+  <section class="section process"><div class="container process-grid"><div class="reveal"><p class="section-kicker">${lang === "fr" ? "Méthode de travail" : "Working method"}</p><h2>${lang === "fr" ? "Cinq étapes pour passer d'un besoin à une réponse exploitable." : "Five steps from requirement to actionable response."}</h2><p class="process-note">${lang === "fr" ? "La méthode reste volontairement simple pour faciliter les appels d'offres, propositions et échanges techniques." : "The method remains deliberately simple to support tenders, proposals and technical exchanges."}</p></div><ol class="steps steps-compact">${method.map((step) => `<li class="reveal"><strong>${step}</strong><span>${lang === "fr" ? "Validation progressive selon les informations disponibles et les contraintes du dossier." : "Progressive validation according to available information and file constraints."}</span></li>`).join("")}</ol></div></section>
+  <section class="quote-band"><div class="container quote-band-inner reveal"><div><p class="section-kicker">${lang === "fr" ? "Passer à l'action" : "Next step"}</p><h2>${lang === "fr" ? "Demandez une proposition ou échangez avec notre équipe." : "Request a proposal or speak with our team."}</h2></div><div class="quote-action-panel"><ul><li>${icon.check}<span>${lang === "fr" ? "Demande structurée" : "Structured inquiry"}</span></li><li>${icon.check}<span>${lang === "fr" ? "Réponse orientée solution" : "Solution-oriented response"}</span></li><li>${icon.check}<span>${lang === "fr" ? "Brochure prête à intégrer dès validation" : "Brochure ready to integrate after validation"}</span></li></ul><a class="button primary" href="${hrefFor(lang, "contact")}">${lang === "fr" ? "Demander une proposition" : "Request a proposal"}${icon.arrow}</a><a class="button secondary" href="${site.whatsapp}" target="_blank" rel="noopener">${lang === "fr" ? "Parler à notre équipe" : "Speak with our team"}</a>${brochureButton(lang, "dark")}</div></div></section>`;
+  return layout(lang, "solutions", title, desc, body, { solidHeader: true });
 }
 
 function sectorsPage(lang) {
@@ -778,16 +832,18 @@ function legalPage(lang) {
     ["Éditeur du site", "LILOTOP SARL, société de droit congolais spécialisée dans l'import-export, l'approvisionnement minier, la logistique, les infrastructures et les solutions digitales."],
     ["Responsable de publication", "Joël Kongolo, Directeur Général."],
     ["Contact", `${site.phone} • ${site.email}`],
-    ["Données personnelles", "Les informations transmises par formulaire, téléphone, email ou WhatsApp sont utilisées pour répondre aux demandes commerciales, devis et partenariats."],
+    ["Données personnelles", "Les informations transmises par formulaire, téléphone, email ou WhatsApp sont utilisées uniquement pour répondre aux demandes commerciales, devis, appels d'offres et partenariats adressés à LILOTOP SARL."],
+    ["Cookies", "Le site ne dépose pas de cookies publicitaires. Les services tiers intégrés, notamment Google Maps, peuvent appliquer leurs propres règles de confidentialité."],
     ["Propriété intellectuelle", "Les textes, visuels, éléments graphiques et contenus du site sont destinés à la communication de LILOTOP SARL."],
-    ["Hébergement", "Hébergement recommandé: Netlify. Les informations finales seront complétées selon le prestataire retenu."],
+    ["Hébergement", "Site hébergé sur Vercel. Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, United States."],
   ] : [
     ["Publisher", "LILOTOP SARL, a Congolese company specialized in import-export, mining supply, logistics, infrastructure and digital solutions."],
     ["Publication manager", "Joël Kongolo, Managing Director."],
     ["Contact", `${site.phone} • ${site.email}`],
-    ["Personal data", "Information submitted through forms, phone, email or WhatsApp is used to respond to commercial requests, quotes and partnerships."],
+    ["Personal data", "Information submitted through forms, phone, email or WhatsApp is used only to respond to commercial requests, quotes, tenders and partnerships addressed to LILOTOP SARL."],
+    ["Cookies", "The website does not set advertising cookies. Embedded third-party services, including Google Maps, may apply their own privacy rules."],
     ["Intellectual property", "Texts, visuals, graphic elements and website content are intended for LILOTOP SARL communication."],
-    ["Hosting", "Recommended hosting: Netlify. Final hosting details will be completed according to the retained provider."],
+    ["Hosting", "Website hosted by Vercel. Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, United States."],
   ];
   const body = `${subHero(lang, lang === "fr" ? "Informations légales" : "Legal information", lang === "fr" ? "Mentions légales" : "Legal notice", desc)}
   <section class="section"><div class="container">${cardGrid(cards, "why-grid")}</div></section>`;
@@ -796,14 +852,31 @@ function legalPage(lang) {
 
 function quoteForm(lang) {
   const f = data[lang].form;
-  return `<form class="form" data-quote-form>
+  const sectors = [
+    ["Produits chimiques et réactifs miniers", lang === "fr" ? "Produits chimiques et réactifs miniers" : "Chemical products and mining reagents"],
+    ["Billes de broyage", lang === "fr" ? "Billes de broyage" : "Grinding media"],
+    ["Lubrifiants et carburants", lang === "fr" ? "Lubrifiants et carburants" : "Lubricants and fuels"],
+    ["Fournitures industrielles", lang === "fr" ? "Fournitures industrielles" : "Industrial supplies"],
+    ["Infrastructures", lang === "fr" ? "Infrastructures" : "Infrastructure"],
+    ["Conseil stratégique", lang === "fr" ? "Conseil stratégique" : "Strategic advisory"],
+    ["Partenariat", lang === "fr" ? "Partenariat" : "Partnership"],
+    ["Appel d'offres", lang === "fr" ? "Appel d'offres" : "Tender"],
+    ["Autre", lang === "fr" ? "Autre" : "Other"],
+  ];
+  return `<form class="form" data-quote-form data-endpoint="/api/contact" novalidate>
     <div><p class="section-kicker">${f.title}</p><h2>${f.title}</h2><p>${f.intro}</p></div>
     <label>${f.name}<input name="name" autocomplete="name" required></label>
-    <label>${f.company}<input name="company" autocomplete="organization"></label>
+    <label>${f.company}<input name="company" autocomplete="organization" required></label>
     <label>${f.email}<input type="email" name="email" autocomplete="email" required></label>
-    <label>${f.phone}<input name="phone" autocomplete="tel"></label>
-    <label>${f.need}<select name="need"><option>Mining supply</option><option>Logistics / Import-export</option><option>Infrastructure</option><option>Odoo / Digital solutions</option><option>Partnership</option></select></label>
-    <label>${f.message}<textarea name="message" rows="6" required></textarea></label>
+    <label>${f.phone}<input name="phone" autocomplete="tel" required></label>
+    <label>${f.country}<input name="country" autocomplete="country-name" required></label>
+    <label>${f.subject}<input name="subject" required></label>
+    <label>${f.sector}<select name="sector" required><option value="">${lang === "fr" ? "Sélectionner un secteur" : "Select a sector"}</option>${sectors.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>
+    <label>${f.message}<textarea name="message" rows="6" minlength="10" required></textarea></label>
+    <label class="form-hp" aria-hidden="true" tabindex="-1">Website<input name="website" autocomplete="off" tabindex="-1"></label>
+    <label class="consent-field"><input type="checkbox" name="consent" required><span>${f.consent}</span></label>
+    <p class="form-note">${lang === "fr" ? `Votre demande sera envoyée à ${site.email}. LILOTOP utilise ces informations uniquement pour traiter votre demande.` : `Your request will be sent to ${site.email}. LILOTOP uses this information only to process your request.`}</p>
+    <div class="form-status" data-form-status role="status" aria-live="polite"></div>
     <button class="button primary" type="submit">${f.submit}${icon.arrow}</button>
   </form>`;
 }
@@ -812,7 +885,7 @@ function subHero(lang, kicker, title, lead) {
   return `<section class="page-hero corporate-hero"><div class="container reveal"><p class="section-kicker">${kicker}</p><h1>${title}</h1><p>${lead}</p></div></section>`;
 }
 
-const generators = { index: homePage, about: aboutPage, sectors: sectorsPage, products: productsPage, partners: partnersPage, projects: projectsPage, news: newsPage, contact: contactPage, legal: legalPage };
+const generators = { index: homePage, about: aboutPage, sectors: sectorsPage, solutions: solutionsPage, products: productsPage, partners: partnersPage, projects: projectsPage, news: newsPage, contact: contactPage, legal: legalPage };
 
 fs.mkdirSync("en", { recursive: true });
 for (const lang of ["fr", "en"]) {
@@ -823,7 +896,7 @@ for (const lang of ["fr", "en"]) {
   }
 }
 
-fs.writeFileSync("services.html", layout("fr", "sectors", "Services | LILOTOP SARL", data.fr.metaDefault, `<script>location.replace("secteurs.html")</script><noscript><a href="secteurs.html">Secteurs d'activité</a></noscript>`, { solidHeader: true }), "utf8");
+fs.writeFileSync("services.html", layout("fr", "solutions", "Services | LILOTOP SARL", data.fr.metaDefault, `<script>location.replace("solutions.html")</script><noscript><a href="solutions.html">Solutions</a></noscript>`, { solidHeader: true }), "utf8");
 
 const sitemap = [`<?xml version="1.0" encoding="UTF-8"?>`, `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`];
 for (const lang of ["fr", "en"]) {
