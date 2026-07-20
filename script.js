@@ -124,6 +124,6 @@ if (quoteForm) {
       "Message:",
       form.get("message") || "",
     ].join("\n"));
-    window.location.href = `mailto:lilotoppme@gmail.com?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:contact@lilotopsarl.com?subject=${subject}&body=${body}`;
   });
 }

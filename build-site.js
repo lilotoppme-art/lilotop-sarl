@@ -5,7 +5,7 @@ const site = {
   domain: "https://lilotopsarl.com",
   phone: "+243 800 982 436",
   phoneHref: "+243800982436",
-  email: "lilotoppme@gmail.com",
+  email: "contact@lilotopsarl.com",
   whatsapp: "https://wa.me/243800982436?text=Bonjour%20LILOTOP%20SARL%2C%20je%20souhaite%20obtenir%20un%20devis.",
   address: "2266 Avenue des Aviateurs, quartier Tshangalele, Lubumbashi; Boulevard du 30 Juin, n°144, Immeuble Didi, 3ème niveau, Kinshasa/Gombe",
 };
