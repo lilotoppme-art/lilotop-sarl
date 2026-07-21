@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lilotopsarl.com/sitemap.xml
+Sitemap: https://www.lilotopsarl.com/sitemap.xml
