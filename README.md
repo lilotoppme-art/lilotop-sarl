@@ -41,25 +41,25 @@ Variables d'environnement a configurer dans Vercel :
 
 ```text
 RESEND_API_KEY=
-EMAIL_FROM=LILOTOP Website <notifications@updates.example.com>
-EMAIL_REPLY_TO=contact@example.com
-EMAIL_CONTACT_TO=contact@example.com
-EMAIL_RFQ_TO=commercial@example.com
-EMAIL_SUPPLIER_TO=procurement@example.com
-EMAIL_PARTNERSHIP_TO=partnerships@example.com
-EMAIL_TENDER_TO=tenders@example.com
+EMAIL_FROM=LILOTOP Website <notifications@updates.lilotopsarl.com>
+EMAIL_REPLY_TO=contact@lilotopsarl.com
+EMAIL_CONTACT_TO=contact@lilotopsarl.com
+EMAIL_RFQ_TO=contact@lilotopsarl.com
+EMAIL_SUPPLIER_TO=contact@lilotopsarl.com
+EMAIL_PARTNERSHIP_TO=contact@lilotopsarl.com
+EMAIL_TENDER_TO=contact@lilotopsarl.com
 EMAIL_TEST_MODE=true
-EMAIL_TEST_TO=test@example.com
+EMAIL_TEST_TO=contact@lilotopsarl.com
 RFQ_SEND_ACK=false
-NEXT_PUBLIC_SITE_URL=https://example.com
+NEXT_PUBLIC_SITE_URL=https://lilotopsarl.com
 ```
 
 Remarques :
 
 - `RESEND_API_KEY` doit etre renseignee depuis le tableau de bord Resend.
-- `EMAIL_FROM` doit utiliser un domaine verifie dans Resend.
-- Les variables `EMAIL_*_TO` definissent les destinataires par parcours.
-- `EMAIL_TEST_MODE=true` protege les deploiements Preview en redirigeant vers `EMAIL_TEST_TO`.
+- `EMAIL_FROM` doit utiliser le domaine Resend verifie `updates.lilotopsarl.com`.
+- Pour la version 1.0, toutes les variables `EMAIL_*_TO` pointent vers `contact@lilotopsarl.com`, tout en restant separees pour une evolution future.
+- `EMAIL_TEST_MODE=true` doit rester active sur les deploiements Preview. Passer a `false` uniquement apres verification du domaine Resend, configuration Vercel et tests reels valides.
 - Sans `RESEND_API_KEY`, l'API renvoie une erreur de configuration claire et aucun envoi fictif n'est effectue.
 - `RFQ_SEND_ACK=false` garde l'accuse de reception automatique des RFQ desactive. Passer a `true` uniquement apres validation.
 

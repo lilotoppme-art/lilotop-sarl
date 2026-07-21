@@ -88,22 +88,29 @@ Security:
 
 - `RESEND_API_KEY` must be marked sensitive.
 - Do not expose `RESEND_API_KEY` as `NEXT_PUBLIC_*`.
-- Use `EMAIL_TEST_MODE=true` and `EMAIL_TEST_TO` in Preview unless real recipients are intentionally tested.
-- Use `EMAIL_TEST_MODE=false` in Production.
+- Keep `EMAIL_TEST_MODE=true` in Preview until real tests are validated.
+- Do not set `EMAIL_TEST_MODE=false` for Production until the Resend domain is verified, Vercel variables are configured, and Preview tests are approved.
 
 ## Recommended Values To Fill Manually
 
-Do not copy generic examples into production without verification.
+Version 1.0 routes every website request to one mailbox while keeping separate variables for future routing changes.
 
 - `RESEND_API_KEY`: generated in Resend.
-- `EMAIL_FROM`: verified Resend sender, for example `LILOTOP Website <notifications@updates.lilotopsarl.com>` after domain verification.
-- `EMAIL_REPLY_TO`: official reply address, currently expected to be `contact@lilotopsarl.com`.
-- Department recipients may initially all point to `contact@lilotopsarl.com` until dedicated mailboxes are active.
-- `NEXT_PUBLIC_SITE_URL`: canonical public URL, currently expected to be `https://lilotopsarl.com`.
+- `EMAIL_FROM`: `LILOTOP Website <notifications@updates.lilotopsarl.com>`.
+- `EMAIL_REPLY_TO`: `contact@lilotopsarl.com`.
+- `EMAIL_CONTACT_TO`: `contact@lilotopsarl.com`.
+- `EMAIL_RFQ_TO`: `contact@lilotopsarl.com`.
+- `EMAIL_SUPPLIER_TO`: `contact@lilotopsarl.com`.
+- `EMAIL_PARTNERSHIP_TO`: `contact@lilotopsarl.com`.
+- `EMAIL_TENDER_TO`: `contact@lilotopsarl.com`.
+- `EMAIL_TEST_MODE`: `true` for Preview.
+- `EMAIL_TEST_TO`: `contact@lilotopsarl.com` for v1.0 Preview validation.
+- `RFQ_SEND_ACK`: `false`.
+- `NEXT_PUBLIC_SITE_URL`: `https://lilotopsarl.com`.
 
 ## Resend Domain
 
-- Preferred sending subdomain: `updates.lilotopsarl.com` or `mail.lilotopsarl.com`.
+- Required sending subdomain for v1.0: `updates.lilotopsarl.com`.
 - DNS records must be copied directly from the Resend dashboard.
 - Do not add generic SPF/DKIM values from documentation.
 - Do not modify existing Vercel or Google Workspace DNS records without a DNS audit.
@@ -170,9 +177,9 @@ Manual tests still required on Vercel Preview:
    - Name: `Test Production`
    - Subject: `TEST V1.0 - NE PAS TRAITER`
 7. Confirm delivery in Resend and mailbox.
-8. Configure Production variables.
+8. Configure Production variables only after Resend domain verification and validated Preview tests.
 9. Merge `release/v1.0` into `main`.
-10. Deploy Production.
+10. Deploy Production only after explicit approval.
 11. Repeat real tests on production domain.
 12. Tag release: `v1.0.0`.
 

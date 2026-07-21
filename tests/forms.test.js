@@ -1,6 +1,8 @@
 const assert = require("assert");
 const { Readable } = require("stream");
 
+let lastEmailPayload = null;
+
 function clearModule(path) {
   delete require.cache[require.resolve(path)];
 }
@@ -62,17 +64,23 @@ async function callMultipart(path, fields, file, env = {}) {
 
 function mockResend() {
   process.env.RESEND_API_KEY = "re_test_mock";
-  process.env.EMAIL_FROM = "LILOTOP Website <notifications@example.com>";
-  process.env.EMAIL_CONTACT_TO = "contact@example.com";
-  process.env.EMAIL_RFQ_TO = "commercial@example.com";
-  process.env.EMAIL_SUPPLIER_TO = "procurement@example.com";
-  process.env.EMAIL_PARTNERSHIP_TO = "partnerships@example.com";
-  process.env.EMAIL_TENDER_TO = "tenders@example.com";
-  process.env.EMAIL_TEST_MODE = "false";
+  setWebsiteEmailEnv();
   global.fetch = async (url, options) => {
     const payload = JSON.parse(options.body);
+    lastEmailPayload = payload;
     return { ok: true, status: 200, json: async () => ({ id: `mock-${payload.subject.length}` }) };
   };
+}
+
+function setWebsiteEmailEnv() {
+  process.env.EMAIL_FROM = "LILOTOP Website <notifications@updates.lilotopsarl.com>";
+  process.env.EMAIL_REPLY_TO = "contact@lilotopsarl.com";
+  process.env.EMAIL_CONTACT_TO = "contact@lilotopsarl.com";
+  process.env.EMAIL_RFQ_TO = "contact@lilotopsarl.com";
+  process.env.EMAIL_SUPPLIER_TO = "contact@lilotopsarl.com";
+  process.env.EMAIL_PARTNERSHIP_TO = "contact@lilotopsarl.com";
+  process.env.EMAIL_TENDER_TO = "contact@lilotopsarl.com";
+  process.env.EMAIL_TEST_MODE = "false";
 }
 
 function resetEmailEnv() {
@@ -147,6 +155,7 @@ const supplierValid = {
   assert.equal(result.status, 400);
   assert(result.body.fields.includes("name"));
 
+  setWebsiteEmailEnv();
   result = await callJson("../api/contact.js", contactValid);
   assert.equal(result.status, 503);
   assert.equal(result.body.code, "EMAIL_SERVICE_NOT_CONFIGURED");
@@ -166,18 +175,21 @@ const supplierValid = {
   assert.equal(result.status, 200);
   assert(/^RFQ-\d{8}-[A-Z0-9]{4}$/.test(result.body.reference));
   assert(result.body.deliveryId);
+  assert.deepEqual(lastEmailPayload.to, ["contact@lilotopsarl.com"]);
 
   mockResend();
   result = await callMultipart("../api/portal.js", supplierValid, { name: "catalog.pdf", type: "application/pdf", buffer: Buffer.from("%PDF-test") });
   assert.equal(result.status, 200);
   assert(/^SUP-\d{8}-[A-Z0-9]{4}$/.test(result.body.reference));
+  assert.deepEqual(lastEmailPayload.to, ["contact@lilotopsarl.com"]);
 
   mockResend();
   process.env.VERCEL_ENV = "preview";
   process.env.EMAIL_TEST_MODE = "true";
-  process.env.EMAIL_TEST_TO = "preview@example.com";
+  process.env.EMAIL_TEST_TO = "contact@lilotopsarl.com";
   result = await callMultipart("../api/portal.js", { ...supplierValid, company: "Preview Test" }, null);
   assert.equal(result.status, 200);
+  assert.deepEqual(lastEmailPayload.to, ["contact@lilotopsarl.com"]);
   delete process.env.VERCEL_ENV;
 
   console.log("forms tests ok");
