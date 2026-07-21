@@ -14,6 +14,18 @@ const allowedSectors = new Set([
   "Autre",
 ]);
 
+const allowedDepartments = new Set([
+  "Commercial",
+  "Achats",
+  "Fournisseurs",
+  "Appels d'offres",
+  "Partenariats",
+  "Projets",
+  "Finance",
+  "Direction",
+  "Autre",
+]);
+
 function clean(value, max = 2000) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, max);
 }
@@ -26,6 +38,12 @@ function normalizeSector(value) {
 
 function isEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+function makeReference(prefix = "CNT", now = new Date()) {
+  const date = now.toISOString().slice(0, 10).replace(/-/g, "");
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${prefix}-${date}-${suffix}`;
 }
 
 function json(res, status, payload) {
@@ -50,6 +68,9 @@ function textMessage(data) {
   return [
     "Nouvelle demande depuis lilotopsarl.com",
     "",
+    `Reference: ${data.reference}`,
+    `Date et heure: ${data.submittedAt}`,
+    `Departement: ${data.department}`,
     `Nom complet: ${data.name}`,
     `Entreprise: ${data.company}`,
     `Email: ${data.email}`,
@@ -70,6 +91,9 @@ function htmlMessage(data) {
     ["Email", data.email],
     ["Telephone", data.phone],
     ["Pays", data.country],
+    ["Reference", data.reference],
+    ["Date et heure", data.submittedAt],
+    ["Departement", data.department],
     ["Objet", data.subject],
     ["Secteur d'interet", data.sector],
   ];
@@ -117,9 +141,12 @@ module.exports = async function handler(req, res) {
     phone: clean(body.phone, 80),
     country: clean(body.country, 120),
     subject: clean(body.subject, 160),
+    department: clean(body.department, 120),
     sector: clean(body.sector, 160),
     message: clean(body.message, 5000),
     consent: body.consent === true || body.consent === "on" || body.consent === "true",
+    reference: makeReference(),
+    submittedAt: new Date().toISOString(),
   };
 
   const errors = [];
@@ -128,6 +155,7 @@ module.exports = async function handler(req, res) {
   if (!isEmail(data.email)) errors.push("email");
   if (!data.phone) errors.push("phone");
   if (!data.country) errors.push("country");
+  if (!allowedDepartments.has(data.department)) errors.push("department");
   if (!data.subject) errors.push("subject");
   if (!allowedSectors.has(normalizeSector(data.sector))) errors.push("sector");
   if (!data.message || data.message.length < 10) errors.push("message");
@@ -142,10 +170,11 @@ module.exports = async function handler(req, res) {
       ok: false,
       error: "Email service is not configured",
       code: "EMAIL_SERVICE_NOT_CONFIGURED",
+      reference: data.reference,
     });
   }
 
-  const subject = `[LILOTOP] ${data.sector} - ${data.subject}`;
+  const subject = `[CNT LILOTOP] ${data.department} - ${data.company} - ${data.subject}`;
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -166,5 +195,5 @@ module.exports = async function handler(req, res) {
     return json(res, 502, { ok: false, error: "Email delivery failed" });
   }
 
-  return json(res, 200, { ok: true });
+  return json(res, 200, { ok: true, reference: data.reference });
 };

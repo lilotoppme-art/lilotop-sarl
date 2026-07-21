@@ -117,8 +117,16 @@ document.querySelectorAll('[data-track="rfq-cta-click"]').forEach((link) => {
   link.addEventListener("click", () => trackEvent("rfq_cta_click", { href: link.getAttribute("href") }));
 });
 
+document.querySelectorAll('[data-track="portal-path-click"]').forEach((link) => {
+  link.addEventListener("click", () => trackEvent("portal_path_click", { path: link.dataset.path || "", href: link.getAttribute("href") }));
+});
+
 if (document.body.classList.contains("page-rfq")) {
   trackEvent("rfq_page_view");
+}
+
+if (document.body.classList.contains("page-b2b")) {
+  trackEvent("b2b_portal_view");
 }
 
 const quoteForm = document.querySelector("[data-quote-form]");
@@ -169,7 +177,8 @@ if (quoteForm) {
       }
 
       quoteForm.reset();
-      setStatus("success", isEnglish ? "Thank you. Your inquiry has been sent to LILOTOP SARL." : "Merci. Votre demande a bien été envoyée à LILOTOP SARL.");
+      const reference = result.reference ? ` ${isEnglish ? "Reference:" : "Référence :"} ${result.reference}` : "";
+      setStatus("success", (isEnglish ? "Thank you. Your inquiry has been sent to LILOTOP SARL." : "Merci. Votre demande a bien été envoyée à LILOTOP SARL.") + reference);
     } catch (error) {
       const message = error.message === "config"
         ? (isEnglish ? "The email service is not configured yet. Please contact us by email or WhatsApp." : "Le service d'envoi n'est pas encore configuré. Merci de nous contacter par e-mail ou WhatsApp.")
@@ -298,3 +307,103 @@ if (rfqForm) {
     }
   });
 }
+
+document.querySelectorAll("[data-portal-form]").forEach((portalForm) => {
+  const status = portalForm.querySelector("[data-form-status]");
+  const submitButton = portalForm.querySelector('button[type="submit"]');
+  const fileInput = portalForm.querySelector('input[type="file"]');
+  const fileList = portalForm.querySelector("[data-file-list]");
+  const initialButtonText = submitButton ? submitButton.textContent : "";
+  const isEnglish = document.documentElement.lang === "en";
+  const portalType = portalForm.querySelector('[name="portalType"]')?.value || "portal";
+  const allowedExtensions = [".pdf", ".xls", ".xlsx", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+  const maxFiles = 5;
+  const maxFileSize = 4 * 1024 * 1024;
+  const maxTotalSize = 8 * 1024 * 1024;
+  let started = false;
+
+  const setStatus = (type, message) => {
+    if (!status) return;
+    status.className = `form-status ${type ? `is-${type}` : ""}`.trim();
+    status.textContent = message || "";
+  };
+
+  const validateFiles = () => {
+    const files = Array.from(fileInput?.files || []);
+    const errors = [];
+    const total = files.reduce((sum, file) => sum + file.size, 0);
+    if (files.length > maxFiles) errors.push(isEnglish ? "Maximum 5 files are allowed." : "Maximum 5 fichiers sont autorisés.");
+    if (total > maxTotalSize) errors.push(isEnglish ? "Total file size must not exceed 8 MB." : "La taille totale des fichiers ne doit pas dépasser 8 Mo.");
+    files.forEach((file) => {
+      const lower = file.name.toLowerCase();
+      if (!allowedExtensions.some((ext) => lower.endsWith(ext))) errors.push(isEnglish ? `Unsupported file format: ${file.name}` : `Format non autorisé : ${file.name}`);
+      if (file.size > maxFileSize) errors.push(isEnglish ? `File too large: ${file.name}` : `Fichier trop lourd : ${file.name}`);
+    });
+    if (fileList) fileList.innerHTML = files.map((file) => `<li>${file.name} <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span></li>`).join("");
+    return errors;
+  };
+
+  portalForm.addEventListener("input", () => {
+    if (!started) {
+      started = true;
+      trackEvent("portal_form_start", { portalType });
+    }
+  });
+
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      const errors = validateFiles();
+      trackEvent("portal_document_added", { portalType, fileCount: fileInput.files.length });
+      setStatus(errors.length ? "error" : "", errors.join(" "));
+    });
+  }
+
+  portalForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setStatus("", "");
+
+    const fileErrors = validateFiles();
+    if (!portalForm.checkValidity() || fileErrors.length) {
+      portalForm.reportValidity();
+      setStatus("error", fileErrors.join(" ") || (isEnglish ? "Please complete all required fields before sending." : "Veuillez compléter tous les champs obligatoires avant l'envoi."));
+      trackEvent("portal_submit_failed", { portalType, reason: "client_validation" });
+      return;
+    }
+
+    const form = new FormData(portalForm);
+    if (form.get("website")) return;
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = isEnglish ? "Sending..." : "Envoi en cours...";
+    }
+
+    try {
+      const response = await fetch(portalForm.dataset.endpoint || "/api/portal", {
+        method: "POST",
+        body: form,
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.ok) {
+        const configMissing = result.code === "EMAIL_SERVICE_NOT_CONFIGURED";
+        throw new Error(configMissing ? "config" : "send");
+      }
+
+      portalForm.reset();
+      if (fileList) fileList.innerHTML = "";
+      setStatus("success", isEnglish ? `Thank you. Your submission has been received. Reference: ${result.reference}` : `Merci. Votre demande a bien été reçue. Référence : ${result.reference}`);
+      trackEvent("portal_submit_success", { portalType, reference: result.reference });
+    } catch (error) {
+      const message = error.message === "config"
+        ? (isEnglish ? "The email service is not configured yet. Please contact us by email or WhatsApp." : "Le service d'envoi n'est pas encore configuré. Merci de nous contacter par e-mail ou WhatsApp.")
+        : (isEnglish ? "The submission could not be sent. Please try again or contact us by email." : "La demande n'a pas pu être envoyée. Merci de réessayer ou de nous contacter par e-mail.");
+      setStatus("error", message);
+      trackEvent("portal_submit_failed", { portalType, reason: error.message });
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = initialButtonText;
+      }
+    }
+  });
+});

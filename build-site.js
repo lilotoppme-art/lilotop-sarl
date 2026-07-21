@@ -25,13 +25,17 @@ function assetPrefix() {
 const pages = [
   { slug: "index", file: "index.html", enFile: "en/index.html", fr: "Accueil", en: "Home" },
   { slug: "about", file: "a-propos.html", enFile: "en/about.html", fr: "Société", en: "Company" },
-  { slug: "sectors", file: "secteurs.html", enFile: "en/sectors.html", fr: "Activités", en: "Markets" },
+  { slug: "sectors", file: "secteurs.html", enFile: "en/sectors.html", fr: "Activités", en: "Markets", hidden: true },
   { slug: "solutions", file: "solutions.html", enFile: "en/solutions.html", fr: "Solutions", en: "Solutions" },
-  { slug: "rfq", file: "request-a-quote.html", enFile: "en/request-a-quote.html", fr: "RFQ", en: "RFQ" },
-  { slug: "products", file: "produits.html", enFile: "en/products.html", fr: "Produits", en: "Products", hidden: true },
-  { slug: "partners", file: "partenaires.html", enFile: "en/partners.html", fr: "Partenariats", en: "Partnerships" },
-  { slug: "projects", file: "projets.html", enFile: "en/projects.html", fr: "Projets", en: "Projects" },
-  { slug: "news", file: "actualites.html", enFile: "en/news.html", fr: "Insights", en: "Insights" },
+  { slug: "products", file: "produits.html", enFile: "en/products.html", fr: "Produits", en: "Products" },
+  { slug: "b2b", file: "b2b-portal.html", enFile: "en/b2b-portal.html", fr: "Portail B2B", en: "B2B Portal" },
+  { slug: "rfq", file: "request-a-quote.html", enFile: "en/request-a-quote.html", fr: "RFQ", en: "RFQ", hidden: true },
+  { slug: "suppliers", file: "suppliers.html", enFile: "en/suppliers.html", fr: "Devenir fournisseur", en: "Become a supplier", hidden: true },
+  { slug: "partnerships", file: "partnerships.html", enFile: "en/partnerships.html", fr: "Partenariats stratégiques", en: "Strategic partnerships", hidden: true },
+  { slug: "tenders", file: "tenders.html", enFile: "en/tenders.html", fr: "Appels d'offres", en: "Tenders", hidden: true },
+  { slug: "partners", file: "partenaires.html", enFile: "en/partners.html", fr: "Partenariats", en: "Partnerships", hidden: true },
+  { slug: "projects", file: "projets.html", enFile: "en/projects.html", fr: "Projets", en: "Projects", hidden: true },
+  { slug: "news", file: "actualites.html", enFile: "en/news.html", fr: "Insights", en: "Insights", hidden: true },
   { slug: "contact", file: "contact.html", enFile: "en/contact.html", fr: "Contact", en: "Contact" },
   { slug: "legal", file: "mentions-legales.html", enFile: "en/legal.html", fr: "Mentions légales", en: "Legal", hidden: true },
 ];
@@ -157,6 +161,7 @@ const data = {
       email: "Email professionnel",
       phone: "Téléphone / WhatsApp",
       country: "Pays",
+      department: "Motif / département",
       subject: "Objet de la demande",
       sector: "Secteur d'intérêt",
       message: "Votre demande",
@@ -273,6 +278,7 @@ const data = {
       email: "Business email",
       phone: "Phone / WhatsApp",
       country: "Country",
+      department: "Reason / department",
       subject: "Request subject",
       sector: "Sector of interest",
       message: "Your request",
@@ -452,6 +458,7 @@ function homePage(lang) {
   ${impactStatsSection(lang)}
   ${whyChooseSection(lang)}
   ${gallerySection(lang)}
+  ${portalCards(lang)}
   ${illustratedSectorsSection(lang)}
   ${complianceHseSection(lang)}
   <section class="section">
@@ -916,6 +923,141 @@ function rfqPage(lang) {
   return layout(lang, "rfq", title, desc, body, { solidHeader: true });
 }
 
+function portalEntries(lang) {
+  return lang === "fr" ? [
+    ["clients", "Clients", "Demander une cotation, déposer un cahier des charges ou présenter un besoin d'approvisionnement.", "Je souhaite acheter ou demander une cotation", "rfq"],
+    ["suppliers", "Fournisseurs", "Présenter votre entreprise, vos produits, vos capacités d'approvisionnement et vos documents.", "Je souhaite devenir fournisseur", "suppliers"],
+    ["partners", "Partenaires", "Proposer une collaboration commerciale, technique, industrielle ou institutionnelle.", "Je souhaite proposer un partenariat", "partnerships"],
+    ["tenders", "Appels d'offres", "Transmettre un dossier de consultation, une préqualification ou une demande de consortium.", "Je souhaite transmettre un appel d'offres", "tenders"],
+  ] : [
+    ["clients", "Clients", "Request a quote, submit specifications or present a procurement requirement.", "I want to buy or request a quote", "rfq"],
+    ["suppliers", "Suppliers", "Present your company, products, supply capacity and documents.", "I want to become a supplier", "suppliers"],
+    ["partners", "Partners", "Propose a commercial, technical, industrial or institutional collaboration.", "I want to propose a partnership", "partnerships"],
+    ["tenders", "Tenders", "Submit a tender file, prequalification package or consortium request.", "I want to submit a tender", "tenders"],
+  ];
+}
+
+function portalCards(lang, heading = true) {
+  const entries = portalEntries(lang);
+  return `<section class="section portal-pathways">
+    <div class="container">
+      ${heading ? `<div class="section-heading split-heading reveal"><div><p class="section-kicker">${lang === "fr" ? "Portail B2B" : "B2B Portal"}</p><h2>${lang === "fr" ? "Comment pouvons-nous vous accompagner ?" : "How can we support you?"}</h2></div><p>${lang === "fr" ? "Les demandes sont étudiées selon leur nature technique, commerciale ou stratégique afin d'orienter rapidement le bon traitement." : "Requests are reviewed according to their technical, commercial or strategic nature so they can be routed quickly."}</p></div>` : ""}
+      <div class="portal-grid">${entries.map(([id, title, text, cta, slug], index) => `<article class="portal-card reveal"><span>${String(index + 1).padStart(2, "0")}</span><h3>${title}</h3><p>${text}</p><a class="button dark" href="${hrefFor(lang, slug)}" data-track="portal-path-click" data-path="${id}">${cta}${icon.arrow}</a></article>`).join("")}</div>
+    </div>
+  </section>`;
+}
+
+function b2bPage(lang) {
+  const title = lang === "fr" ? "Portail B2B LILOTOP | LILOTOP SARL" : "LILOTOP B2B Portal | LILOTOP SARL";
+  const desc = lang === "fr"
+    ? "Point d'entrée B2B pour clients, fournisseurs, partenaires et institutions souhaitant travailler avec LILOTOP SARL."
+    : "B2B entry point for clients, suppliers, partners and institutions seeking to work with LILOTOP SARL.";
+  const clientActions = lang === "fr" ? [
+    ["Demander une cotation", "rfq"],
+    ["Déposer un cahier des charges", "rfq"],
+    ["Présenter un besoin d'approvisionnement", "rfq"],
+    ["Demander une proposition technique", "rfq"],
+    ["Télécharger la brochure", "contact"],
+    ["Contacter l'équipe commerciale", "contact"],
+  ] : [
+    ["Request a quote", "rfq"],
+    ["Submit specifications", "rfq"],
+    ["Present a procurement requirement", "rfq"],
+    ["Request a technical proposal", "rfq"],
+    ["Download brochure", "contact"],
+    ["Contact the commercial team", "contact"],
+  ];
+  const body = `${subHero(lang, lang === "fr" ? "Portail B2B LILOTOP" : "LILOTOP B2B Portal", lang === "fr" ? "Votre point d'entrée pour travailler avec LILOTOP SARL" : "Your entry point for working with LILOTOP SARL", lang === "fr" ? "Clients, fournisseurs, partenaires et institutions peuvent soumettre leurs demandes, documents et opportunités à travers des parcours adaptés." : "Clients, suppliers, partners and institutions can submit requests, documents and opportunities through tailored pathways.")}
+  ${portalCards(lang, false)}
+  <section class="section section-band"><div class="container"><div class="section-heading split-heading reveal"><div><p class="section-kicker">${lang === "fr" ? "Espace clients" : "Client area"}</p><h2>${lang === "fr" ? "Un accès direct aux demandes commerciales et techniques." : "Direct access to commercial and technical requests."}</h2></div><p>${lang === "fr" ? "Aucun compte client n'est requis pour cette première version. Les demandes arrivent provisoirement à contact@lilotopsarl.com." : "No client account is required for this first version. Requests temporarily arrive at contact@lilotopsarl.com."}</p></div><div class="portal-action-grid">${clientActions.map(([label, slug]) => `<a class="portal-action reveal" href="${hrefFor(lang, slug)}" data-track="portal-path-click"><strong>${label}</strong>${icon.arrow}</a>`).join("")}</div></div></section>`;
+  return layout(lang, "b2b", title, desc, body, { solidHeader: true });
+}
+
+function portalForm(lang, type) {
+  const isSupplier = type === "supplier";
+  const isPartnership = type === "partnership";
+  const title = {
+    supplier: lang === "fr" ? "Présenter votre entreprise" : "Present your company",
+    partnership: lang === "fr" ? "Proposer un partenariat" : "Propose a partnership",
+    tender: lang === "fr" ? "Soumettre un appel d'offres" : "Submit a tender",
+  }[type];
+  const categories = lang === "fr" ? [
+    "Produits chimiques et réactifs miniers", "Billes de broyage", "Lubrifiants", "Carburants", "Fournitures industrielles", "Équipements miniers", "Solutions routières", "Logistique", "Ingénierie", "Autres"
+  ] : [
+    "Chemical products and mining reagents", "Grinding media", "Lubricants", "Fuels", "Industrial supplies", "Mining equipment", "Road solutions", "Logistics", "Engineering", "Other"
+  ];
+  const partnershipTypes = lang === "fr" ? [
+    ["commercial", "Partenariat commercial"], ["distribution", "Distribution"], ["local-representation", "Représentation locale"], ["joint-venture", "Joint-venture"], ["industrial-project", "Projet industriel"], ["technical", "Partenariat technique"], ["investment", "Investissement"], ["consortium", "Consortium pour appel d'offres"]
+  ] : [
+    ["commercial", "Commercial partnership"], ["distribution", "Distribution"], ["local-representation", "Local representation"], ["joint-venture", "Joint venture"], ["industrial-project", "Industrial project"], ["technical", "Technical partnership"], ["investment", "Investment"], ["consortium", "Tender consortium"]
+  ];
+  const sectors = lang === "fr" ? [
+    ["mining", "Mines"], ["metallurgy", "Métallurgie"], ["industry", "Industrie"], ["energy", "Énergie"], ["infrastructure", "Infrastructures"], ["construction", "BTP"], ["oil-gas", "Pétrole et gaz"], ["public-institution", "Institution publique"], ["other", "Autre"]
+  ] : [
+    ["mining", "Mining"], ["metallurgy", "Metallurgy"], ["industry", "Industry"], ["energy", "Energy"], ["infrastructure", "Infrastructure"], ["construction", "Construction"], ["oil-gas", "Oil and gas"], ["public-institution", "Public institution"], ["other", "Other"]
+  ];
+
+  if (isSupplier) {
+    return `<form class="form portal-form" data-portal-form data-endpoint="/api/portal" enctype="multipart/form-data" novalidate><input type="hidden" name="portalType" value="supplier">
+      <div class="rfq-form-head"><p class="section-kicker">${lang === "fr" ? "Fournisseurs" : "Suppliers"}</p><h2>${title}</h2><p>${lang === "fr" ? "Présentez vos produits, capacités et documents. Aucune référence ne sera publiée automatiquement." : "Present your products, capabilities and documents. No reference will be published automatically."}</p></div>
+      <fieldset><legend>${lang === "fr" ? "Entreprise" : "Company"}</legend><div class="form-two-cols">
+        <label>${lang === "fr" ? "Raison sociale" : "Legal name"}<input name="company" required></label><label>${lang === "fr" ? "Pays" : "Country"}<input name="country" required></label><label>${lang === "fr" ? "Ville" : "City"}<input name="city" required></label><label>${lang === "fr" ? "Site web" : "Website"}<input name="websiteUrl" type="url"></label><label>${lang === "fr" ? "Année de création optionnelle" : "Year founded optional"}<input name="yearFounded" inputmode="numeric"></label><label>${lang === "fr" ? "Nom du contact" : "Contact name"}<input name="contactName" required></label><label>${lang === "fr" ? "Fonction" : "Position"}<input name="position" required></label><label>${lang === "fr" ? "E-mail professionnel" : "Business email"}<input type="email" name="email" required></label><label>${lang === "fr" ? "Téléphone" : "Phone"}<input name="phone" required></label>
+      </div></fieldset>
+      <fieldset><legend>${lang === "fr" ? "Catégories proposées" : "Offered categories"}</legend><div class="checkbox-grid">${categories.map((item) => `<label><input type="checkbox" name="categories" value="${item}"><span>${item}</span></label>`).join("")}</div></fieldset>
+      <fieldset><legend>${lang === "fr" ? "Informations commerciales" : "Commercial information"}</legend><label>${lang === "fr" ? "Zones géographiques desservies" : "Geographic areas served"}<input name="servedAreas" required></label><label>${lang === "fr" ? "Capacité d'approvisionnement" : "Supply capacity"}<textarea name="capacity" rows="4" required></textarea></label><div class="form-two-cols"><label>${lang === "fr" ? "Délai moyen" : "Average lead time"}<input name="leadTime" required></label><label>Incoterms<input name="incoterms" required></label><label>${lang === "fr" ? "Devises acceptées" : "Accepted currencies"}<input name="currencies" required></label><label>${lang === "fr" ? "Intérêt commercial" : "Commercial interest"}<select name="interest" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option><option value="distribution">Distribution</option><option value="representation">${lang === "fr" ? "Représentation" : "Representation"}</option><option value="spot-supply">${lang === "fr" ? "Fourniture ponctuelle" : "Spot supply"}</option></select></label></div><label>${lang === "fr" ? "Références disponibles sans publication automatique" : "Available references, not for automatic publication"}<textarea name="references" rows="4"></textarea></label></fieldset>
+      ${portalDocuments(lang)}${portalConsent(lang, type)}</form>`;
+  }
+
+  if (isPartnership) {
+    return `<form class="form portal-form" data-portal-form data-endpoint="/api/portal" enctype="multipart/form-data" novalidate><input type="hidden" name="portalType" value="partnership">
+      <div class="rfq-form-head"><p class="section-kicker">${lang === "fr" ? "Partenariats" : "Partnerships"}</p><h2>${title}</h2></div>
+      <fieldset><legend>${lang === "fr" ? "Informations" : "Information"}</legend><div class="form-two-cols"><label>${lang === "fr" ? "Entreprise" : "Company"}<input name="company" required></label><label>${lang === "fr" ? "Pays" : "Country"}<input name="country" required></label><label>${lang === "fr" ? "Nom du contact" : "Contact name"}<input name="contactName" required></label><label>${lang === "fr" ? "Fonction" : "Position"}<input name="position" required></label><label>E-mail<input type="email" name="email" required></label><label>${lang === "fr" ? "Téléphone" : "Phone"}<input name="phone" required></label><label>${lang === "fr" ? "Type de partenariat" : "Partnership type"}<select name="partnershipType" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(partnershipTypes)}</select></label><label>${lang === "fr" ? "Secteur" : "Sector"}<select name="sector" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(sectors)}</select></label><label class="span-2">${lang === "fr" ? "Marché ou pays concerné" : "Target market or country"}<input name="targetMarket" required></label></div><label>${lang === "fr" ? "Résumé de la proposition" : "Proposal summary"}<textarea name="summary" rows="7" minlength="20" required></textarea></label></fieldset>
+      ${portalDocuments(lang)}${portalConsent(lang, type)}</form>`;
+  }
+
+  return `<form class="form portal-form" data-portal-form data-endpoint="/api/portal" enctype="multipart/form-data" novalidate><input type="hidden" name="portalType" value="tender">
+    <div class="rfq-form-head"><p class="section-kicker">${lang === "fr" ? "Appels d'offres" : "Tenders"}</p><h2>${title}</h2></div>
+    <fieldset><legend>${lang === "fr" ? "Consultation" : "Consultation"}</legend><div class="form-two-cols"><label>${lang === "fr" ? "Organisation" : "Organization"}<input name="organization" required></label><label>${lang === "fr" ? "Pays" : "Country"}<input name="country" required></label><label>${lang === "fr" ? "Personne de contact" : "Contact person"}<input name="contactName" required></label><label>E-mail<input type="email" name="email" required></label><label>${lang === "fr" ? "Téléphone" : "Phone"}<input name="phone" required></label><label>${lang === "fr" ? "Référence de l'appel d'offres" : "Tender reference"}<input name="tenderReference" required></label><label>${lang === "fr" ? "Objet" : "Subject"}<input name="subject" required></label><label>${lang === "fr" ? "Secteur" : "Sector"}<select name="sector" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(sectors)}</select></label><label>${lang === "fr" ? "Date limite" : "Deadline"}<input type="date" name="deadline" required></label><label>${lang === "fr" ? "Lien public éventuel" : "Optional public link"}<input type="url" name="publicLink"></label></div><label>${lang === "fr" ? "Résumé" : "Summary"}<textarea name="summary" rows="7" minlength="20" required></textarea></label></fieldset>
+    ${portalDocuments(lang)}${portalConsent(lang, type)}</form>`;
+}
+
+function portalDocuments(lang) {
+  return `<fieldset><legend>${lang === "fr" ? "Documents" : "Documents"}</legend><label>${lang === "fr" ? "Ajouter des documents" : "Add documents"}<input type="file" name="documents" multiple accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"></label><p class="form-note">${lang === "fr" ? "Documents possibles: catalogue, fiche technique, certificat, présentation, prix indicatif, dossier d'appel d'offres. Maximum 5 fichiers, 4 Mo par fichier, 8 Mo au total." : "Possible documents: catalog, technical sheet, certificate, company profile, indicative price list, tender file. Maximum 5 files, 4 MB per file, 8 MB total."}</p><ul class="file-list" data-file-list></ul></fieldset>`;
+}
+
+function portalConsent(lang, type) {
+  return `<label class="form-hp" aria-hidden="true" tabindex="-1">Website<input name="website" autocomplete="off" tabindex="-1"></label><label class="consent-field"><input type="checkbox" name="consent" required><span>${lang === "fr" ? "J'autorise LILOTOP SARL à traiter les informations et documents soumis pour analyser cette demande. Aucun document ne sera publié automatiquement." : "I authorize LILOTOP SARL to process the submitted information and documents to review this request. No document will be published automatically."}</span></label><div class="form-status" data-form-status role="status" aria-live="polite"></div><div class="portal-submit-row"><button class="button primary" type="submit">${lang === "fr" ? "Soumettre" : "Submit"}${icon.arrow}</button><a class="button secondary" href="${hrefFor(lang, "b2b")}">${lang === "fr" ? "Retour au portail" : "Back to portal"}</a></div>`;
+}
+
+function portalSubmissionPage(lang, type) {
+  const config = {
+    supplier: {
+      slug: "suppliers",
+      title: lang === "fr" ? "Devenir fournisseur | LILOTOP SARL" : "Become a supplier | LILOTOP SARL",
+      kicker: lang === "fr" ? "Devenir fournisseur" : "Become a supplier",
+      h1: lang === "fr" ? "Présentez vos produits et capacités à LILOTOP SARL" : "Present your products and capabilities to LILOTOP SARL",
+      desc: lang === "fr" ? "Espace destiné aux fournisseurs locaux et internationaux souhaitant présenter leurs produits, documents et capacités." : "Area for local and international suppliers wishing to present products, documents and capabilities.",
+    },
+    partnership: {
+      slug: "partnerships",
+      title: lang === "fr" ? "Partenariats stratégiques | LILOTOP SARL" : "Strategic partnerships | LILOTOP SARL",
+      kicker: lang === "fr" ? "Partenariats stratégiques" : "Strategic partnerships",
+      h1: lang === "fr" ? "Proposez une collaboration structurée avec LILOTOP SARL" : "Propose a structured collaboration with LILOTOP SARL",
+      desc: lang === "fr" ? "Partenariat commercial, distribution, représentation locale, joint-venture, projet industriel, investissement ou consortium." : "Commercial partnership, distribution, local representation, joint venture, industrial project, investment or consortium.",
+    },
+    tender: {
+      slug: "tenders",
+      title: lang === "fr" ? "Appels d'offres et consultations | LILOTOP SARL" : "Tenders and consultations | LILOTOP SARL",
+      kicker: lang === "fr" ? "Appels d'offres et consultations" : "Tenders and consultations",
+      h1: lang === "fr" ? "Transmettez une consultation ou un dossier de préqualification" : "Submit a consultation or prequalification file",
+      desc: lang === "fr" ? "Soumettre un appel d'offres, une manifestation d'intérêt, une demande de consortium ou un dossier stratégique." : "Submit a tender, expression of interest, consortium request or strategic file.",
+    },
+  }[type];
+  const body = `${subHero(lang, config.kicker, config.h1, config.desc)}
+  <section class="section rfq-page-section"><div class="container rfq-layout"><div class="rfq-form-wrap reveal">${portalForm(lang, type)}</div><aside class="rfq-side reveal"><div class="premium-card rfq-assurance"><p class="section-kicker">${lang === "fr" ? "Traitement confidentiel" : "Confidential handling"}</p><h2>${lang === "fr" ? "Documents sécurisés, analyse structurée." : "Secure documents, structured review."}</h2><p>${lang === "fr" ? "Les informations sont envoyées provisoirement à contact@lilotopsarl.com et préparées pour de futures intégrations IA, Odoo et suivi interne." : "Information is temporarily sent to contact@lilotopsarl.com and prepared for future AI, Odoo and internal tracking integrations."}</p></div><div class="rfq-step-list"><article><span>01</span><h3>${lang === "fr" ? "Référence unique" : "Unique reference"}</h3><p>${lang === "fr" ? "Une référence est générée automatiquement." : "A reference is generated automatically."}</p></article><article><span>02</span><h3>${lang === "fr" ? "Validation serveur" : "Server validation"}</h3><p>${lang === "fr" ? "Champs, fichiers, extensions et tailles sont contrôlés." : "Fields, files, extensions and sizes are controlled."}</p></article><article><span>03</span><h3>${lang === "fr" ? "Tri futur" : "Future routing"}</h3><p>${lang === "fr" ? "Les données sont structurées pour un tri automatique ultérieur." : "Data is structured for later automated routing."}</p></article></div></aside></div></section>`;
+  return layout(lang, config.slug, config.title, config.desc, body, { solidHeader: true });
+}
+
 function partnersPage(lang) {
   const t = data[lang];
   const title = lang === "fr" ? "Partenaires | LILOTOP SARL" : "Partners | LILOTOP SARL";
@@ -1029,6 +1171,17 @@ function quoteForm(lang) {
     ["Appel d'offres", lang === "fr" ? "Appel d'offres" : "Tender"],
     ["Autre", lang === "fr" ? "Autre" : "Other"],
   ];
+  const departments = [
+    ["Commercial", lang === "fr" ? "Commercial" : "Commercial"],
+    ["Achats", lang === "fr" ? "Achats" : "Procurement"],
+    ["Fournisseurs", lang === "fr" ? "Fournisseurs" : "Suppliers"],
+    ["Appels d'offres", lang === "fr" ? "Appels d'offres" : "Tenders"],
+    ["Partenariats", lang === "fr" ? "Partenariats" : "Partnerships"],
+    ["Projets", lang === "fr" ? "Projets" : "Projects"],
+    ["Finance", lang === "fr" ? "Finance" : "Finance"],
+    ["Direction", lang === "fr" ? "Direction" : "Management"],
+    ["Autre", lang === "fr" ? "Autre" : "Other"],
+  ];
   return `<form class="form" data-quote-form data-endpoint="/api/contact" novalidate>
     <div><p class="section-kicker">${f.title}</p><h2>${f.title}</h2><p>${f.intro}</p></div>
     <label>${f.name}<input name="name" autocomplete="name" required></label>
@@ -1036,6 +1189,7 @@ function quoteForm(lang) {
     <label>${f.email}<input type="email" name="email" autocomplete="email" required></label>
     <label>${f.phone}<input name="phone" autocomplete="tel" required></label>
     <label>${f.country}<input name="country" autocomplete="country-name" required></label>
+    <label>${f.department}<select name="department" required><option value="">${lang === "fr" ? "Sélectionner un motif" : "Select a reason"}</option>${departments.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>
     <label>${f.subject}<input name="subject" required></label>
     <label>${f.sector}<select name="sector" required><option value="">${lang === "fr" ? "Sélectionner un secteur" : "Select a sector"}</option>${sectors.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>
     <label>${f.message}<textarea name="message" rows="6" minlength="10" required></textarea></label>
@@ -1051,7 +1205,23 @@ function subHero(lang, kicker, title, lead) {
   return `<section class="page-hero corporate-hero"><div class="container reveal"><p class="section-kicker">${kicker}</p><h1>${title}</h1><p>${lead}</p></div></section>`;
 }
 
-const generators = { index: homePage, about: aboutPage, sectors: sectorsPage, solutions: solutionsPage, rfq: rfqPage, products: productsPage, partners: partnersPage, projects: projectsPage, news: newsPage, contact: contactPage, legal: legalPage };
+const generators = {
+  index: homePage,
+  about: aboutPage,
+  sectors: sectorsPage,
+  solutions: solutionsPage,
+  products: productsPage,
+  b2b: b2bPage,
+  rfq: rfqPage,
+  suppliers: (lang) => portalSubmissionPage(lang, "supplier"),
+  partnerships: (lang) => portalSubmissionPage(lang, "partnership"),
+  tenders: (lang) => portalSubmissionPage(lang, "tender"),
+  partners: partnersPage,
+  projects: projectsPage,
+  news: newsPage,
+  contact: contactPage,
+  legal: legalPage,
+};
 
 fs.mkdirSync("en", { recursive: true });
 for (const lang of ["fr", "en"]) {

@@ -1693,6 +1693,34 @@ blockquote cite {
     image-set(url("assets/industrial-warehouse.webp") type("image/webp"), url("assets/industrial-warehouse.png") type("image/png"));
 }
 
+.page-b2b .page-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 13, 24, 0.96), rgba(5, 13, 24, 0.8) 48%, rgba(5, 13, 24, 0.42)),
+    linear-gradient(0deg, rgba(5, 13, 24, 0.92), rgba(5, 13, 24, 0.36)),
+    image-set(url("assets/digital-operations.webp") type("image/webp"), url("assets/digital-operations.png") type("image/png"));
+}
+
+.page-suppliers .page-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 13, 24, 0.96), rgba(5, 13, 24, 0.8) 48%, rgba(5, 13, 24, 0.42)),
+    linear-gradient(0deg, rgba(5, 13, 24, 0.92), rgba(5, 13, 24, 0.36)),
+    image-set(url("assets/industrial-warehouse.webp") type("image/webp"), url("assets/industrial-warehouse.png") type("image/png"));
+}
+
+.page-partnerships .page-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 13, 24, 0.96), rgba(5, 13, 24, 0.8) 48%, rgba(5, 13, 24, 0.42)),
+    linear-gradient(0deg, rgba(5, 13, 24, 0.92), rgba(5, 13, 24, 0.36)),
+    image-set(url("assets/international-partnerships.webp") type("image/webp"), url("assets/international-partnerships.png") type("image/png"));
+}
+
+.page-tenders .page-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 13, 24, 0.96), rgba(5, 13, 24, 0.8) 48%, rgba(5, 13, 24, 0.42)),
+    linear-gradient(0deg, rgba(5, 13, 24, 0.92), rgba(5, 13, 24, 0.36)),
+    image-set(url("assets/quality-inspection.webp") type("image/webp"), url("assets/quality-inspection.png") type("image/png"));
+}
+
 .page-hero h1 {
   max-width: 940px;
   margin: 0;
@@ -2100,6 +2128,118 @@ blockquote cite {
   color: var(--muted);
 }
 
+.portal-pathways {
+  background:
+    linear-gradient(180deg, #ffffff, #f7f9fc);
+}
+
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.portal-card,
+.portal-action {
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), transparent 36%),
+    linear-gradient(180deg, #ffffff, #f8fafc);
+  box-shadow: var(--shadow-soft), var(--inset-line);
+}
+
+.portal-card {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+  min-height: 330px;
+  padding: 28px;
+  transition: transform 190ms ease, box-shadow 190ms ease, border-color 190ms ease;
+}
+
+.portal-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(201, 154, 46, 0.46);
+  box-shadow: var(--shadow), var(--inset-line);
+}
+
+.portal-card > span {
+  color: var(--gold-500);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.portal-card p {
+  color: var(--muted);
+}
+
+.portal-card .button {
+  align-self: end;
+  margin-top: auto;
+}
+
+.portal-action-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.portal-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 96px;
+  padding: 22px;
+  color: var(--navy-900);
+  font-weight: 900;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.portal-action:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201, 154, 46, 0.42);
+  box-shadow: var(--shadow);
+}
+
+.portal-action svg {
+  width: 18px;
+  color: var(--gold-500);
+}
+
+.portal-form {
+  gap: 22px;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.checkbox-grid label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 50px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  font-weight: 800;
+}
+
+.checkbox-grid input {
+  width: auto;
+  margin-top: 3px;
+}
+
+.portal-submit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .contact-card {
   display: grid;
   gap: 18px;
@@ -2357,6 +2497,8 @@ blockquote cite {
   .project-grid,
   .news-grid,
   .testimonial-grid,
+  .portal-grid,
+  .portal-action-grid,
   .solutions-grid,
   .visual-grid,
   .solutions-grid,
@@ -2466,6 +2608,7 @@ blockquote cite {
 
   .hero-stats,
   .form-two-cols,
+  .checkbox-grid,
   .service-grid,
   .why-grid,
   .sector-grid,

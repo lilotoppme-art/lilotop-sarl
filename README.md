@@ -4,13 +4,14 @@ Site corporate statique de LILOTOP SARL, genere a partir du profil societe offic
 
 ## Architecture
 
-- Francais : `index.html`, `a-propos.html`, `secteurs.html`, `solutions.html`, `request-a-quote.html`, `produits.html`, `partenaires.html`, `projets.html`, `actualites.html`, `contact.html`
+- Francais : `index.html`, `a-propos.html`, `solutions.html`, `produits.html`, `b2b-portal.html`, `request-a-quote.html`, `suppliers.html`, `partnerships.html`, `tenders.html`, `contact.html`
 - English : dossier `en/`
 - Page legale : `mentions-legales.html` et `en/legal.html`
 - Source de generation : `build-site.js`
 - Design et animations : `styles.css`, `script.js`
 - API formulaire : `api/contact.js`
 - API RFQ : `api/rfq.js`
+- API portail B2B : `api/portal.js`
 - SEO : `sitemap.xml`, `robots.txt`, canonical, hreflang, Open Graph et JSON-LD
 
 ## Apercu local
@@ -56,6 +57,17 @@ Remarques :
 ## Espace RFQ
 
 La page `request-a-quote.html` permet de soumettre une demande de cotation complete avec documents.
+
+## Portail B2B
+
+La page `b2b-portal.html` regroupe les parcours :
+
+- Clients : `request-a-quote.html`
+- Fournisseurs : `suppliers.html`
+- Partenariats : `partnerships.html`
+- Appels d'offres : `tenders.html`
+
+Les soumissions fournisseurs, partenariats et appels d'offres utilisent `api/portal.js`. Elles generent des references `SUP-YYYYMMDD-XXXX`, `PART-YYYYMMDD-XXXX` et `TND-YYYYMMDD-XXXX`. Les donnees sont structurees pour de futures integrations IA, Odoo CRM, Odoo Achats, stockage cloud et tableau de suivi, sans connexion active a ce stade.
 
 Limites appliquees cote serveur :
 
