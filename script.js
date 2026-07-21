@@ -107,6 +107,20 @@ if (parallaxHero && !reduceMotion) {
   updateParallax();
 }
 
+const trackEvent = (name, detail = {}) => {
+  window.dispatchEvent(new CustomEvent("lilotop:analytics", { detail: { name, ...detail } }));
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ event: name, ...detail });
+};
+
+document.querySelectorAll('[data-track="rfq-cta-click"]').forEach((link) => {
+  link.addEventListener("click", () => trackEvent("rfq_cta_click", { href: link.getAttribute("href") }));
+});
+
+if (document.body.classList.contains("page-rfq")) {
+  trackEvent("rfq_page_view");
+}
+
 const quoteForm = document.querySelector("[data-quote-form]");
 if (quoteForm) {
   const status = quoteForm.querySelector("[data-form-status]");
@@ -161,6 +175,121 @@ if (quoteForm) {
         ? (isEnglish ? "The email service is not configured yet. Please contact us by email or WhatsApp." : "Le service d'envoi n'est pas encore configuré. Merci de nous contacter par e-mail ou WhatsApp.")
         : (isEnglish ? "The message could not be sent. Please try again or contact us by email." : "Le message n'a pas pu être envoyé. Merci de réessayer ou de nous contacter par e-mail.");
       setStatus("error", message);
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent = initialButtonText;
+      }
+    }
+  });
+}
+
+const rfqForm = document.querySelector("[data-rfq-form]");
+if (rfqForm) {
+  const status = rfqForm.querySelector("[data-form-status]");
+  const submitButton = rfqForm.querySelector('button[type="submit"]');
+  const fileInput = rfqForm.querySelector('input[type="file"]');
+  const fileList = rfqForm.querySelector("[data-file-list]");
+  const initialButtonText = submitButton ? submitButton.textContent : "";
+  const isEnglish = document.documentElement.lang === "en";
+  const maxFiles = 5;
+  const maxFileSize = 4 * 1024 * 1024;
+  const maxTotalSize = 8 * 1024 * 1024;
+  const allowedExtensions = [".pdf", ".xls", ".xlsx", ".doc", ".docx", ".jpg", ".jpeg", ".png"];
+  let started = false;
+
+  const setStatus = (type, message) => {
+    if (!status) return;
+    status.className = `form-status ${type ? `is-${type}` : ""}`.trim();
+    status.textContent = message || "";
+  };
+
+  const validateFiles = () => {
+    const files = Array.from(fileInput?.files || []);
+    const errors = [];
+    const total = files.reduce((sum, file) => sum + file.size, 0);
+
+    if (files.length > maxFiles) {
+      errors.push(isEnglish ? "Maximum 5 files are allowed." : "Maximum 5 fichiers sont autorisés.");
+    }
+    if (total > maxTotalSize) {
+      errors.push(isEnglish ? "Total file size must not exceed 8 MB." : "La taille totale des fichiers ne doit pas dépasser 8 Mo.");
+    }
+    files.forEach((file) => {
+      const lower = file.name.toLowerCase();
+      const validExtension = allowedExtensions.some((ext) => lower.endsWith(ext));
+      if (!validExtension) {
+        errors.push(isEnglish ? `Unsupported file format: ${file.name}` : `Format non autorisé : ${file.name}`);
+      }
+      if (file.size > maxFileSize) {
+        errors.push(isEnglish ? `File too large: ${file.name}` : `Fichier trop lourd : ${file.name}`);
+      }
+    });
+
+    if (fileList) {
+      fileList.innerHTML = files.map((file) => `<li>${file.name} <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span></li>`).join("");
+    }
+
+    return errors;
+  };
+
+  rfqForm.addEventListener("input", () => {
+    if (!started) {
+      started = true;
+      trackEvent("rfq_form_start");
+    }
+  }, { once: false });
+
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      const errors = validateFiles();
+      trackEvent("rfq_document_added", { fileCount: fileInput.files.length });
+      setStatus(errors.length ? "error" : "", errors.join(" "));
+    });
+  }
+
+  rfqForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setStatus("", "");
+
+    const fileErrors = validateFiles();
+    if (!rfqForm.checkValidity() || fileErrors.length) {
+      rfqForm.reportValidity();
+      setStatus("error", fileErrors.join(" ") || (isEnglish ? "Please complete all required fields before sending." : "Veuillez compléter tous les champs obligatoires avant l'envoi."));
+      trackEvent("rfq_submit_failed", { reason: "client_validation" });
+      return;
+    }
+
+    const form = new FormData(rfqForm);
+    if (form.get("website")) return;
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = isEnglish ? "Sending RFQ..." : "Envoi de la RFQ...";
+    }
+
+    try {
+      const response = await fetch(rfqForm.dataset.endpoint || "/api/rfq", {
+        method: "POST",
+        body: form,
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.ok) {
+        const configMissing = result.code === "EMAIL_SERVICE_NOT_CONFIGURED";
+        throw new Error(configMissing ? "config" : "send");
+      }
+
+      rfqForm.reset();
+      if (fileList) fileList.innerHTML = "";
+      setStatus("success", isEnglish ? `Thank you. Your RFQ has been submitted. Reference: ${result.reference}` : `Merci. Votre RFQ a bien été soumise. Référence : ${result.reference}`);
+      trackEvent("rfq_submit_success", { reference: result.reference });
+    } catch (error) {
+      const message = error.message === "config"
+        ? (isEnglish ? "The email service is not configured yet. Please contact us by email or WhatsApp." : "Le service d'envoi n'est pas encore configuré. Merci de nous contacter par e-mail ou WhatsApp.")
+        : (isEnglish ? "The RFQ could not be sent. Please try again or contact us by email." : "La RFQ n'a pas pu être envoyée. Merci de réessayer ou de nous contacter par e-mail.");
+      setStatus("error", message);
+      trackEvent("rfq_submit_failed", { reason: error.message });
     } finally {
       if (submitButton) {
         submitButton.disabled = false;

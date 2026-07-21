@@ -4,12 +4,13 @@ Site corporate statique de LILOTOP SARL, genere a partir du profil societe offic
 
 ## Architecture
 
-- Francais : `index.html`, `a-propos.html`, `secteurs.html`, `solutions.html`, `produits.html`, `partenaires.html`, `projets.html`, `actualites.html`, `contact.html`
+- Francais : `index.html`, `a-propos.html`, `secteurs.html`, `solutions.html`, `request-a-quote.html`, `produits.html`, `partenaires.html`, `projets.html`, `actualites.html`, `contact.html`
 - English : dossier `en/`
 - Page legale : `mentions-legales.html` et `en/legal.html`
 - Source de generation : `build-site.js`
 - Design et animations : `styles.css`, `script.js`
 - API formulaire : `api/contact.js`
+- API RFQ : `api/rfq.js`
 - SEO : `sitemap.xml`, `robots.txt`, canonical, hreflang, Open Graph et JSON-LD
 
 ## Apercu local
@@ -41,6 +42,7 @@ Variables d'environnement a configurer dans Vercel :
 RESEND_API_KEY=
 CONTACT_TO_EMAIL=contact@lilotopsarl.com
 CONTACT_FROM_EMAIL=LILOTOP SARL <noreply@lilotopsarl.com>
+RFQ_SEND_ACK=false
 ```
 
 Remarques :
@@ -49,6 +51,20 @@ Remarques :
 - `CONTACT_FROM_EMAIL` doit utiliser un domaine verifie dans Resend.
 - `CONTACT_TO_EMAIL` recoit les demandes envoyees depuis le site.
 - Sans `RESEND_API_KEY`, l'API renvoie une erreur de configuration claire et aucun envoi fictif n'est effectue.
+- `RFQ_SEND_ACK=false` garde l'accuse de reception automatique des RFQ desactive. Passer a `true` uniquement apres validation.
+
+## Espace RFQ
+
+La page `request-a-quote.html` permet de soumettre une demande de cotation complete avec documents.
+
+Limites appliquees cote serveur :
+
+- 5 fichiers maximum.
+- 4 Mo par fichier.
+- 8 Mo au total.
+- Extensions autorisees : PDF, XLS, XLSX, DOC, DOCX, JPG, PNG.
+
+Les documents ne sont pas stockes dans le depot GitHub. Ils sont prepares pour etre envoyes comme pieces jointes via Resend lorsque les variables d'environnement sont configurees. Les donnees RFQ sont aussi structurees en JSON pour de futures integrations IA, Odoo CRM ou suivi fournisseur, sans connexion active a ce stade.
 
 ## Publication Vercel
 

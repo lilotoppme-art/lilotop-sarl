@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demande de cotation | LILOTOP SARL</title>
+    <meta name="description" content="Soumettez une demande de cotation complète pour produits miniers, fournitures industrielles, infrastructures, partenariats techniques ou appels d'offres.">
+    <meta name="theme-color" content="#071426">
+    <meta property="og:title" content="Demande de cotation | LILOTOP SARL">
+    <meta property="og:description" content="Soumettez une demande de cotation complète pour produits miniers, fournitures industrielles, infrastructures, partenariats techniques ou appels d'offres.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/hero-industrial-drc.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://lilotopsarl.com/request-a-quote.html">
+    <link rel="alternate" hreflang="fr" href="https://lilotopsarl.com/request-a-quote.html">
+    <link rel="alternate" hreflang="en" href="https://lilotopsarl.com/en/request-a-quote.html">
+    <link rel="alternate" hreflang="x-default" href="https://lilotopsarl.com/">
+    <link rel="preload" href="assets/hero-industrial-drc.webp" as="image" type="image/webp">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"LILOTOP SARL","url":"https://lilotopsarl.com","logo":"https://lilotopsarl.com/assets/logo-lilotop.svg","description":"Soumettez une demande de cotation complète pour produits miniers, fournitures industrielles, infrastructures, partenariats techniques ou appels d'offres.","telephone":"+243 800 982 436","email":"contact@lilotopsarl.com","address":{"@type":"PostalAddress","addressCountry":"CD","addressLocality":"Lubumbashi / Kinshasa","streetAddress":"2266 Avenue des Aviateurs, quartier Tshangalele, Lubumbashi; Boulevard du 30 Juin, n°144, Immeuble Didi, 3ème niveau, Kinshasa/Gombe"},"areaServed":["Democratic Republic of Congo","Central Africa"],"knowsAbout":["Mining supply","Logistics","Infrastructure","Import-export","Odoo","Digital solutions"]}</script>
+  </head>
+  <body class="page-rfq">
+    <a class="skip-link" href="#contenu">Aller au contenu</a>
+    <header class="site-header is-scrolled" data-header>
+      <a class="brand" href="index.html" aria-label="LILOTOP SARL">
+        <img class="brand-logo" src="assets/logo-lilotop.svg" alt="" width="152" height="42">
+        <span><strong>LILOTOP</strong><small>SARL</small></span>
+      </a>
+      <button class="menu-toggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" data-menu-toggle>
+        <span></span><span></span><span></span>
+      </button>
+      <nav class="nav" data-nav>
+        <a href="index.html">Accueil</a><a href="a-propos.html">Société</a><a href="secteurs.html">Activités</a><a href="solutions.html">Solutions</a><a href="request-a-quote.html" aria-current="page">RFQ</a><a href="partenaires.html">Partenariats</a><a href="projets.html">Projets</a><a href="actualites.html">Insights</a><a href="contact.html">Contact</a>
+        <a class="nav-cta" href="request-a-quote.html">Demander une cotation</a>
+        <a class="lang-switch" href="en/request-a-quote.html" hreflang="en">EN</a>
+      </nav>
+    </header>
+    <main id="contenu"><section class="page-hero corporate-hero"><div class="container reveal"><p class="section-kicker">RFQ</p><h1>Soumettez votre demande de cotation</h1><p>LILOTOP SARL traite les demandes de prix, d'approvisionnement, de partenariat technique et de fournitures industrielles.</p></div></section>
+  <section class="section rfq-page-section"><div class="container rfq-layout">
+    <div class="rfq-form-wrap reveal"><form class="form rfq-form" data-rfq-form data-endpoint="/api/rfq" enctype="multipart/form-data" novalidate>
+    <div class="rfq-form-head"><p class="section-kicker">RFQ</p><h2>Soumettez votre demande de cotation</h2><p>Transmettez-nous vos besoins techniques et commerciaux. Notre équipe analysera votre demande et reviendra vers vous avec une proposition adaptée.</p></div>
+    <fieldset><legend>Informations du demandeur</legend>
+      <div class="form-two-cols">
+        <label>Nom complet<input name="fullName" autocomplete="name" required></label>
+        <label>Fonction<input name="position" autocomplete="organization-title" required></label>
+        <label>Entreprise<input name="company" autocomplete="organization" required></label>
+        <label>Adresse e-mail professionnelle<input type="email" name="email" autocomplete="email" required></label>
+        <label>Téléphone<input name="phone" autocomplete="tel" required></label>
+        <label>Pays<input name="country" autocomplete="country-name" required></label>
+        <label>Ville<input name="city" autocomplete="address-level2" required></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>Classification de la demande</legend>
+      <div class="form-two-cols">
+        <label>Type de demande<select name="requestType" required><option value="">Sélectionner</option><option value="price-request">Demande de prix</option><option value="procurement-request">Demande d'approvisionnement</option><option value="partnership-request">Demande de partenariat</option><option value="technical-request">Demande technique</option><option value="tender">Appel d'offres</option><option value="other">Autre</option></select></label>
+        <label>Secteur<select name="sector" required><option value="">Sélectionner</option><option value="mining">Mines</option><option value="metallurgy">Métallurgie</option><option value="industry">Industrie</option><option value="energy">Énergie</option><option value="infrastructure">Infrastructures</option><option value="construction">BTP</option><option value="oil-gas">Pétrole et gaz</option><option value="public-institution">Institution publique</option><option value="other">Autre</option></select></label>
+        <label class="span-2">Catégorie de produits ou services<select name="category" required><option value="">Sélectionner</option><option value="mining-chemical-reagents">Réactifs chimiques miniers</option><option value="sulfuric-acid">Acide sulfurique</option><option value="quicklime">Chaux vive</option><option value="flocculants">Floculants</option><option value="activated-carbon">Charbon actif</option><option value="sx-extractants">Extractants SX</option><option value="sodium-sulfate">Sulfate de sodium</option><option value="grinding-media">Billes de broyage</option><option value="lubricants">Lubrifiants</option><option value="fuels">Carburants</option><option value="industrial-supplies">Fournitures industrielles</option><option value="road-solutions">Solutions routières</option><option value="strategic-advisory">Conseil stratégique</option><option value="industrial-project">Projet industriel</option><option value="other">Autre</option></select></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>Détails commerciaux</legend>
+      <label>Description du besoin<textarea name="description" rows="7" minlength="20" required></textarea></label>
+      <div class="form-two-cols">
+        <label>Quantité estimée<input name="quantity" required></label>
+        <label>Unité<input name="unit" placeholder="tonnes, pièces, litres..." required></label>
+        <label>Fréquence d'achat<select name="purchaseFrequency" required><option value="">Sélectionner</option><option value="one-time">Achat ponctuel</option><option value="monthly">Mensuel</option><option value="quarterly">Trimestriel</option><option value="annual">Annuel</option><option value="framework">Contrat cadre</option><option value="unknown">À confirmer</option></select></label>
+        <label>Lieu de livraison<input name="deliveryLocation" required></label>
+        <label>Date souhaitée de livraison<input type="date" name="desiredDeliveryDate" required></label>
+        <label>Devise souhaitée<select name="currency" required><option value="">Sélectionner</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="CDF">CDF</option><option value="ZAR">ZAR</option><option value="Other">Other</option></select></label>
+        <label>Incoterm si connu<input name="incoterm" placeholder="EXW, FOB, CIF, DAP..."></label>
+        <label>Budget indicatif optionnel<input name="budget"></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>Documents</legend>
+      <label>Ajouter des documents<input type="file" name="documents" multiple accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"></label>
+      <p class="form-note">Formats acceptés: PDF, XLS, XLSX, DOC, DOCX, JPG, PNG. Maximum 5 fichiers, 4 Mo par fichier, 8 Mo au total. Les contrôles sont aussi appliqués côté serveur.</p>
+      <ul class="file-list" data-file-list></ul>
+    </fieldset>
+    <label class="form-hp" aria-hidden="true" tabindex="-1">Website<input name="website" autocomplete="off" tabindex="-1"></label>
+    <label class="consent-field"><input type="checkbox" name="consent" required><span>J'accepte que LILOTOP SARL traite les informations soumises afin d'analyser cette demande de cotation, conformément à la politique de confidentialité.</span></label>
+    <div class="form-status" data-form-status role="status" aria-live="polite"></div>
+    <button class="button primary" type="submit">Soumettre la RFQ<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg></button>
+  </form></div>
+    <aside class="rfq-side reveal">
+      <div class="premium-card rfq-assurance"><p class="section-kicker">Traitement professionnel</p><h2>Une demande exploitable dès réception.</h2><p>Soumettez une demande de cotation complète pour produits miniers, fournitures industrielles, infrastructures, partenariats techniques ou appels d'offres.</p></div>
+      <div class="rfq-step-list"><article><span>01</span><h3>Référence automatique</h3><p>Chaque demande reçoit une référence RFQ structurée.</p></article><article><span>02</span><h3>Analyse technique</h3><p>Les informations sont classées par secteur, catégorie et urgence potentielle.</p></article><article><span>03</span><h3>Documents contrôlés</h3><p>Les formats et tailles sont vérifiés côté navigateur et côté serveur.</p></article><article><span>04</span><h3>Prêt pour IA & Odoo</h3><p>Les données sont structurées pour de futurs agents IA et un CRM.</p></article></div>
+    </aside>
+  </div></section></main>
+    <a class="whatsapp-float" href="https://wa.me/243800982436?text=Bonjour%20LILOTOP%20SARL%2C%20je%20souhaite%20obtenir%20un%20devis." target="_blank" rel="noopener" aria-label="Contacter LILOTOP SARL sur WhatsApp"><span>WA</span><strong>WhatsApp</strong></a>
+    <footer class="footer premium-footer">
+    <div class="container footer-grid">
+      <div>
+        <img class="footer-logo" src="assets/logo-lilotop.svg" alt="LILOTOP SARL" width="160" height="44">
+        <p>Partenaire stratégique en approvisionnement minier, logistique, infrastructures et solutions digitales.</p>
+      </div>
+      <div><h2>Navigation</h2><a href="index.html">Accueil</a><a href="a-propos.html">Société</a><a href="secteurs.html">Activités</a><a href="solutions.html">Solutions</a><a href="request-a-quote.html">RFQ</a><a href="partenaires.html">Partenariats</a><a href="projets.html">Projets</a><a href="actualites.html">Insights</a><a href="contact.html">Contact</a></div>
+      <div><h2>Domaines</h2><span>Mining Supply</span><span>Logistics</span><span>Infrastructure</span><span>Odoo & AI</span></div>
+      <div><h2>Contact</h2><a href="tel:+243800982436">+243 800 982 436</a><a href="mailto:contact@lilotopsarl.com">contact@lilotopsarl.com</a><span>RDC • Lubumbashi • Kinshasa</span></div>
+    </div>
+    <div class="container footer-bottom"><span>© 2026 LILOTOP SARL</span><a href="mentions-legales.html">Mentions légales</a><a href="request-a-quote.html" data-track="rfq-cta-click">Demander une cotation</a></div>
+  </footer>
+    <script src="script.js"></script>
+  </body>
+</html>

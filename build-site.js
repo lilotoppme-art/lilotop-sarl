@@ -27,6 +27,7 @@ const pages = [
   { slug: "about", file: "a-propos.html", enFile: "en/about.html", fr: "Société", en: "Company" },
   { slug: "sectors", file: "secteurs.html", enFile: "en/sectors.html", fr: "Activités", en: "Markets" },
   { slug: "solutions", file: "solutions.html", enFile: "en/solutions.html", fr: "Solutions", en: "Solutions" },
+  { slug: "rfq", file: "request-a-quote.html", enFile: "en/request-a-quote.html", fr: "RFQ", en: "RFQ" },
   { slug: "products", file: "produits.html", enFile: "en/products.html", fr: "Produits", en: "Products", hidden: true },
   { slug: "partners", file: "partenaires.html", enFile: "en/partners.html", fr: "Partenariats", en: "Partnerships" },
   { slug: "projects", file: "projets.html", enFile: "en/projects.html", fr: "Projets", en: "Projects" },
@@ -344,7 +345,7 @@ function layout(lang, slug, title, description, body, options = {}) {
       </button>
       <nav class="nav" data-nav>
         ${nav}
-        <a class="nav-cta" href="${hrefFor(lang, "contact")}">${t.quoteCta}</a>
+        <a class="nav-cta" href="${hrefFor(lang, "rfq")}">${lang === "fr" ? "Demander une cotation" : "Request a quote"}</a>
         <a class="lang-switch" href="${otherHref}" hreflang="${other}">${t.altLangName}</a>
       </nav>
     </header>
@@ -397,7 +398,7 @@ function footer(lang) {
       <div><h2>${lang === "fr" ? "Domaines" : "Capabilities"}</h2><span>Mining Supply</span><span>Logistics</span><span>Infrastructure</span><span>Odoo & AI</span></div>
       <div><h2>Contact</h2><a href="tel:${site.phoneHref}">${site.phone}</a><a href="mailto:${site.email}">${site.email}</a><span>RDC • Lubumbashi • Kinshasa</span></div>
     </div>
-    <div class="container footer-bottom"><span>© 2026 LILOTOP SARL</span><a href="${hrefFor(lang, "legal")}">${lang === "fr" ? "Mentions légales" : "Legal"}</a><a href="${hrefFor(lang, "contact")}">${t.quoteCta}</a></div>
+    <div class="container footer-bottom"><span>© 2026 LILOTOP SARL</span><a href="${hrefFor(lang, "legal")}">${lang === "fr" ? "Mentions légales" : "Legal"}</a><a href="${hrefFor(lang, "rfq")}" data-track="rfq-cta-click">${lang === "fr" ? "Demander une cotation" : "Request a quote"}</a></div>
   </footer>`;
 }
 
@@ -416,7 +417,7 @@ function hero(lang) {
         <h1>${h.h1}</h1>
         <p class="hero-lead">${h.lead}</p>
         <div class="hero-actions">
-          <a class="button primary" href="${hrefFor(lang, "contact")}">${t.cta}${icon.arrow}</a>
+          <a class="button primary" href="${hrefFor(lang, "rfq")}" data-track="rfq-cta-click">${lang === "fr" ? "Demander une cotation" : "Request a quote"}${icon.arrow}</a>
           <a class="button whatsapp-inline" href="${site.whatsapp}" target="_blank" rel="noopener">WhatsApp</a>
           <a class="button secondary" href="${hrefFor(lang, "sectors")}">${lang === "fr" ? "Explorer nos secteurs" : "Explore sectors"}</a>
         </div>
@@ -673,7 +674,8 @@ function quoteBand(lang) {
       <div><p class="section-kicker">${lang === "fr" ? "Appels d'offres & partenariats" : "Tenders & partnerships"}</p><h2>${lang === "fr" ? "Soumettez un besoin, un dossier fournisseur ou un projet à structurer en RDC." : "Submit a requirement, supplier file or project to structure in DRC."}</h2></div>
       <div class="quote-action-panel">
         <ul>${points.map((point) => `<li>${icon.check}<span>${point}</span></li>`).join("")}</ul>
-        <a class="button primary" href="${hrefFor(lang, "contact")}">${t.quoteCta}${icon.arrow}</a>
+        <a class="button primary" href="${hrefFor(lang, "rfq")}" data-track="rfq-cta-click">${lang === "fr" ? "Demander une cotation" : "Submit RFQ"}${icon.arrow}</a>
+        <a class="button secondary" href="${hrefFor(lang, "contact")}">${lang === "fr" ? "Contacter l'equipe" : "Contact the team"}</a>
         ${brochureButton(lang)}
       </div>
     </div>
@@ -751,6 +753,169 @@ function productsPage(lang) {
   return layout(lang, "products", title, desc, body, { solidHeader: true });
 }
 
+function optionList(items) {
+  return items.map(([value, label]) => `<option value="${value}">${label}</option>`).join("");
+}
+
+function rfqForm(lang) {
+  const requestTypes = lang === "fr" ? [
+    ["price-request", "Demande de prix"],
+    ["procurement-request", "Demande d'approvisionnement"],
+    ["partnership-request", "Demande de partenariat"],
+    ["technical-request", "Demande technique"],
+    ["tender", "Appel d'offres"],
+    ["other", "Autre"],
+  ] : [
+    ["price-request", "Price request"],
+    ["procurement-request", "Procurement request"],
+    ["partnership-request", "Partnership request"],
+    ["technical-request", "Technical request"],
+    ["tender", "Tender"],
+    ["other", "Other"],
+  ];
+  const sectors = lang === "fr" ? [
+    ["mining", "Mines"],
+    ["metallurgy", "Métallurgie"],
+    ["industry", "Industrie"],
+    ["energy", "Énergie"],
+    ["infrastructure", "Infrastructures"],
+    ["construction", "BTP"],
+    ["oil-gas", "Pétrole et gaz"],
+    ["public-institution", "Institution publique"],
+    ["other", "Autre"],
+  ] : [
+    ["mining", "Mining"],
+    ["metallurgy", "Metallurgy"],
+    ["industry", "Industry"],
+    ["energy", "Energy"],
+    ["infrastructure", "Infrastructure"],
+    ["construction", "Construction"],
+    ["oil-gas", "Oil and gas"],
+    ["public-institution", "Public institution"],
+    ["other", "Other"],
+  ];
+  const categories = lang === "fr" ? [
+    ["mining-chemical-reagents", "Réactifs chimiques miniers"],
+    ["sulfuric-acid", "Acide sulfurique"],
+    ["quicklime", "Chaux vive"],
+    ["flocculants", "Floculants"],
+    ["activated-carbon", "Charbon actif"],
+    ["sx-extractants", "Extractants SX"],
+    ["sodium-sulfate", "Sulfate de sodium"],
+    ["grinding-media", "Billes de broyage"],
+    ["lubricants", "Lubrifiants"],
+    ["fuels", "Carburants"],
+    ["industrial-supplies", "Fournitures industrielles"],
+    ["road-solutions", "Solutions routières"],
+    ["strategic-advisory", "Conseil stratégique"],
+    ["industrial-project", "Projet industriel"],
+    ["other", "Autre"],
+  ] : [
+    ["mining-chemical-reagents", "Mining chemical reagents"],
+    ["sulfuric-acid", "Sulfuric acid"],
+    ["quicklime", "Quicklime"],
+    ["flocculants", "Flocculants"],
+    ["activated-carbon", "Activated carbon"],
+    ["sx-extractants", "SX extractants"],
+    ["sodium-sulfate", "Sodium sulfate"],
+    ["grinding-media", "Grinding media"],
+    ["lubricants", "Lubricants"],
+    ["fuels", "Fuels"],
+    ["industrial-supplies", "Industrial supplies"],
+    ["road-solutions", "Road solutions"],
+    ["strategic-advisory", "Strategic advisory"],
+    ["industrial-project", "Industrial project"],
+    ["other", "Other"],
+  ];
+  const frequencies = lang === "fr" ? [
+    ["one-time", "Achat ponctuel"],
+    ["monthly", "Mensuel"],
+    ["quarterly", "Trimestriel"],
+    ["annual", "Annuel"],
+    ["framework", "Contrat cadre"],
+    ["unknown", "À confirmer"],
+  ] : [
+    ["one-time", "One-time purchase"],
+    ["monthly", "Monthly"],
+    ["quarterly", "Quarterly"],
+    ["annual", "Annual"],
+    ["framework", "Framework contract"],
+    ["unknown", "To be confirmed"],
+  ];
+  const currencies = ["USD", "EUR", "CDF", "ZAR", "Other"].map((value) => [value, value]);
+
+  return `<form class="form rfq-form" data-rfq-form data-endpoint="/api/rfq" enctype="multipart/form-data" novalidate>
+    <div class="rfq-form-head"><p class="section-kicker">RFQ</p><h2>${lang === "fr" ? "Soumettez votre demande de cotation" : "Submit your request for quotation"}</h2><p>${lang === "fr" ? "Transmettez-nous vos besoins techniques et commerciaux. Notre équipe analysera votre demande et reviendra vers vous avec une proposition adaptée." : "Send us your technical and commercial requirements. Our team will review your request and come back with a suitable proposal."}</p></div>
+    <fieldset><legend>${lang === "fr" ? "Informations du demandeur" : "Requester information"}</legend>
+      <div class="form-two-cols">
+        <label>${lang === "fr" ? "Nom complet" : "Full name"}<input name="fullName" autocomplete="name" required></label>
+        <label>${lang === "fr" ? "Fonction" : "Position"}<input name="position" autocomplete="organization-title" required></label>
+        <label>${lang === "fr" ? "Entreprise" : "Company"}<input name="company" autocomplete="organization" required></label>
+        <label>${lang === "fr" ? "Adresse e-mail professionnelle" : "Business email"}<input type="email" name="email" autocomplete="email" required></label>
+        <label>${lang === "fr" ? "Téléphone" : "Phone"}<input name="phone" autocomplete="tel" required></label>
+        <label>${lang === "fr" ? "Pays" : "Country"}<input name="country" autocomplete="country-name" required></label>
+        <label>${lang === "fr" ? "Ville" : "City"}<input name="city" autocomplete="address-level2" required></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>${lang === "fr" ? "Classification de la demande" : "Request classification"}</legend>
+      <div class="form-two-cols">
+        <label>${lang === "fr" ? "Type de demande" : "Request type"}<select name="requestType" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(requestTypes)}</select></label>
+        <label>${lang === "fr" ? "Secteur" : "Sector"}<select name="sector" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(sectors)}</select></label>
+        <label class="span-2">${lang === "fr" ? "Catégorie de produits ou services" : "Product or service category"}<select name="category" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(categories)}</select></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>${lang === "fr" ? "Détails commerciaux" : "Commercial details"}</legend>
+      <label>${lang === "fr" ? "Description du besoin" : "Requirement description"}<textarea name="description" rows="7" minlength="20" required></textarea></label>
+      <div class="form-two-cols">
+        <label>${lang === "fr" ? "Quantité estimée" : "Estimated quantity"}<input name="quantity" required></label>
+        <label>${lang === "fr" ? "Unité" : "Unit"}<input name="unit" placeholder="${lang === "fr" ? "tonnes, pièces, litres..." : "tons, pieces, liters..."}" required></label>
+        <label>${lang === "fr" ? "Fréquence d'achat" : "Purchase frequency"}<select name="purchaseFrequency" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(frequencies)}</select></label>
+        <label>${lang === "fr" ? "Lieu de livraison" : "Delivery location"}<input name="deliveryLocation" required></label>
+        <label>${lang === "fr" ? "Date souhaitée de livraison" : "Desired delivery date"}<input type="date" name="desiredDeliveryDate" required></label>
+        <label>${lang === "fr" ? "Devise souhaitée" : "Preferred currency"}<select name="currency" required><option value="">${lang === "fr" ? "Sélectionner" : "Select"}</option>${optionList(currencies)}</select></label>
+        <label>Incoterm ${lang === "fr" ? "si connu" : "if known"}<input name="incoterm" placeholder="EXW, FOB, CIF, DAP..."></label>
+        <label>${lang === "fr" ? "Budget indicatif optionnel" : "Indicative budget optional"}<input name="budget"></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>${lang === "fr" ? "Documents" : "Documents"}</legend>
+      <label>${lang === "fr" ? "Ajouter des documents" : "Add documents"}<input type="file" name="documents" multiple accept=".pdf,.xls,.xlsx,.doc,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"></label>
+      <p class="form-note">${lang === "fr" ? "Formats acceptés: PDF, XLS, XLSX, DOC, DOCX, JPG, PNG. Maximum 5 fichiers, 4 Mo par fichier, 8 Mo au total. Les contrôles sont aussi appliqués côté serveur." : "Accepted formats: PDF, XLS, XLSX, DOC, DOCX, JPG, PNG. Maximum 5 files, 4 MB per file, 8 MB total. Controls are also applied server-side."}</p>
+      <ul class="file-list" data-file-list></ul>
+    </fieldset>
+    <label class="form-hp" aria-hidden="true" tabindex="-1">Website<input name="website" autocomplete="off" tabindex="-1"></label>
+    <label class="consent-field"><input type="checkbox" name="consent" required><span>${lang === "fr" ? "J'accepte que LILOTOP SARL traite les informations soumises afin d'analyser cette demande de cotation, conformément à la politique de confidentialité." : "I agree that LILOTOP SARL may process the submitted information to analyze this request for quotation in accordance with the privacy policy."}</span></label>
+    <div class="form-status" data-form-status role="status" aria-live="polite"></div>
+    <button class="button primary" type="submit">${lang === "fr" ? "Soumettre la RFQ" : "Submit RFQ"}${icon.arrow}</button>
+  </form>`;
+}
+
+function rfqPage(lang) {
+  const title = lang === "fr" ? "Demande de cotation | LILOTOP SARL" : "Request for Quotation | LILOTOP SARL";
+  const desc = lang === "fr"
+    ? "Soumettez une demande de cotation complète pour produits miniers, fournitures industrielles, infrastructures, partenariats techniques ou appels d'offres."
+    : "Submit a complete RFQ for mining products, industrial supplies, infrastructure, technical partnerships or tenders.";
+  const steps = lang === "fr" ? [
+    ["Référence automatique", "Chaque demande reçoit une référence RFQ structurée."],
+    ["Analyse technique", "Les informations sont classées par secteur, catégorie et urgence potentielle."],
+    ["Documents contrôlés", "Les formats et tailles sont vérifiés côté navigateur et côté serveur."],
+    ["Prêt pour IA & Odoo", "Les données sont structurées pour de futurs agents IA et un CRM."]
+  ] : [
+    ["Automatic reference", "Each request receives a structured RFQ reference."],
+    ["Technical review", "Information is classified by sector, category and potential urgency."],
+    ["Controlled documents", "Formats and sizes are checked client-side and server-side."],
+    ["Ready for AI & Odoo", "Data is structured for future AI agents and CRM workflows."]
+  ];
+  const body = `${subHero(lang, "RFQ", lang === "fr" ? "Soumettez votre demande de cotation" : "Submit your request for quotation", lang === "fr" ? "LILOTOP SARL traite les demandes de prix, d'approvisionnement, de partenariat technique et de fournitures industrielles." : "LILOTOP SARL handles price requests, procurement requests, technical partnerships and industrial supply requirements.")}
+  <section class="section rfq-page-section"><div class="container rfq-layout">
+    <div class="rfq-form-wrap reveal">${rfqForm(lang)}</div>
+    <aside class="rfq-side reveal">
+      <div class="premium-card rfq-assurance"><p class="section-kicker">${lang === "fr" ? "Traitement professionnel" : "Professional handling"}</p><h2>${lang === "fr" ? "Une demande exploitable dès réception." : "A usable request from the first review."}</h2><p>${desc}</p></div>
+      <div class="rfq-step-list">${steps.map(([name, text], index) => `<article><span>${String(index + 1).padStart(2, "0")}</span><h3>${name}</h3><p>${text}</p></article>`).join("")}</div>
+    </aside>
+  </div></section>`;
+  return layout(lang, "rfq", title, desc, body, { solidHeader: true });
+}
+
 function partnersPage(lang) {
   const t = data[lang];
   const title = lang === "fr" ? "Partenaires | LILOTOP SARL" : "Partners | LILOTOP SARL";
@@ -818,6 +983,7 @@ function contactPage(lang) {
         <span><strong>WhatsApp</strong><a href="${site.whatsapp}" target="_blank" rel="noopener">${lang === "fr" ? "Écrire sur WhatsApp" : "Message on WhatsApp"}</a></span>
         <span><strong>Email</strong><a href="mailto:${site.email}">${site.email}</a></span>
         <span><strong>${lang === "fr" ? "Présence" : "Presence"}</strong>RDC • Lubumbashi • Kinshasa</span>
+        <a class="button dark" href="${hrefFor(lang, "rfq")}" data-track="rfq-cta-click">${lang === "fr" ? "Envoyer votre cahier des charges" : "Send your specifications"}</a>
       </address>
       <div class="map-card"><iframe title="Google Maps - LILOTOP SARL" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=Lubumbashi%20RDC&output=embed"></iframe></div>
     </div>
@@ -885,7 +1051,7 @@ function subHero(lang, kicker, title, lead) {
   return `<section class="page-hero corporate-hero"><div class="container reveal"><p class="section-kicker">${kicker}</p><h1>${title}</h1><p>${lead}</p></div></section>`;
 }
 
-const generators = { index: homePage, about: aboutPage, sectors: sectorsPage, solutions: solutionsPage, products: productsPage, partners: partnersPage, projects: projectsPage, news: newsPage, contact: contactPage, legal: legalPage };
+const generators = { index: homePage, about: aboutPage, sectors: sectorsPage, solutions: solutionsPage, rfq: rfqPage, products: productsPage, partners: partnersPage, projects: projectsPage, news: newsPage, contact: contactPage, legal: legalPage };
 
 fs.mkdirSync("en", { recursive: true });
 for (const lang of ["fr", "en"]) {

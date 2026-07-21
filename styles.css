@@ -1686,6 +1686,13 @@ blockquote cite {
     image-set(url("assets/digital-operations.webp") type("image/webp"), url("assets/digital-operations.png") type("image/png"));
 }
 
+.page-rfq .page-hero {
+  background-image:
+    linear-gradient(90deg, rgba(5, 13, 24, 0.96), rgba(5, 13, 24, 0.8) 48%, rgba(5, 13, 24, 0.42)),
+    linear-gradient(0deg, rgba(5, 13, 24, 0.92), rgba(5, 13, 24, 0.36)),
+    image-set(url("assets/industrial-warehouse.webp") type("image/webp"), url("assets/industrial-warehouse.png") type("image/png"));
+}
+
 .page-hero h1 {
   max-width: 940px;
   margin: 0;
@@ -1967,6 +1974,132 @@ blockquote cite {
   color: #b42318;
 }
 
+.rfq-page-section {
+  background:
+    linear-gradient(180deg, #ffffff, #f6f8fb);
+}
+
+.rfq-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.65fr);
+  gap: clamp(28px, 5vw, 68px);
+  align-items: start;
+}
+
+.rfq-form {
+  gap: 22px;
+  padding: clamp(24px, 4vw, 38px);
+}
+
+.rfq-form-head {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.rfq-form fieldset {
+  display: grid;
+  gap: 16px;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.94)),
+    var(--white);
+}
+
+.rfq-form legend {
+  padding: 0 10px;
+  color: var(--gold-500);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.form-two-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+.file-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--navy-900);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.file-list span {
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.rfq-side {
+  position: sticky;
+  top: 104px;
+  display: grid;
+  gap: 18px;
+}
+
+.rfq-assurance {
+  padding: 30px;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.rfq-assurance h2 {
+  color: var(--white);
+  font-size: clamp(30px, 4vw, 48px);
+}
+
+.rfq-assurance p:not(.section-kicker) {
+  margin-top: 16px;
+}
+
+.rfq-step-list {
+  display: grid;
+  gap: 1px;
+  border: 1px solid var(--line);
+  background: var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+.rfq-step-list article {
+  padding: 22px;
+  background:
+    linear-gradient(180deg, #ffffff, #f8fafc);
+}
+
+.rfq-step-list span {
+  display: inline-flex;
+  margin-bottom: 14px;
+  color: var(--gold-500);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.rfq-step-list p {
+  margin-top: 10px;
+  color: var(--muted);
+}
+
 .contact-card {
   display: grid;
   gap: 18px;
@@ -2200,9 +2333,14 @@ blockquote cite {
   .contact-layout,
   .product-layout,
   .hse-grid,
+  .rfq-layout,
   .solutions-grid,
   .split-heading {
     grid-template-columns: 1fr;
+  }
+
+  .rfq-side {
+    position: static;
   }
 
   .solution-card {
@@ -2327,6 +2465,7 @@ blockquote cite {
   }
 
   .hero-stats,
+  .form-two-cols,
   .service-grid,
   .why-grid,
   .sector-grid,
