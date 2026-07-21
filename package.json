@@ -6,6 +6,12 @@
   "scripts": {
     "build": "node build-site.js",
     "start": "python -m http.server 4173",
-    "check:links": "node audit-links.js"
+    "check:links": "node audit-links.js",
+    "lint": "node scripts/lint.js",
+    "typecheck": "node scripts/typecheck.js",
+    "test": "node tests/forms.test.js"
+  },
+  "dependencies": {
+    "resend": "latest"
   }
 }

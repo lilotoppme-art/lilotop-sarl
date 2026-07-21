@@ -1,6 +1,5 @@
-const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || "contact@lilotopsarl.com";
-const CONTACT_FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || "LILOTOP SARL <onboarding@resend.dev>";
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const { emailConfig, recipientFor } = require("../lib/email/config");
+const { sendWebsiteEmail, jsonError } = require("../lib/email/sendWebsiteEmail");
 const RFQ_SEND_ACK = process.env.RFQ_SEND_ACK === "true";
 
 const MAX_FILES = 5;
@@ -454,23 +453,6 @@ function ackMessage(data) {
   };
 }
 
-async function sendEmail(payload) {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const error = new Error("Email delivery failed");
-    error.status = response.status;
-    throw error;
-  }
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -509,15 +491,6 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  if (!RESEND_API_KEY) {
-    return json(res, 503, {
-      ok: false,
-      error: "Email service is not configured",
-      code: "EMAIL_SERVICE_NOT_CONFIGURED",
-      reference,
-    });
-  }
-
   const structured = structuredRfq(data, files);
   const subject = `[RFQ LILOTOP] - ${data.company} - ${label("category", data.category)} - ${data.country}`;
   const attachments = files.map((file) => ({
@@ -526,29 +499,30 @@ module.exports = async function handler(req, res) {
   }));
 
   try {
-    await sendEmail({
-      from: CONTACT_FROM_EMAIL,
-      to: [CONTACT_TO_EMAIL],
-      reply_to: data.email,
+    const delivery = await sendWebsiteEmail({
+      to: recipientFor("rfq"),
+      replyTo: data.email,
       subject,
       text: textMessage(data, files, structured),
       html: htmlMessage(data, files, structured),
       attachments,
+      idempotencyKey: reference,
     });
 
     if (RFQ_SEND_ACK) {
       const ack = ackMessage(data);
-      await sendEmail({
-        from: CONTACT_FROM_EMAIL,
-        to: [data.email],
-        reply_to: CONTACT_TO_EMAIL,
+      await sendWebsiteEmail({
+        to: data.email,
+        replyTo: emailConfig().replyTo,
         subject: ack.subject,
         text: ack.text,
+        html: `<p>${esc(ack.text).replace(/\n/g, "<br>")}</p>`,
+        idempotencyKey: `${reference}:ack`,
       });
     }
-  } catch {
-    return json(res, 502, { ok: false, error: "Email delivery failed", reference });
+    return json(res, 200, { ok: true, reference, deliveryId: delivery.id });
+  } catch (error) {
+    const normalized = jsonError(error);
+    return json(res, normalized.status, { ...normalized.body, reference });
   }
-
-  return json(res, 200, { ok: true, reference });
 };

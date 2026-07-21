@@ -1,6 +1,5 @@
-const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || "contact@lilotopsarl.com";
-const CONTACT_FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || "LILOTOP SARL <onboarding@resend.dev>";
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const { recipientFor } = require("../lib/email/config");
+const { sendWebsiteEmail, jsonError } = require("../lib/email/sendWebsiteEmail");
 
 const allowedSectors = new Set([
   "Produits chimiques et reactifs miniers",
@@ -165,35 +164,19 @@ module.exports = async function handler(req, res) {
     return json(res, 400, { ok: false, error: "Validation failed", fields: errors });
   }
 
-  if (!RESEND_API_KEY) {
-    return json(res, 503, {
-      ok: false,
-      error: "Email service is not configured",
-      code: "EMAIL_SERVICE_NOT_CONFIGURED",
-      reference: data.reference,
-    });
-  }
-
   const subject = `[CNT LILOTOP] ${data.department} - ${data.company} - ${data.subject}`;
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: CONTACT_FROM_EMAIL,
-      to: [CONTACT_TO_EMAIL],
-      reply_to: data.email,
+  try {
+    const delivery = await sendWebsiteEmail({
+      to: recipientFor("contact"),
+      replyTo: data.email,
       subject,
       text: textMessage(data),
       html: htmlMessage(data),
-    }),
-  });
-
-  if (!response.ok) {
-    return json(res, 502, { ok: false, error: "Email delivery failed" });
+      idempotencyKey: data.reference,
+    });
+    return json(res, 200, { ok: true, reference: data.reference, deliveryId: delivery.id });
+  } catch (error) {
+    const normalized = jsonError(error);
+    return json(res, normalized.status, { ...normalized.body, reference: data.reference });
   }
-
-  return json(res, 200, { ok: true, reference: data.reference });
 };

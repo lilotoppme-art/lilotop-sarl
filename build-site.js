@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 
 const site = {
-  domain: "https://lilotopsarl.com",
+  domain: (process.env.NEXT_PUBLIC_SITE_URL || "https://lilotopsarl.com").replace(/\/+$/, ""),
   phone: "+243 800 982 436",
   phoneHref: "+243800982436",
   email: "contact@lilotopsarl.com",

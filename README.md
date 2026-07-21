@@ -41,16 +41,25 @@ Variables d'environnement a configurer dans Vercel :
 
 ```text
 RESEND_API_KEY=
-CONTACT_TO_EMAIL=contact@lilotopsarl.com
-CONTACT_FROM_EMAIL=LILOTOP SARL <noreply@lilotopsarl.com>
+EMAIL_FROM=LILOTOP Website <notifications@updates.example.com>
+EMAIL_REPLY_TO=contact@example.com
+EMAIL_CONTACT_TO=contact@example.com
+EMAIL_RFQ_TO=commercial@example.com
+EMAIL_SUPPLIER_TO=procurement@example.com
+EMAIL_PARTNERSHIP_TO=partnerships@example.com
+EMAIL_TENDER_TO=tenders@example.com
+EMAIL_TEST_MODE=true
+EMAIL_TEST_TO=test@example.com
 RFQ_SEND_ACK=false
+NEXT_PUBLIC_SITE_URL=https://example.com
 ```
 
 Remarques :
 
 - `RESEND_API_KEY` doit etre renseignee depuis le tableau de bord Resend.
-- `CONTACT_FROM_EMAIL` doit utiliser un domaine verifie dans Resend.
-- `CONTACT_TO_EMAIL` recoit les demandes envoyees depuis le site.
+- `EMAIL_FROM` doit utiliser un domaine verifie dans Resend.
+- Les variables `EMAIL_*_TO` definissent les destinataires par parcours.
+- `EMAIL_TEST_MODE=true` protege les deploiements Preview en redirigeant vers `EMAIL_TEST_TO`.
 - Sans `RESEND_API_KEY`, l'API renvoie une erreur de configuration claire et aucun envoi fictif n'est effectue.
 - `RFQ_SEND_ACK=false` garde l'accuse de reception automatique des RFQ desactive. Passer a `true` uniquement apres validation.
 

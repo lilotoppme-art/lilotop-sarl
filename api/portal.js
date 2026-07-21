@@ -1,6 +1,5 @@
-const CONTACT_TO_EMAIL = process.env.CONTACT_TO_EMAIL || "contact@lilotopsarl.com";
-const CONTACT_FROM_EMAIL = process.env.CONTACT_FROM_EMAIL || "LILOTOP SARL <onboarding@resend.dev>";
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const { recipientFor } = require("../lib/email/config");
+const { sendWebsiteEmail, jsonError } = require("../lib/email/sendWebsiteEmail");
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -284,18 +283,6 @@ function htmlMessage(data, files, structured) {
   return `<div style="font-family:Arial,sans-serif;color:#0d1622;line-height:1.55"><h2 style="margin:0 0 8px;color:#081728">Portail B2B LILOTOP SARL</h2><p><strong>${esc(data.reference)}</strong></p><table cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;max-width:780px">${rows}</table><h3>Documents joints</h3><ul>${files.length ? files.map((file) => `<li>${esc(file.filename)} (${file.buffer.length} octets)</li>`).join("") : "<li>Aucun document joint</li>"}</ul><h3>Données structurees</h3><pre style="white-space:pre-wrap;background:#f3f5f8;border:1px solid #d7dde5;padding:14px">${esc(JSON.stringify(structured, null, 2))}</pre></div>`;
 }
 
-async function sendEmail(payload) {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!response.ok) throw new Error("Email delivery failed");
-}
-
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -325,26 +312,22 @@ module.exports = async function handler(req, res) {
     return json(res, 400, { ok: false, error: "Validation failed", fields: fieldErrors, files: fileErrors });
   }
 
-  if (!RESEND_API_KEY) {
-    return json(res, 503, { ok: false, error: "Email service is not configured", code: "EMAIL_SERVICE_NOT_CONFIGURED", reference });
-  }
-
   const structured = structuredSubmission(data, files);
   const attachments = files.map((file) => ({ filename: file.filename, content: file.buffer.toString("base64") }));
 
   try {
-    await sendEmail({
-      from: CONTACT_FROM_EMAIL,
-      to: [CONTACT_TO_EMAIL],
-      reply_to: data.email,
+    const delivery = await sendWebsiteEmail({
+      to: recipientFor(data.portalType),
+      replyTo: data.email,
       subject: subjectFor(data),
       text: textMessage(data, files, structured),
       html: htmlMessage(data, files, structured),
       attachments,
+      idempotencyKey: reference,
     });
-  } catch {
-    return json(res, 502, { ok: false, error: "Email delivery failed", reference });
+    return json(res, 200, { ok: true, reference, deliveryId: delivery.id });
+  } catch (error) {
+    const normalized = jsonError(error);
+    return json(res, normalized.status, { ...normalized.body, reference });
   }
-
-  return json(res, 200, { ok: true, reference });
 };
