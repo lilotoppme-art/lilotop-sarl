@@ -6,7 +6,9 @@ Ouvrez `/admin/business-radar` sur l'environnement autorise. Saisissez l'adresse
 
 ## Vue generale
 
-La page d'accueil du module affiche le nombre total d'opportunites, les nouvelles opportunites, les dossiers avec un score superieur ou egal a 70, les donnees de demonstration, les principaux secteurs, les pays, les prochaines echeances et les dernieres executions.
+La page d'accueil du module affiche les nouvelles opportunites du jour, les dossiers prioritaires, les echeances a sept jours et 72 heures, les inscriptions fournisseurs requises, les opportunites retenues, les favoris, la valeur potentielle disponible et les dernieres executions. Une valeur absente est affichee comme non disponible et n'est jamais inventee.
+
+La section **Actions recommandees aujourd'hui** classe cinq dossiers selon leur score, leur urgence et leur statut. Ouvrez une action pour consulter sa fiche privee.
 
 Le badge `DEMO` signifie que la donnee est fictive. Elle ne doit jamais etre utilisee dans une offre commerciale ou presentee comme une opportunite reelle.
 
@@ -49,17 +51,33 @@ Le statut peut etre modifie directement dans la liste :
 
 Le score est un indicateur de priorite, pas une decision automatique. Verifiez toujours la source, les exigences, l'echeance et la conformite.
 
+## Favoris et filtres
+
+L'etoile ajoute une opportunite aux favoris sans modifier son statut. Le filtre **Favoris**, la recherche, le statut et le tri restent memorises pendant la session du navigateur. Les tris disponibles sont le score, la date limite et la date de detection.
+
+## Notes internes
+
+Ouvrez une fiche pour ajouter une note privee. Chaque note indique son auteur, sa date et son heure. L'auteur peut modifier ou supprimer sa note apres confirmation. Ces notes ne sont jamais exposees sur le site public.
+
+## Pieces jointes
+
+Le panneau de documents indique **NON CONFIGUREE EN PREVIEW** tant qu'aucun stockage prive n'est connecte. Aucun televersement n'est simule. La couche de validation accepte uniquement PDF, DOCX, XLSX, PNG et JPG, avec une limite de 10 Mo.
+
 ## Fournisseurs
 
 L'onglet **Fournisseurs** reprend les nouvelles inscriptions envoyees depuis le portail fournisseur lorsque la base Business Radar est configuree. L'e-mail de soumission reste envoye par le systeme existant meme si l'enregistrement dans la base est temporairement indisponible.
 
 ## Exports
 
-Les boutons **CSV** et **Excel** exportent jusqu'a 200 opportunites selon le filtre serveur. Les fichiers contiennent les informations operationnelles et les liens source; ils ne contiennent aucun secret.
+Les boutons **CSV** et **Excel** exportent jusqu'a 200 opportunites selon les filtres actifs. Les fichiers conservent les accents, dates, valeurs, devises et liens source. Les cellules externes commencant par `=`, `+`, `-` ou `@` sont neutralisees afin d'eviter l'execution d'une formule dans Excel.
 
 ## Alertes
 
-Une nouvelle opportunite reelle avec un score d'au moins 70 peut produire une alerte a l'adresse configuree. Les sources DEMO ne produisent jamais d'alerte. En cas de doute, consultez l'historique et demandez une verification technique avant de relancer plusieurs fois.
+Une opportunite reelle peut produire une alerte pour un score d'au moins 80, une echeance inferieure a sept jours ou 72 heures, ou une inscription fournisseur requise. Les e-mails Preview sont marques **Business Radar Preview**. Les sources DEMO ne produisent jamais d'alerte.
+
+## Supprimer les donnees DEMO
+
+Dans **Opportunites**, choisissez **Supprimer les DEMO**, puis confirmez. Cette action supprime toutes les opportunites et sources de demonstration, sans toucher aux donnees reelles.
 
 ## Bonnes pratiques
 

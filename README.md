@@ -118,6 +118,16 @@ Le premier module NEXUS AI est isole du site public et accessible sur :
 
 Il utilise des fonctions Vercel, PostgreSQL, une session administrateur signee, des connecteurs modulaires, Resend pour les alertes et une analyse OpenAI optionnelle. Sans cle OpenAI, le module reste operationnel en mode `no_ai`.
 
+Le centre de commande inclut les priorites du jour, les echeances, les favoris, les notes internes, la suppression des donnees `DEMO` et des exports CSV/Excel neutralisant les formules externes. Les pieces jointes restent explicitement desactivees tant qu'un stockage prive n'est pas configure.
+
+Commandes principales :
+
+```bash
+npm run admin:hash-password
+npm run db:migrate:radar
+npm run test
+```
+
 Documentation technique : `docs/business-radar.md`.
 
 Guide utilisateur : `BUSINESS_RADAR_GUIDE_UTILISATEUR.md`.

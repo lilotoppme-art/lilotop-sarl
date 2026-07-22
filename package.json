@@ -10,7 +10,7 @@
     "check:links": "node audit-links.js",
     "lint": "node scripts/lint.js",
     "typecheck": "node scripts/typecheck.js",
-    "test": "node tests/forms.test.js && node tests/business-radar.test.js",
+    "test": "node tests/forms.test.js && node tests/business-radar.test.js && node tests/business-radar-extended.test.js",
     "admin:hash-password": "node scripts/hash-admin-password.js",
     "db:migrate:radar": "node scripts/migrate-business-radar.js"
   },
