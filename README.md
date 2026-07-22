@@ -107,3 +107,17 @@ Avant un deploiement de production avec formulaire actif :
 2. Ajouter les variables d'environnement dans Vercel.
 3. Redeployer le projet.
 4. Envoyer une demande test depuis la page Contact.
+
+## LILOTOP NEXUS AI - Business Radar
+
+Le premier module NEXUS AI est isole du site public et accessible sur :
+
+```text
+/admin/business-radar
+```
+
+Il utilise des fonctions Vercel, PostgreSQL, une session administrateur signee, des connecteurs modulaires, Resend pour les alertes et une analyse OpenAI optionnelle. Sans cle OpenAI, le module reste operationnel en mode `no_ai`.
+
+Documentation technique : `docs/business-radar.md`.
+
+Guide utilisateur : `BUSINESS_RADAR_GUIDE_UTILISATEUR.md`.

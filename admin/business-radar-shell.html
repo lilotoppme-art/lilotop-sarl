@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP NEXUS AI</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/business-radar.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <main class="login-view" data-login-view>
+    <section class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL" width="220" height="82">
+      <p class="eyebrow">NEXUS AI</p>
+      <h1>Business Radar</h1>
+      <p class="login-copy">Espace prive de veille commerciale et de qualification des opportunites.</p>
+      <form data-login-form>
+        <label>Adresse administrateur<input type="email" name="email" autocomplete="username" required></label>
+        <label>Mot de passe<input type="password" name="password" autocomplete="current-password" required minlength="14"></label>
+        <p class="form-status" data-login-status role="status"></p>
+        <button type="submit">Se connecter</button>
+      </form>
+    </section>
+  </main>
+
+  <div class="app-shell" data-app-shell>
+    <aside class="sidebar">
+      <a class="brand" href="/admin/business-radar"><img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL" width="180" height="68"></a>
+      <div class="product-name"><span>NEXUS AI</span><strong>Business Radar</strong></div>
+      <nav aria-label="Navigation Business Radar">
+        <button class="nav-item active" data-tab="overview">Vue generale</button>
+        <button class="nav-item" data-tab="opportunities">Opportunites</button>
+        <button class="nav-item" data-tab="sources">Sources</button>
+        <button class="nav-item" data-tab="suppliers">Fournisseurs</button>
+        <button class="nav-item" data-tab="history">Historique</button>
+      </nav>
+      <div class="sidebar-foot"><span class="system-dot"></span><span>Module MVP 1.0</span><button data-logout>Deconnexion</button></div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div><p class="eyebrow">LILOTOP NEXUS AI</p><h1 data-page-title>Vue generale</h1></div>
+        <div class="top-actions"><a class="button ghost" href="/api/business-radar?action=export">CSV</a><a class="button ghost" href="/api/business-radar?action=export-xlsx">Excel</a><button class="button gold" data-run-radar>Lancer le radar</button></div>
+      </header>
+      <p class="global-status" data-global-status role="status"></p>
+
+      <section class="tab-panel active" data-panel="overview">
+        <div class="stats-grid" data-stats></div>
+        <div class="dashboard-grid">
+          <section class="panel wide"><div class="panel-head"><div><span class="kicker">Priorites</span><h2>Opportunites a fort potentiel</h2></div><button class="text-button" data-tab-link="opportunities">Voir tout</button></div><div class="table-wrap"><table><thead><tr><th>Opportunite</th><th>Pays</th><th>Echeance</th><th>Score</th><th>Statut</th></tr></thead><tbody data-priority-rows></tbody></table></div></section>
+          <section class="panel"><div class="panel-head"><div><span class="kicker">Repartition</span><h2>Secteurs</h2></div></div><div class="bar-list" data-sectors></div></section>
+          <section class="panel"><div class="panel-head"><div><span class="kicker">Geographie</span><h2>Pays</h2></div></div><div class="bar-list" data-countries></div></section>
+          <section class="panel wide"><div class="panel-head"><div><span class="kicker">Calendrier</span><h2>Prochaines echeances</h2></div></div><div class="deadline-list" data-deadlines></div></section>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-panel="opportunities">
+        <div class="toolbar"><input type="search" placeholder="Rechercher une opportunite" data-search><select data-status-filter><option value="">Tous les statuts</option><option value="new">Nouveau</option><option value="reviewing">En analyse</option><option value="qualified">Qualifie</option><option value="monitoring">Suivi</option><option value="submitted">Soumis</option><option value="won">Gagne</option><option value="lost">Perdu</option><option value="archived">Archive</option></select><button class="button ghost" data-open-dialog="url-dialog">Analyser une URL</button><button class="button gold" data-open-dialog="opportunity-dialog">Ajouter</button></div>
+        <section class="panel"><div class="table-wrap"><table><thead><tr><th>Opportunite</th><th>Organisation</th><th>Secteur</th><th>Echeance</th><th>Score</th><th>Statut</th><th>Source</th></tr></thead><tbody data-opportunity-rows></tbody></table></div></section>
+      </section>
+
+      <section class="tab-panel" data-panel="sources">
+        <div class="section-action"><p>Les sources actives sont analysees lors des executions manuelles et planifiees.</p><button class="button gold" data-open-dialog="source-dialog">Ajouter une source</button></div>
+        <div class="card-grid" data-source-cards></div>
+      </section>
+
+      <section class="tab-panel" data-panel="suppliers">
+        <section class="panel"><div class="panel-head"><div><span class="kicker">Registre</span><h2>Inscriptions fournisseurs</h2></div></div><div class="table-wrap"><table><thead><tr><th>Entreprise</th><th>Contact</th><th>Pays</th><th>Categories</th><th>Statut</th><th>Date</th></tr></thead><tbody data-registration-rows></tbody></table></div></section>
+      </section>
+
+      <section class="tab-panel" data-panel="history">
+        <section class="panel"><div class="panel-head"><div><span class="kicker">Executions</span><h2>Historique du radar</h2></div></div><div class="run-list" data-run-list></div></section>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="source-dialog"><form method="dialog" class="dialog-form" data-source-form><div class="dialog-head"><div><span class="kicker">Connecteur</span><h2>Nouvelle source</h2></div><button value="cancel" aria-label="Fermer">×</button></div><label>Nom<input name="name" required></label><label>Type<select name="type" required><option value="rss">Flux RSS/Atom</option><option value="html">Page HTML</option><option value="manual">Saisie manuelle</option><option value="demo">Source DEMO</option></select></label><label>URL<input name="url" type="url" placeholder="https://"></label><label>Pays<input name="country"></label><div class="dialog-actions"><button value="cancel" class="button ghost">Annuler</button><button type="submit" value="default" class="button gold">Enregistrer</button></div></form></dialog>
+  <dialog id="opportunity-dialog"><form method="dialog" class="dialog-form" data-opportunity-form><div class="dialog-head"><div><span class="kicker">Saisie manuelle</span><h2>Nouvelle opportunite</h2></div><button value="cancel" aria-label="Fermer">×</button></div><label>Titre<input name="title" required></label><div class="form-grid"><label>Organisation<input name="organization"></label><label>Pays<input name="country"></label><label>Secteur<input name="sector"></label><label>Type<input name="opportunityType"></label><label>Echeance<input name="deadlineAt" type="date"></label><label>URL source<input name="sourceUrl" type="url"></label></div><label>Description<textarea name="description" rows="5"></textarea></label><div class="dialog-actions"><button value="cancel" class="button ghost">Annuler</button><button type="submit" value="default" class="button gold">Analyser et enregistrer</button></div></form></dialog>
+  <dialog id="url-dialog"><form method="dialog" class="dialog-form" data-url-form><div class="dialog-head"><div><span class="kicker">Analyse ponctuelle</span><h2>Analyser une URL</h2></div><button value="cancel" aria-label="Fermer">×</button></div><label>URL publique<input name="url" type="url" required placeholder="https://"></label><div class="analysis-result" data-analysis-result></div><div class="dialog-actions"><button value="cancel" class="button ghost">Fermer</button><button type="submit" value="default" class="button gold">Analyser</button><button type="button" class="button gold" data-save-analysis hidden>Enregistrer</button></div></form></dialog>
+  <script src="/admin/business-radar.js" defer></script>
+</body>
+</html>

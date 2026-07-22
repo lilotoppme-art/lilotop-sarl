@@ -5,13 +5,18 @@
   "description": "Static corporate website for LILOTOP SARL.",
   "scripts": {
     "build": "node build-site.js",
-    "start": "python -m http.server 4173",
+    "start": "node scripts/serve-static.js",
+    "start:radar": "node scripts/dev-business-radar.js",
     "check:links": "node audit-links.js",
     "lint": "node scripts/lint.js",
     "typecheck": "node scripts/typecheck.js",
-    "test": "node tests/forms.test.js"
+    "test": "node tests/forms.test.js && node tests/business-radar.test.js",
+    "admin:hash-password": "node scripts/hash-admin-password.js",
+    "db:migrate:radar": "node scripts/migrate-business-radar.js"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
+    "pg": "^8.16.3",
     "resend": "latest"
   }
 }

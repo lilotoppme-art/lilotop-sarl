@@ -1,5 +1,6 @@
 const { recipientFor } = require("../lib/email/config");
 const { sendWebsiteEmail, jsonError } = require("../lib/email/sendWebsiteEmail");
+const radarStore = require("../lib/business-radar/store");
 
 const MAX_FILES = 5;
 const MAX_FILE_SIZE = 4 * 1024 * 1024;
@@ -325,6 +326,23 @@ module.exports = async function handler(req, res) {
       attachments,
       idempotencyKey: reference,
     });
+    if (data.portalType === "supplier") {
+      try {
+        await radarStore.createRegistration({
+          companyName: data.company,
+          contactName: data.contactName,
+          email: data.email,
+          phone: data.phone,
+          country: data.country,
+          categories: data.categories,
+          notes: data.capacity,
+          sourceReference: reference,
+          rawData: structured,
+        });
+      } catch (radarError) {
+        console.info("[business-radar] supplier registration not persisted", { code: radarError.code || "PERSISTENCE_FAILED" });
+      }
+    }
     return json(res, 200, { ok: true, reference, deliveryId: delivery.id });
   } catch (error) {
     const normalized = jsonError(error);

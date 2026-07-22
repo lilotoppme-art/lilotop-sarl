@@ -1,6 +1,18 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/admin/business-radar",
+      "destination": "/api/business-radar-page"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron-business-radar",
+      "schedule": "0 6 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",

@@ -10,6 +10,7 @@ function walk(dir) {
 }
 
 const missing = [];
+const rewrites = fs.existsSync("vercel.json") ? new Set((JSON.parse(fs.readFileSync("vercel.json", "utf8")).rewrites || []).map((item) => item.source)) : new Set();
 for (const file of walk(".").filter((item) => item.endsWith(".html"))) {
   const html = fs.readFileSync(file, "utf8");
   const base = path.dirname(file);
@@ -21,15 +22,17 @@ for (const file of walk(".").filter((item) => item.endsWith(".html"))) {
       href.startsWith("http") ||
       href.startsWith("mailto:") ||
       href.startsWith("tel:") ||
+      href.startsWith("/api/") ||
       href.startsWith("#") ||
       href.startsWith("data:")
     ) {
       continue;
     }
-    href = href.split("#")[0];
+    href = href.split(/[?#]/)[0];
     if (!href) continue;
-    const target = path.normalize(path.join(base, href));
-    if (!fs.existsSync(target)) missing.push({ file, href, target });
+    if (rewrites.has(href)) continue;
+    const target = path.normalize(href.startsWith("/") ? path.join(".", href.slice(1)) : path.join(base, href));
+    if (!fs.existsSync(target) && !fs.existsSync(`${target}.html`)) missing.push({ file, href, target });
   }
 }
 
