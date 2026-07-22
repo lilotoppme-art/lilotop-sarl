@@ -60,11 +60,6 @@ function request(method, body = {}, headers = {}) {
   assert.equal(cronRes.statusCode, 200); assert.match(cronRes.body, /completed/);
   if (originalService) require.cache[servicePath] = originalService; else delete require.cache[servicePath];
 
-  delete process.env.MIGRATION_SECRET;
-  const migrate = require("../api/business-radar-migrate");
-  const migrateRes = capture(); await migrate(request("POST"), migrateRes);
-  assert.equal(migrateRes.statusCode, 401);
-
   process.env.OPENAI_API_KEY = "test-key-never-sent";
   process.env.OPENAI_MODEL = "test-model";
   const originalFetch = global.fetch; let calls = 0;

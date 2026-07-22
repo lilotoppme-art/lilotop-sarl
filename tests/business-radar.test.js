@@ -32,6 +32,10 @@ function capture() {
   assert.equal(noAiAnalysis({ ...item, score: scored.total }).mode, "no_ai");
   assert(privateAddress("127.0.0.1"));
   assert(privateAddress("192.168.1.20"));
+  assert(privateAddress("100.64.0.1"));
+  assert(privateAddress("224.0.0.1"));
+  assert(privateAddress("::ffff:127.0.0.1"));
+  assert(privateAddress("fe80::1"));
   assert(!privateAddress("8.8.8.8"));
 
   delete require.cache[require.resolve("../api/cron-business-radar")];

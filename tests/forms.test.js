@@ -65,10 +65,20 @@ async function callMultipart(path, fields, file, env = {}) {
 function mockResend() {
   process.env.RESEND_API_KEY = "re_test_mock";
   setWebsiteEmailEnv();
-  global.fetch = async (url, options) => {
-    const payload = JSON.parse(options.body);
-    lastEmailPayload = payload;
-    return { ok: true, status: 200, json: async () => ({ id: `mock-${payload.subject.length}` }) };
+  const resendPath = require.resolve("../lib/email/resend");
+  clearModule("../lib/email/sendWebsiteEmail");
+  require.cache[resendPath] = {
+    id: resendPath,
+    filename: resendPath,
+    loaded: true,
+    exports: {
+      createResendClient: () => ({
+        send: async (payload) => {
+          lastEmailPayload = payload;
+          return { data: { id: `mock-${payload.subject.length}` }, error: null };
+        },
+      }),
+    },
   };
 }
 

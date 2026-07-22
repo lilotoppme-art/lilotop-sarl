@@ -1,0 +1,4 @@
+minimumReleaseAgeExclude:
+  - resend@6.18.0
+overrides:
+  uuid: 11.1.1
