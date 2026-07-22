@@ -60,6 +60,7 @@ La session expire apres 8 heures. Le cookie est `HttpOnly`, `SameSite=Strict` et
 | `RESEND_API_KEY` | Pour alertes | Cle Resend deja utilisee par le site, jamais exposee au navigateur. |
 | `BUSINESS_RADAR_ALERT_EMAIL` | Pour alertes | Destinataire des opportunites a score eleve. |
 | `CRON_SECRET` | Oui pour cron | Jeton Bearer verifie en temps constant. |
+| `MIGRATION_SECRET` | Temporaire en Preview | Autorise la route de migration Preview; a supprimer apres execution. |
 | `ADMIN_EMAIL` | Oui | Identifiant de l'administrateur. |
 | `ADMIN_PASSWORD_HASH` | Oui | Hash PBKDF2, jamais le mot de passe. |
 | `AUTH_SECRET` | Oui | Signature des sessions. |
@@ -115,6 +116,8 @@ Vercel appelle `/api/cron-business-radar` chaque jour a 06:00 UTC. La route refu
 - `GET /api/cron-business-radar` : execution planifiee protegee.
 
 Toutes les routes metier exigent une session administrateur valide.
+
+La route `POST /api/business-radar-migrate` est interdite en Production. En Preview, elle exige `MIGRATION_SECRET`, applique les migrations numerotees et retourne uniquement les noms de tables et d'index. Supprimer `MIGRATION_SECRET` de Vercel des que la migration est validee.
 
 ## Tests
 
