@@ -151,6 +151,7 @@ function fakeFetch(result) {
     assert.ok(shell.includes(label), `Missing interface label: ${label}`);
   }
   assert.ok(shell.includes("Envoi désactivé"));
+  assert.ok(shell.includes("Pièces jointes recommandées"));
 
   console.log("Commercial operational assistant tests passed.");
 })().catch((error) => {

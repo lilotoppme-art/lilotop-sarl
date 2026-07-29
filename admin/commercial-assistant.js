@@ -73,6 +73,7 @@ function renderAssistantResult(item) {
   assistantList("assistant-requested-actions", output.requestedActions);
   assistantList("assistant-checklist", [...(output.requirements || []), ...(output.checklist || [])]);
   assistantList("assistant-missing-items", output.missingItems);
+  assistantList("assistant-attachment-suggestions", output.attachmentSuggestions);
   assistantList("assistant-commercial-conditions", output.commercialConditions);
   assistantList("assistant-recommended-actions", output.recommendedActions);
   document.getElementById("assistant-financial-status").textContent = output.financialDraftStatus || "";
