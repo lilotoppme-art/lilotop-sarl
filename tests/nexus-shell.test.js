@@ -19,7 +19,7 @@ assert.deepStrictEqual(
     ["Finance", "À venir"],
     ["Odoo", "À venir"]
   ],
-  "Le catalogue des modules Phase 1 doit rester strictement statique."
+  "Le catalogue des modules NEXUS doit rester strictement statique."
 );
 
 assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 1);
@@ -46,8 +46,25 @@ assert.ok(nexusCatalog.settings.every((setting) => setting.statusLabel === "Non 
 assert.deepStrictEqual(nexusCatalog.activity, []);
 assert.deepStrictEqual(
   nexusCatalog.dashboard.map((metric) => metric.label),
-  ["Opportunités", "Utilisateurs", "Modules actifs", "Dernière activité", "Santé du système"]
+  [
+    "Opportunités",
+    "Appels d'offres",
+    "Clients",
+    "Fournisseurs",
+    "Commandes",
+    "Devis",
+    "Valeur potentielle",
+    "Trésorerie",
+    "Alertes IA",
+    "Activité récente"
+  ]
 );
+assert.ok(nexusCatalog.dashboard.every((metric) => metric.value === "—"));
+assert.deepStrictEqual(
+  nexusCatalog.executivePanels.map((panel) => panel.title),
+  ["Actions recommandées par l'IA", "Résumé du jour", "Échéances importantes"]
+);
+assert.ok(nexusCatalog.executivePanels.every((panel) => panel.statusLabel === "Placeholder"));
 
 const serializedCatalog = JSON.stringify(nexusCatalog);
 assert.ok(!/api[_-]?key|password|secret|token/i.test(serializedCatalog), "Le catalogue ne doit contenir aucun secret.");
@@ -69,6 +86,9 @@ assert.ok(
 const shell = read("admin/nexus-shell.html");
 assert.ok(shell.includes('href="/admin/business-radar"'));
 assert.ok(shell.includes('id="activity-journal"'));
+assert.ok(shell.includes('id="panel-ai-actions"'));
+assert.ok(shell.includes('id="panel-daily-summary"'));
+assert.ok(shell.includes('id="panel-deadlines"'));
 assert.ok(shell.includes("{{NEXUS_BOOTSTRAP}}"));
 
 const stylesheet = read("admin/nexus.css");
@@ -79,4 +99,4 @@ const pageRoute = read("api/nexus-page.js");
 assert.ok(pageRoute.includes('require("../lib/business-radar/auth")'));
 assert.ok(pageRoute.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
 
-console.log("NEXUS AI Phase 1 shell tests passed.");
+console.log("NEXUS AI Phase 2 dashboard tests passed.");

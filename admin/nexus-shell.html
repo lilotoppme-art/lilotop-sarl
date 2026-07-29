@@ -34,7 +34,7 @@
         <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
         <div>
           <strong>NEXUS AI</strong>
-          <span>Phase 1</span>
+          <span>Phase 2</span>
         </div>
       </div>
 
@@ -63,43 +63,23 @@
           <p class="eyebrow">LILOTOP SARL</p>
           <h1 id="view-title">Tableau de bord</h1>
         </div>
-        <span class="phase-badge">Fondation NEXUS AI</span>
+        <span class="phase-badge">Dashboard DG</span>
       </header>
 
       <section class="view is-visible" id="view-dashboard" data-view-panel="dashboard">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Vue générale</p>
-            <h2>Centre de pilotage</h2>
+            <p class="eyebrow">Direction Générale</p>
+            <h2>Tableau de bord exécutif</h2>
           </div>
-          <p>Données de démonstration, sans connexion aux systèmes opérationnels.</p>
+          <p>Vue de démonstration sans connexion aux données opérationnelles, financières ou IA.</p>
         </div>
         <div class="metrics-grid" id="dashboard-metrics"></div>
 
-        <div class="content-grid">
-          <section class="surface">
-            <div class="surface-header">
-              <div>
-                <p class="eyebrow">Premier module</p>
-                <h2>Business Radar</h2>
-              </div>
-              <span class="status status-active">Actif</span>
-            </div>
-            <p>Accédez au module existant sans modifier son fonctionnement ni ses données.</p>
-            <a class="button button-primary button-inline" href="/admin/business-radar">Ouvrir Business Radar</a>
-          </section>
-          <section class="surface">
-            <div class="surface-header">
-              <div>
-                <p class="eyebrow">Journal d'activité</p>
-                <h2>Derniers événements</h2>
-              </div>
-            </div>
-            <div class="empty-state">
-              <strong>Aucune activité</strong>
-              <p>Le journal sera alimenté dans une phase ultérieure.</p>
-            </div>
-          </section>
+        <div class="executive-grid" aria-label="Synthèses de Direction Générale">
+          <section class="surface executive-panel executive-panel-wide" id="panel-ai-actions"></section>
+          <section class="surface executive-panel" id="panel-daily-summary"></section>
+          <section class="surface executive-panel" id="panel-deadlines"></section>
         </div>
       </section>
 
@@ -109,7 +89,7 @@
             <p class="eyebrow">Architecture modulaire</p>
             <h2>Modules NEXUS AI</h2>
           </div>
-          <p>Business Radar est le seul module actif pendant la Phase 1.</p>
+          <p>Business Radar reste le seul module actif pendant la Phase 2.</p>
         </div>
         <div class="module-grid" id="module-grid"></div>
       </section>

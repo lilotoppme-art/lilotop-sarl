@@ -37,6 +37,26 @@ function renderDashboard() {
   `).join("");
 }
 
+function renderExecutivePanels() {
+  bootstrap.executivePanels.forEach((panel) => {
+    const target = document.getElementById(`panel-${panel.key}`);
+    if (!target) return;
+    target.innerHTML = `
+      <div class="surface-header">
+        <div>
+          <p class="eyebrow">${escapeHtml(panel.eyebrow)}</p>
+          <h2>${escapeHtml(panel.title)}</h2>
+        </div>
+        <span class="status status-neutral">${escapeHtml(panel.statusLabel)}</span>
+      </div>
+      <div class="executive-empty">
+        <strong>${escapeHtml(panel.emptyTitle)}</strong>
+        <p>${escapeHtml(panel.emptyText)}</p>
+      </div>
+    `;
+  });
+}
+
 function renderModules() {
   const target = document.getElementById("module-grid");
   target.innerHTML = bootstrap.modules.map((module) => {
@@ -139,6 +159,7 @@ async function logout() {
 }
 
 renderDashboard();
+renderExecutivePanels();
 renderModules();
 renderRoles();
 renderSettings();
