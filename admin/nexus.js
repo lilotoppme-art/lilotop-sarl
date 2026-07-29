@@ -23,6 +23,7 @@ function setAuthenticated(authenticated) {
   body.dataset.authenticated = String(authenticated);
   loginScreen.hidden = authenticated;
   nexusShell.hidden = !authenticated;
+  document.title = `${authenticated ? "NEXUS AI" : "Connexion NEXUS AI"} | LILOTOP SARL`;
 }
 
 function renderDashboard() {

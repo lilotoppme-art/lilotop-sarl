@@ -71,6 +71,10 @@ assert.ok(shell.includes('href="/admin/business-radar"'));
 assert.ok(shell.includes('id="activity-journal"'));
 assert.ok(shell.includes("{{NEXUS_BOOTSTRAP}}"));
 
+const stylesheet = read("admin/nexus.css");
+assert.ok(stylesheet.includes("[hidden]"), "Les vues masquées doivent respecter l'attribut HTML hidden.");
+assert.ok(stylesheet.includes("display: none !important"));
+
 const pageRoute = read("api/nexus-page.js");
 assert.ok(pageRoute.includes('require("../lib/business-radar/auth")'));
 assert.ok(pageRoute.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
