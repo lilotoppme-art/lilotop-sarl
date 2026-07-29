@@ -124,6 +124,24 @@ async function loadTenderDashboard() {
   }
 }
 
+async function loadMiningDashboard() {
+  try {
+    const response = await fetch("/api/mining-watch?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const opportunityCard = document.querySelector('[data-metric-key="opportunities"]');
+    if (!opportunityCard) return;
+    opportunityCard.querySelector("strong").textContent = summary.signalsToday;
+    opportunityCard.querySelector("p").textContent = summary.latest
+      ? `${summary.latest.signals.length} signal(s) dans la derniere veille miniere`
+      : `${summary.searchesToday} veille(s) miniere(s) aujourd'hui`;
+  } catch {
+    // Le placeholder reste visible si Veille Miniere AI n'est pas disponible.
+  }
+}
+
 function renderExecutivePanels() {
   bootstrap.executivePanels.forEach((panel) => {
     const target = document.getElementById(`panel-${panel.key}`);
@@ -237,6 +255,7 @@ async function authenticate(event) {
     loadCommercialDashboard();
     loadProcurementDashboard();
     loadTenderDashboard();
+    loadMiningDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -258,6 +277,7 @@ if (body.dataset.authenticated === "true") {
   loadCommercialDashboard();
   loadProcurementDashboard();
   loadTenderDashboard();
+  loadMiningDashboard();
 }
 
 loginForm.addEventListener("submit", authenticate);

@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/commercial-ai.css">
+  <link rel="stylesheet" href="/admin/tender-ai.css">
+  <link rel="stylesheet" href="/admin/mining-watch.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#mining-main">Aller au contenu</a>
+
+  <section class="login-screen" id="mining-login" aria-labelledby="mining-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">Accès sécurisé</p>
+      <h1 id="mining-login-title">Veille Minière AI</h1>
+      <p>Utilisez votre compte administrateur NEXUS AI.</p>
+      <form id="mining-login-form">
+        <label for="mining-email">Adresse administrateur</label>
+        <input id="mining-email" name="email" type="email" autocomplete="username" required>
+        <label for="mining-password">Mot de passe</label>
+        <input id="mining-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="mining-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="mining-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Veille Minière AI</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/nexus/tender-ai">Appels d'Offres AI</a>
+        <a href="/admin/nexus/commercial-ai">Commercial AI</a>
+        <a href="/admin/nexus/procurement-ai">Achats AI</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="mining-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="mining-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Agent IA Veille Minière</p>
+          <h1>Signaux miniers et besoins industriels</h1>
+          <p>Surveillez les projets, extensions et besoins d'approvisionnement des groupes miniers.</p>
+        </div>
+        <span class="agent-status">Agent actif</span>
+      </section>
+
+      <p class="global-status" id="mining-status" role="status" aria-live="polite"></p>
+
+      <section class="workspace-panel tender-search-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Nouvelle veille</p>
+            <h2>Périmètre de surveillance</h2>
+          </div>
+          <span class="erp-note">Architecture ERP-compatible</span>
+        </div>
+        <form class="tender-form" id="mining-search-form">
+          <label class="filter-field" for="mining-countries">
+            <span>Pays et régions</span>
+            <input id="mining-countries" name="countries" type="text" maxlength="500" value="RDC, Haut-Katanga, Lualaba" placeholder="RDC, Zambie, Afrique australe">
+          </label>
+          <label class="filter-field" for="mining-keywords">
+            <span>Mots-clés complémentaires</span>
+            <input id="mining-keywords" name="keywords" type="text" maxlength="1000" value="mining supply, achats, logistique, usine, extension" placeholder="pompes, réactifs, transport">
+          </label>
+          <label class="filter-field" for="mining-published-after">
+            <span>Publié après le</span>
+            <input id="mining-published-after" name="publishedAfter" type="date">
+          </label>
+          <fieldset class="source-fieldset">
+            <legend>Besoins à détecter</legend>
+            <div class="source-grid mining-needs-grid" id="mining-needs-grid"></div>
+          </fieldset>
+          <fieldset class="source-fieldset">
+            <legend>Sociétés surveillées</legend>
+            <div class="source-grid" id="mining-source-grid"></div>
+          </fieldset>
+          <div class="tender-form-action">
+            <button class="button button-primary" type="submit">Lancer la veille minière</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="summary-strip" aria-label="Résumé Veille Minière AI">
+        <article><span>Veilles enregistrées</span><strong id="mining-search-count">0</strong></article>
+        <article><span>Signaux détectés</span><strong id="mining-signal-count">0</strong></article>
+        <article><span>Prioritaires</span><strong id="mining-priority-count">0</strong></article>
+        <article><span>Dernière veille</span><strong id="mining-last-date">—</strong></article>
+      </section>
+
+      <section class="workspace-panel tender-results-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Résultats qualifiés</p>
+            <h2>Opportunités minières détectées</h2>
+          </div>
+          <button class="button button-secondary" id="rerun-mining-search" type="button" disabled>Relancer la veille</button>
+        </div>
+        <div class="analysis-empty" id="mining-result-empty">
+          <strong>Aucune veille sélectionnée</strong>
+          <p>Les résultats afficheront le besoin détecté, le score, les risques et les recommandations.</p>
+        </div>
+        <div id="mining-result-content" hidden>
+          <p class="tender-executive-summary" id="mining-watch-summary"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Signal</th>
+                  <th>Société</th>
+                  <th>Localisation</th>
+                  <th>Besoin détecté</th>
+                  <th>Calendrier</th>
+                  <th>Score</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="mining-rows"></tbody>
+            </table>
+          </div>
+          <div class="tender-detail-list" id="mining-detail-list"></div>
+          <div class="tender-analysis-grid">
+            <section><h3>Risques globaux</h3><ul id="mining-global-risks"></ul></section>
+            <section><h3>Recommandations</h3><ol id="mining-global-actions"></ol></section>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace-panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Traçabilité</p>
+            <h2>Historique des veilles</h2>
+          </div>
+          <button class="button button-secondary" id="refresh-mining-history" type="button">Actualiser</button>
+        </div>
+        <div class="tender-history" id="mining-history">
+          <p class="empty-message">Aucune veille enregistrée.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/mining-watch.js" defer></script>
+</body>
+</html>

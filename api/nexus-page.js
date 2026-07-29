@@ -5,6 +5,7 @@ const path = require("path");
 const { verifySession } = require("../lib/business-radar/auth");
 const { nexusCatalog } = require("../lib/nexus/catalog");
 const tenderHandler = require("../lib/nexus/tender-handler");
+const miningWatchHandler = require("../lib/nexus/mining-watch-handler");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -49,6 +50,9 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "tender-api") {
     return tenderHandler(req, res);
   }
+  if (delegatedHandler === "mining-api") {
+    return miningWatchHandler(req, res);
+  }
   if (req.method !== "GET") {
     res.statusCode = 405;
     return res.end("Method not allowed");
@@ -58,6 +62,10 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "tender-page") {
     const title = authenticated ? "Appels d'Offres AI" : "Connexion Appels d'Offres AI";
     return sendPrivateHtml(res, "tender-ai-shell.html", authenticated, title);
+  }
+  if (delegatedHandler === "mining-page") {
+    const title = authenticated ? "Veille Miniere AI" : "Connexion Veille Miniere AI";
+    return sendPrivateHtml(res, "mining-watch-shell.html", authenticated, title);
   }
   const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
   return sendPrivateHtml(res, "nexus-shell.html", authenticated, pageTitle, nexusCatalog);
