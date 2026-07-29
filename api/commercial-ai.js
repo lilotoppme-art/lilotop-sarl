@@ -1,8 +1,5 @@
 "use strict";
 
-const fs = require("fs");
-const path = require("path");
-const { query } = require("../lib/business-radar/db");
 const radarStore = require("../lib/business-radar/store");
 const radarService = require("../lib/business-radar/service");
 const validation = require("../lib/business-radar/validation");
@@ -105,14 +102,6 @@ async function get(req, res, action, url) {
         ]
       }
     });
-  }
-  if (action === "migrate-assistant") {
-    const sql = fs.readFileSync(
-      path.join(process.cwd(), "db", "migrations", "007_commercial_assistant.sql"),
-      "utf8"
-    );
-    await query(sql);
-    return json(res, 200, { ok: true, data: { migrated: true } });
   }
   return json(res, 404, { ok: false, error: "Unknown action" });
 }
