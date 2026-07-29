@@ -8,6 +8,7 @@ const {
   NEED_TYPES,
   buildRequest,
   classifyScore,
+  isInactiveSignal,
   normalizeCriteria,
   searchMiningSignals
 } = require("../lib/nexus/mining-watch-ai");
@@ -24,6 +25,20 @@ assert.strictEqual(classifyScore(90), "Tres prioritaire");
 assert.strictEqual(classifyScore(75), "Prioritaire");
 assert.strictEqual(classifyScore(60), "Moyen");
 assert.strictEqual(classifyScore(20), "Faible");
+assert.strictEqual(
+  isInactiveSignal(
+    { timing: "Publie le 2025-05-29; cloture 2025-06-29" },
+    new Date("2026-07-29T12:00:00Z")
+  ),
+  true
+);
+assert.strictEqual(
+  isInactiveSignal(
+    { timing: "Horizon operationnel 2027", evidence: "Projet actif" },
+    new Date("2026-07-29T12:00:00Z")
+  ),
+  false
+);
 
 const criteria = normalizeCriteria({
   countries: ["RDC", "Haut-Katanga"],
