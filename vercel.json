@@ -3,6 +3,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/tender-ai",
+      "destination": "/api/tender-ai-page"
+    },
+    {
       "source": "/admin/nexus/procurement-ai",
       "destination": "/api/procurement-ai-page"
     },

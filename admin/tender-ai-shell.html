@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/commercial-ai.css">
+  <link rel="stylesheet" href="/admin/tender-ai.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#tender-main">Aller au contenu</a>
+
+  <section class="login-screen" id="tender-login" aria-labelledby="tender-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">Accès sécurisé</p>
+      <h1 id="tender-login-title">Appels d'Offres AI</h1>
+      <p>Utilisez votre compte administrateur NEXUS AI.</p>
+      <form id="tender-login-form">
+        <label for="tender-email">Adresse administrateur</label>
+        <input id="tender-email" name="email" type="email" autocomplete="username" required>
+        <label for="tender-password">Mot de passe</label>
+        <input id="tender-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="tender-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="tender-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Appels d'Offres AI</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/nexus/commercial-ai">Commercial AI</a>
+        <a href="/admin/nexus/procurement-ai">Achats AI</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="tender-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="tender-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Agent IA Appels d'Offres</p>
+          <h1>Veille et qualification des marchés</h1>
+          <p>Surveillez les bailleurs, institutions, portails miniers et donneurs d'ordre internationaux.</p>
+        </div>
+        <span class="agent-status">Agent actif</span>
+      </section>
+
+      <p class="global-status" id="tender-status" role="status" aria-live="polite"></p>
+
+      <section class="workspace-panel tender-search-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Nouvelle veille</p>
+            <h2>Filtres de recherche</h2>
+          </div>
+          <span class="erp-note">Architecture ERP-compatible</span>
+        </div>
+        <form class="tender-form" id="tender-search-form">
+          <label class="filter-field" for="tender-countries">
+            <span>Pays</span>
+            <input id="tender-countries" name="countries" type="text" maxlength="500" placeholder="RDC, Zambie, Afrique du Sud">
+          </label>
+          <label class="filter-field" for="tender-sectors">
+            <span>Secteurs</span>
+            <input id="tender-sectors" name="sectors" type="text" maxlength="500" placeholder="Mining supply, logistique, énergie">
+          </label>
+          <label class="filter-field" for="tender-amount">
+            <span>Montant minimum</span>
+            <input id="tender-amount" name="minimumAmount" type="text" maxlength="100" placeholder="Ex. 50 000 USD">
+          </label>
+          <label class="filter-field" for="tender-deadline">
+            <span>Date limite avant le</span>
+            <input id="tender-deadline" name="deadlineBefore" type="date">
+          </label>
+          <label class="filter-field" for="tender-organizations">
+            <span>Organismes ciblés</span>
+            <input id="tender-organizations" name="organizations" type="text" maxlength="500" placeholder="UNICEF, Banque Mondiale">
+          </label>
+          <label class="filter-field" for="tender-keywords">
+            <span>Mots-clés</span>
+            <input id="tender-keywords" name="keywords" type="text" maxlength="1000" placeholder="fournitures industrielles, pompes, EPI">
+          </label>
+          <fieldset class="source-fieldset">
+            <legend>Sources surveillées</legend>
+            <div class="source-grid" id="tender-source-grid"></div>
+          </fieldset>
+          <div class="tender-form-action">
+            <button class="button button-primary" type="submit">Rechercher des appels d'offres</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="summary-strip" aria-label="Résumé Appels d'Offres AI">
+        <article><span>Recherches enregistrées</span><strong id="tender-search-count">0</strong></article>
+        <article><span>Appels d'offres détectés</span><strong id="tender-result-count">0</strong></article>
+        <article><span>Prioritaires</span><strong id="tender-priority-count">0</strong></article>
+        <article><span>Dernière veille</span><strong id="tender-last-date">—</strong></article>
+      </section>
+
+      <section class="workspace-panel tender-results-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Résultats qualifiés</p>
+            <h2>Appels d'offres détectés</h2>
+          </div>
+          <button class="button button-secondary" id="rerun-tender-search" type="button" disabled>Relancer la recherche</button>
+        </div>
+        <div class="analysis-empty" id="tender-result-empty">
+          <strong>Aucune veille sélectionnée</strong>
+          <p>Les résultats afficheront le score d'intérêt, la chance de gagner, les risques et les actions recommandées.</p>
+        </div>
+        <div id="tender-result-content" hidden>
+          <p class="tender-executive-summary" id="tender-executive-summary"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Appel d'offres</th>
+                  <th>Organisme</th>
+                  <th>Pays / secteur</th>
+                  <th>Montant</th>
+                  <th>Date limite</th>
+                  <th>Intérêt</th>
+                  <th>Chance</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="tender-rows"></tbody>
+            </table>
+          </div>
+          <div class="tender-detail-list" id="tender-detail-list"></div>
+          <div class="tender-analysis-grid">
+            <section><h3>Risques globaux</h3><ul id="tender-global-risks"></ul></section>
+            <section><h3>Actions recommandées</h3><ol id="tender-global-actions"></ol></section>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace-panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Traçabilité</p>
+            <h2>Historique des recherches</h2>
+          </div>
+          <button class="button button-secondary" id="refresh-tender-history" type="button">Actualiser</button>
+        </div>
+        <div class="tender-history" id="tender-history">
+          <p class="empty-message">Aucune recherche enregistrée.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/tender-ai.js" defer></script>
+</body>
+</html>

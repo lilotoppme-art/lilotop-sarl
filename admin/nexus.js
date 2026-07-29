@@ -106,6 +106,24 @@ async function loadProcurementDashboard() {
   }
 }
 
+async function loadTenderDashboard() {
+  try {
+    const response = await fetch("/api/tender-ai?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const tenderCard = document.querySelector('[data-metric-key="tenders"]');
+    if (!tenderCard) return;
+    tenderCard.querySelector("strong").textContent = summary.tendersToday;
+    tenderCard.querySelector("p").textContent = summary.latest
+      ? `${summary.latest.tenders.length} résultat(s) dans la dernière veille`
+      : `${summary.searchesToday} veille(s) aujourd'hui`;
+  } catch {
+    // Le placeholder reste visible si Appels d'Offres AI n'est pas disponible.
+  }
+}
+
 function renderExecutivePanels() {
   bootstrap.executivePanels.forEach((panel) => {
     const target = document.getElementById(`panel-${panel.key}`);
@@ -218,6 +236,7 @@ async function authenticate(event) {
     showView("dashboard");
     loadCommercialDashboard();
     loadProcurementDashboard();
+    loadTenderDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -238,6 +257,7 @@ setAuthenticated(body.dataset.authenticated === "true");
 if (body.dataset.authenticated === "true") {
   loadCommercialDashboard();
   loadProcurementDashboard();
+  loadTenderDashboard();
 }
 
 loginForm.addEventListener("submit", authenticate);
