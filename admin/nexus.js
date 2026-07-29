@@ -88,6 +88,24 @@ async function loadCommercialDashboard() {
   }
 }
 
+async function loadProcurementDashboard() {
+  try {
+    const response = await fetch("/api/procurement-ai?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const supplierCard = document.querySelector('[data-metric-key="suppliers"]');
+    if (!supplierCard) return;
+    supplierCard.querySelector("strong").textContent = summary.suppliersToday;
+    supplierCard.querySelector("p").textContent = summary.latest
+      ? `Dernier sourcing : ${summary.latest.criteria.product}`
+      : `${summary.searchesToday} recherche(s) Achats AI aujourd'hui`;
+  } catch {
+    // Le placeholder reste visible si Achats AI n'est pas disponible.
+  }
+}
+
 function renderExecutivePanels() {
   bootstrap.executivePanels.forEach((panel) => {
     const target = document.getElementById(`panel-${panel.key}`);
@@ -199,6 +217,7 @@ async function authenticate(event) {
     setAuthenticated(true);
     showView("dashboard");
     loadCommercialDashboard();
+    loadProcurementDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -216,7 +235,10 @@ renderModules();
 renderRoles();
 renderSettings();
 setAuthenticated(body.dataset.authenticated === "true");
-if (body.dataset.authenticated === "true") loadCommercialDashboard();
+if (body.dataset.authenticated === "true") {
+  loadCommercialDashboard();
+  loadProcurementDashboard();
+}
 
 loginForm.addEventListener("submit", authenticate);
 logoutButton.addEventListener("click", logout);

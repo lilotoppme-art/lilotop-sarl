@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/commercial-ai.css">
+  <link rel="stylesheet" href="/admin/procurement-ai.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#procurement-main">Aller au contenu</a>
+
+  <section class="login-screen" id="procurement-login" aria-labelledby="procurement-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">Accès sécurisé</p>
+      <h1 id="procurement-login-title">Achats AI</h1>
+      <p>Utilisez votre compte administrateur NEXUS AI.</p>
+      <form id="procurement-login-form">
+        <label for="procurement-email">Adresse administrateur</label>
+        <input id="procurement-email" name="email" type="email" autocomplete="username" required>
+        <label for="procurement-password">Mot de passe</label>
+        <input id="procurement-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="procurement-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="procurement-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Achats AI</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/nexus/commercial-ai">Commercial AI</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="procurement-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="procurement-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Agent IA Achats</p>
+          <h1>Recherche fournisseurs internationale</h1>
+          <p>Identifiez et comparez des fabricants et distributeurs à partir de sources web vérifiables.</p>
+        </div>
+        <span class="agent-status">Agent actif</span>
+      </section>
+
+      <p class="global-status" id="procurement-status" role="status" aria-live="polite"></p>
+
+      <section class="workspace-panel search-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Nouveau sourcing</p>
+            <h2>Critères de recherche</h2>
+          </div>
+          <span class="compatibility-note">Supply Chain · Procurement · Odoo-ready</span>
+        </div>
+        <form class="procurement-form" id="supplier-search-form">
+          <label class="field field-wide" for="product">
+            <span>Produit ou besoin</span>
+            <input id="product" name="product" type="text" maxlength="500"
+              placeholder="Ex. pompes centrifuges industrielles pour mine" required>
+          </label>
+          <label class="field" for="countries">
+            <span>Pays ciblés</span>
+            <input id="countries" name="countries" type="text" maxlength="500"
+              placeholder="Afrique du Sud, Allemagne, Chine">
+          </label>
+          <fieldset class="field supplier-types">
+            <legend>Type de fournisseur</legend>
+            <label><input name="supplierTypes" type="checkbox" value="manufacturer" checked> Fabricant</label>
+            <label><input name="supplierTypes" type="checkbox" value="distributor" checked> Distributeur</label>
+          </fieldset>
+          <label class="field" for="quantity">
+            <span>Quantité indicative</span>
+            <input id="quantity" name="quantity" type="text" maxlength="200" placeholder="Ex. 12 unités">
+          </label>
+          <label class="field" for="requirements">
+            <span>Exigences techniques</span>
+            <textarea id="requirements" name="requirements" maxlength="2500" rows="3"
+              placeholder="Normes, matériaux, destination, contraintes de livraison…"></textarea>
+          </label>
+          <div class="form-action">
+            <button class="button button-primary" type="submit">Rechercher des fournisseurs</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="summary-strip" aria-label="Résumé Achats AI">
+        <article><span>Recherches enregistrées</span><strong id="search-count">0</strong></article>
+        <article><span>Fournisseurs identifiés</span><strong id="supplier-count">0</strong></article>
+        <article><span>Pays représentés</span><strong id="country-count">0</strong></article>
+        <article><span>Dernière recherche</span><strong id="last-search-date">—</strong></article>
+      </section>
+
+      <section class="workspace-panel result-workspace">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Comparatif fournisseurs</p>
+            <h2 id="result-title">Résultats de recherche</h2>
+          </div>
+          <button class="button button-secondary" id="rerun-search" type="button" disabled>Relancer la recherche</button>
+        </div>
+        <div class="analysis-empty" id="result-empty">
+          <strong>Aucune recherche sélectionnée</strong>
+          <p>Les fournisseurs seront classés par pays, type, qualité, délai et prix estimé.</p>
+        </div>
+        <div id="result-content" hidden>
+          <p class="result-summary" id="result-summary"></p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fournisseur</th>
+                  <th>Pays</th>
+                  <th>Type</th>
+                  <th>Qualité</th>
+                  <th>Délai</th>
+                  <th>Prix estimé</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody id="supplier-rows"></tbody>
+            </table>
+          </div>
+          <div class="analysis-columns">
+            <section><h3>Avantages</h3><ul id="result-advantages"></ul></section>
+            <section><h3>Risques</h3><ul id="result-risks"></ul></section>
+            <section><h3>Recommandations</h3><ol id="result-recommendations"></ol></section>
+          </div>
+        </div>
+      </section>
+
+      <section class="workspace-panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Traçabilité</p>
+            <h2>Historique des recherches</h2>
+          </div>
+          <button class="button button-secondary" id="refresh-history" type="button">Actualiser</button>
+        </div>
+        <div class="procurement-history" id="search-history">
+          <p class="empty-message">Aucune recherche enregistrée.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/procurement-ai.js" defer></script>
+</body>
+</html>
