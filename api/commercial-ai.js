@@ -6,6 +6,12 @@ const validation = require("../lib/business-radar/validation");
 const { json, parseJson, requireAdmin } = require("../lib/business-radar/http");
 const commercialStore = require("../lib/nexus/commercial-store");
 const { analyzeCommercialOpportunity } = require("../lib/nexus/commercial-ai");
+const assistantStore = require("../lib/nexus/commercial-assistant-store");
+const {
+  WORKFLOW_TYPES,
+  assertSendingDisabled,
+  prepareCommercialWork
+} = require("../lib/nexus/commercial-assistant");
 
 function safeCommercialError(error) {
   if (error.code === "VALIDATION_ERROR") {
@@ -17,6 +23,9 @@ function safeCommercialError(error) {
   if (error.code === "DATABASE_NOT_CONFIGURED" || error.code === "OPENAI_NOT_CONFIGURED") {
     return { status: 503, body: { ok: false, error: error.message, code: error.code } };
   }
+  if (error.code === "COMMERCIAL_SEND_DISABLED") {
+    return { status: 403, body: { ok: false, error: error.message, code: error.code } };
+  }
   if (error.code === "42P01") {
     return {
       status: 503,
@@ -27,7 +36,10 @@ function safeCommercialError(error) {
       }
     };
   }
-  if (String(error.code || "").startsWith("COMMERCIAL_AI_")) {
+  if (
+    String(error.code || "").startsWith("COMMERCIAL_AI_")
+    || String(error.code || "").startsWith("COMMERCIAL_ASSISTANT_")
+  ) {
     return { status: 502, body: { ok: false, error: error.message, code: error.code } };
   }
   return {
@@ -46,6 +58,50 @@ async function get(req, res, action, url) {
   }
   if (action === "dashboard") {
     return json(res, 200, { ok: true, data: await commercialStore.dashboardSummary() });
+  }
+  if (action === "work-items") {
+    const type = url.searchParams.get("type");
+    if (type && !WORKFLOW_TYPES.includes(type)) {
+      throw Object.assign(new Error("Type de travail commercial invalide."), {
+        code: "VALIDATION_ERROR"
+      });
+    }
+    return json(res, 200, {
+      ok: true,
+      data: await assistantStore.listWork(type, url.searchParams.get("limit"))
+    });
+  }
+  if (action === "tasks") {
+    return json(res, 200, {
+      ok: true,
+      data: await assistantStore.listTasks(url.searchParams.get("limit"))
+    });
+  }
+  if (action === "activity") {
+    return json(res, 200, {
+      ok: true,
+      data: await assistantStore.listActivity(url.searchParams.get("limit"))
+    });
+  }
+  if (action === "gmail-config") {
+    return json(res, 200, {
+      ok: true,
+      data: {
+        configured: Boolean(
+          process.env.GOOGLE_OAUTH_CLIENT_ID
+          && process.env.GOOGLE_OAUTH_REDIRECT_URI
+        ),
+        consentRequired: true,
+        draftCreationAllowed: true,
+        sendingEnabled: false,
+        scopes: [
+          "openid",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/gmail.readonly",
+          "https://www.googleapis.com/auth/gmail.compose"
+        ]
+      }
+    });
   }
   return json(res, 404, { ok: false, error: "Unknown action" });
 }
@@ -73,6 +129,32 @@ async function post(req, res, action, session) {
         candidates: await commercialStore.listCandidates(100)
       }
     });
+  }
+  if (action === "prepare") {
+    const result = await prepareCommercialWork(body);
+    return json(res, 201, {
+      ok: true,
+      data: await assistantStore.saveWork(result, session.email)
+    });
+  }
+  if (action === "validate") {
+    return json(res, 200, {
+      ok: true,
+      data: await assistantStore.validateWork(
+        validation.uuid(body.id),
+        body.decision,
+        session.email
+      )
+    });
+  }
+  if (action === "task") {
+    return json(res, 201, {
+      ok: true,
+      data: await assistantStore.createTask(body, session.email)
+    });
+  }
+  if (action === "send") {
+    assertSendingDisabled();
   }
   return json(res, 404, { ok: false, error: "Unknown action" });
 }

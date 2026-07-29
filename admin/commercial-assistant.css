@@ -1,0 +1,310 @@
+.commercial-tabs {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--steel-300);
+}
+
+.commercial-tabs button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 10px 13px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  color: var(--steel-700);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.commercial-tabs button:hover,
+.commercial-tabs button.is-active {
+  color: var(--navy-950);
+  border-bottom-color: var(--gold);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.assistant-view,
+.assistant-list-panel,
+.task-panel,
+.activity-panel {
+  margin-top: 20px;
+}
+
+.assistant-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(380px, 1.05fr);
+  gap: 18px;
+}
+
+.assistant-compose,
+.assistant-result,
+.assistant-list-panel,
+.task-panel,
+.activity-panel,
+.gmail-panel {
+  padding: 24px;
+}
+
+.assistant-compose form,
+.assistant-compose label {
+  display: grid;
+  gap: 7px;
+}
+
+.assistant-compose form {
+  gap: 16px;
+}
+
+.assistant-compose label {
+  color: var(--navy-900);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.assistant-compose input,
+.assistant-compose select,
+.assistant-compose textarea,
+.task-form input,
+.task-form textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--steel-300);
+  border-radius: 3px;
+  color: var(--navy-950);
+  background: var(--white);
+  font: inherit;
+}
+
+.assistant-compose textarea,
+.task-form textarea {
+  resize: vertical;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.check-row,
+.consent-row {
+  grid-template-columns: 20px minmax(0, 1fr) !important;
+  align-items: center;
+  min-height: 45px;
+  padding: 10px 12px;
+  border: 1px solid var(--steel-200);
+  background: #f7f9fa;
+}
+
+.check-row input,
+.consent-row input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+.draft-guard,
+.validation-chip,
+.gmail-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 9px;
+  border-radius: 3px;
+  color: var(--amber);
+  background: var(--amber-soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.assistant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button-danger {
+  color: var(--red);
+  background: var(--white);
+  border-color: #d7a8a8;
+}
+
+.assistant-result section {
+  margin-top: 18px;
+}
+
+.assistant-result h3 {
+  margin: 0 0 7px;
+  font-size: 14px;
+}
+
+.assistant-result p,
+.assistant-result li {
+  color: var(--steel-700);
+  font-size: 13px;
+}
+
+.assistant-result pre {
+  max-height: 360px;
+  margin: 0;
+  padding: 14px;
+  overflow: auto;
+  border: 1px solid var(--steel-200);
+  color: var(--navy-900);
+  background: #f7f9fa;
+  font: 13px/1.55 "Segoe UI", Arial, sans-serif;
+  white-space: pre-wrap;
+}
+
+.result-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.result-meta div {
+  padding: 12px;
+  background: var(--steel-100);
+}
+
+.result-meta dt {
+  color: var(--steel-500);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.result-meta dd {
+  margin: 3px 0 0;
+  font-weight: 800;
+}
+
+.financial-status {
+  padding: 11px 12px;
+  border-left: 3px solid var(--gold);
+  background: var(--amber-soft);
+}
+
+.assistant-work-list {
+  display: grid;
+  gap: 8px;
+}
+
+.assistant-work-item {
+  display: flex;
+  width: 100%;
+  min-height: 62px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--steel-200);
+  color: var(--navy-900);
+  background: var(--white);
+  text-align: left;
+  cursor: pointer;
+}
+
+.assistant-work-item:hover {
+  border-color: var(--gold);
+  background: #fbfaf6;
+}
+
+.assistant-work-item strong,
+.assistant-work-item small {
+  display: block;
+}
+
+.assistant-work-item small {
+  margin-top: 3px;
+  color: var(--steel-500);
+}
+
+.assistant-list-entry {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.7fr) minmax(0, 1fr) auto;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--steel-200);
+}
+
+.assistant-list-entry span,
+.assistant-list-entry small {
+  color: var(--steel-700);
+}
+
+.task-form {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) 220px minmax(240px, 1fr) auto;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.gmail-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 18px;
+  border-left: 3px solid var(--gold);
+}
+
+.gmail-panel h2,
+.gmail-panel p {
+  margin: 0;
+}
+
+.gmail-panel p {
+  margin-top: 7px;
+  color: var(--steel-700);
+}
+
+.gmail-panel > div:last-child {
+  display: grid;
+  justify-items: end;
+  gap: 8px;
+  text-align: right;
+}
+
+@media (max-width: 1050px) {
+  .assistant-grid,
+  .task-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .form-grid,
+  .result-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .assistant-compose,
+  .assistant-result,
+  .assistant-list-panel,
+  .task-panel,
+  .activity-panel,
+  .gmail-panel {
+    padding: 18px;
+  }
+
+  .assistant-list-entry,
+  .gmail-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .gmail-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .gmail-panel > div:last-child {
+    justify-items: start;
+    text-align: left;
+  }
+}

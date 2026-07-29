@@ -28,6 +28,9 @@ function setAuthenticated(authenticated) {
   loginScreen.hidden = authenticated;
   appShell.hidden = !authenticated;
   document.title = `${authenticated ? "Commercial AI" : "Connexion Commercial AI"} | LILOTOP SARL`;
+  document.dispatchEvent(new CustomEvent("commercial-auth-changed", {
+    detail: { authenticated }
+  }));
 }
 
 function setBusy(busy, message = "") {

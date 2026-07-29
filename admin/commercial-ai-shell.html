@@ -7,6 +7,7 @@
   <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/admin/commercial-ai.css">
+  <link rel="stylesheet" href="/admin/commercial-assistant.css">
 </head>
 <body data-authenticated="{{AUTHENTICATED}}">
   <a class="skip-link" href="#commercial-main">Aller au contenu</a>
@@ -58,6 +59,20 @@
 
       <p class="global-status" id="commercial-status" role="status" aria-live="polite"></p>
 
+      <nav class="commercial-tabs" aria-label="Espaces de travail de l'Agent IA Commercial">
+        <button class="is-active" type="button" data-commercial-view="pipeline">Pipeline</button>
+        <button type="button" data-commercial-view="email">Boîte de réception</button>
+        <button type="button" data-commercial-view="drafts">Brouillons</button>
+        <button type="button" data-commercial-view="tender">Appels d'offres</button>
+        <button type="button" data-commercial-view="offer">Offres commerciales</button>
+        <button type="button" data-commercial-view="quote">Devis</button>
+        <button type="button" data-commercial-view="followup">Relances</button>
+        <button type="button" data-commercial-view="tasks">Tâches</button>
+        <button type="button" data-commercial-view="history">Historique</button>
+        <button type="button" data-commercial-view="approvals">Validations en attente</button>
+      </nav>
+
+      <div id="commercial-pipeline-view">
       <section class="summary-strip" aria-label="Résumé Commercial AI">
         <article><span>Opportunités disponibles</span><strong id="candidate-count">—</strong></article>
         <article><span>Analysées</span><strong id="analyzed-count">—</strong></article>
@@ -145,9 +160,128 @@
           <p class="empty-message">Sélectionnez « Historique » sur une opportunité pour consulter ses analyses.</p>
         </div>
       </section>
+      </div>
+
+      <section class="assistant-view" id="commercial-assistant-view" hidden>
+        <div class="assistant-grid">
+          <section class="workspace-panel assistant-compose" id="assistant-compose-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Assistant opérationnel</p>
+                <h2 id="assistant-form-title">Analyser un e-mail autorisé</h2>
+              </div>
+              <span class="draft-guard">Brouillon uniquement</span>
+            </div>
+            <form id="assistant-work-form">
+              <input id="assistant-work-type" name="type" type="hidden" value="email">
+              <div class="form-grid">
+                <label>Titre<input id="assistant-title" name="title" maxlength="300" required></label>
+                <label>Langue du brouillon
+                  <select id="assistant-language" name="language">
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                  </select>
+                </label>
+              </div>
+              <label id="assistant-sender-field">Expéditeur
+                <input id="assistant-sender" name="sender" type="email" maxlength="320">
+              </label>
+              <label>Contenu à analyser
+                <textarea id="assistant-content" name="content" rows="11" maxlength="12000" required></textarea>
+              </label>
+              <label>Pièces jointes identifiées
+                <input id="assistant-attachments" name="attachments" placeholder="Ex. cahier-des-charges.pdf, bordereau.xlsx">
+              </label>
+              <div class="form-grid">
+                <label>Échéance<input id="assistant-due-date" name="dueDate" type="date"></label>
+                <label class="check-row">
+                  <input id="assistant-validated-data" name="validatedCommercialData" type="checkbox">
+                  Données commerciales et financières validées
+                </label>
+              </div>
+              <label class="consent-row" id="assistant-consent-row">
+                <input id="assistant-content-authorized" type="checkbox">
+                Je confirme que ce contenu a été explicitement autorisé pour analyse.
+              </label>
+              <div class="assistant-actions">
+                <button class="button button-primary" id="assistant-submit" type="submit">Analyser avec l'IA</button>
+                <button class="button button-secondary" type="button" disabled title="L'envoi automatique est désactivé">Envoi désactivé</button>
+              </div>
+            </form>
+          </section>
+
+          <aside class="workspace-panel assistant-result" aria-labelledby="assistant-result-title">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Résultat contrôlé</p><h2 id="assistant-result-title">Brouillon à valider</h2></div>
+              <span class="validation-chip" id="assistant-validation-status">En attente</span>
+            </div>
+            <div class="analysis-empty" id="assistant-result-empty">
+              <strong>Aucun brouillon sélectionné</strong>
+              <p>Chaque analyse est enregistrée et exige une validation humaine.</p>
+            </div>
+            <div id="assistant-result-content" hidden>
+              <dl class="result-meta">
+                <div><dt>Classification</dt><dd id="assistant-classification"></dd></div>
+                <div><dt>Urgence</dt><dd id="assistant-urgency"></dd></div>
+              </dl>
+              <section><h3>Résumé</h3><p id="assistant-summary"></p></section>
+              <section><h3>Objet proposé</h3><p id="assistant-subject"></p></section>
+              <section><h3>Brouillon</h3><pre id="assistant-draft"></pre></section>
+              <section><h3>Actions demandées</h3><ul id="assistant-requested-actions"></ul></section>
+              <section><h3>Exigences et checklist</h3><ul id="assistant-checklist"></ul></section>
+              <section><h3>Éléments manquants</h3><ul id="assistant-missing-items"></ul></section>
+              <section><h3>Conditions commerciales</h3><ul id="assistant-commercial-conditions"></ul></section>
+              <section><h3>Actions recommandées</h3><ul id="assistant-recommended-actions"></ul></section>
+              <p class="financial-status" id="assistant-financial-status"></p>
+              <div class="assistant-actions">
+                <button class="button button-secondary" id="download-assistant-draft" type="button">Télécharger le brouillon</button>
+                <button class="button button-primary" id="approve-assistant-draft" type="button">Approuver</button>
+                <button class="button button-danger" id="reject-assistant-draft" type="button">Rejeter</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <section class="workspace-panel assistant-list-panel" id="assistant-work-list-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Suivi</p><h2 id="assistant-list-title">Éléments récents</h2></div>
+            <button class="button button-secondary" id="refresh-assistant-list" type="button">Actualiser</button>
+          </div>
+          <div class="assistant-work-list" id="assistant-work-list"></div>
+        </section>
+
+        <section class="workspace-panel task-panel" id="assistant-task-panel" hidden>
+          <div class="panel-heading"><div><p class="eyebrow">Organisation</p><h2>Tâches commerciales</h2></div></div>
+          <form class="task-form" id="assistant-task-form">
+            <input name="title" placeholder="Titre de la tâche" maxlength="300" required>
+            <input name="dueAt" type="datetime-local">
+            <textarea name="description" rows="3" placeholder="Description"></textarea>
+            <button class="button button-primary" type="submit">Créer la tâche</button>
+          </form>
+          <div class="assistant-work-list" id="assistant-task-list"></div>
+        </section>
+
+        <section class="workspace-panel activity-panel" id="assistant-activity-panel" hidden>
+          <div class="panel-heading"><div><p class="eyebrow">Traçabilité</p><h2>Journal d'activité</h2></div></div>
+          <div class="assistant-work-list" id="assistant-activity-list"></div>
+        </section>
+
+        <section class="workspace-panel gmail-panel">
+          <div>
+            <p class="eyebrow">Google Workspace</p>
+            <h2>Gmail OAuth préparé</h2>
+            <p>Lecture après consentement et création de brouillons uniquement. Aucun mot de passe Gmail n'est stocké.</p>
+          </div>
+          <div>
+            <span class="gmail-status" id="gmail-oauth-status">Vérification…</span>
+            <strong>Envoi automatique désactivé</strong>
+          </div>
+        </section>
+      </section>
     </main>
   </div>
 
   <script src="/admin/commercial-ai.js" defer></script>
+  <script src="/admin/commercial-assistant.js" defer></script>
 </body>
 </html>
