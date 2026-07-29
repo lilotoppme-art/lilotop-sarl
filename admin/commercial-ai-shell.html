@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/commercial-ai.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#commercial-main">Aller au contenu</a>
+
+  <section class="login-screen" id="commercial-login" aria-labelledby="commercial-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">NEXUS AI · Accès sécurisé</p>
+      <h1 id="commercial-login-title">Commercial AI</h1>
+      <p>Utilisez votre accès administrateur NEXUS AI.</p>
+      <form id="commercial-login-form">
+        <label for="commercial-email">Adresse administrateur</label>
+        <input id="commercial-email" name="email" type="email" autocomplete="username" required>
+        <label for="commercial-password">Mot de passe</label>
+        <input id="commercial-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="commercial-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div class="commercial-shell" id="commercial-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Commercial AI</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="commercial-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="commercial-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Agent IA Commercial</p>
+          <h1>Qualification intelligente des opportunités</h1>
+          <p>Analyse commerciale assistée par OpenAI à partir des opportunités détectées par Business Radar.</p>
+        </div>
+        <div class="heading-actions">
+          <span class="agent-status">Agent actif</span>
+          <button class="button button-primary" id="search-opportunities" type="button">
+            Rechercher les opportunités
+          </button>
+        </div>
+      </section>
+
+      <p class="global-status" id="commercial-status" role="status" aria-live="polite"></p>
+
+      <section class="summary-strip" aria-label="Résumé Commercial AI">
+        <article><span>Opportunités disponibles</span><strong id="candidate-count">—</strong></article>
+        <article><span>Analysées</span><strong id="analyzed-count">—</strong></article>
+        <article><span>Très prioritaires</span><strong id="urgent-count">—</strong></article>
+        <article><span>Dernière analyse</span><strong id="last-analysis-date">—</strong></article>
+      </section>
+
+      <div class="workspace-grid">
+        <section class="workspace-panel candidates-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Pipeline</p>
+              <h2>Opportunités commerciales</h2>
+            </div>
+            <button class="button button-secondary" id="refresh-candidates" type="button">Actualiser</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Opportunité</th>
+                  <th>Organisation</th>
+                  <th>Échéance</th>
+                  <th>Score IA</th>
+                  <th>Classement</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="candidate-rows">
+                <tr><td colspan="6" class="empty-cell">Chargement des opportunités…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <aside class="workspace-panel result-panel" aria-labelledby="analysis-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Résultat</p>
+              <h2 id="analysis-title">Analyse commerciale</h2>
+            </div>
+            <span class="classification classification-neutral" id="analysis-classification">En attente</span>
+          </div>
+          <div class="analysis-empty" id="analysis-empty">
+            <strong>Sélectionnez une opportunité</strong>
+            <p>L'analyse affichera le score, le résumé exécutif, les points forts, les risques et les actions recommandées.</p>
+          </div>
+          <div id="analysis-result" hidden>
+            <div class="score-block">
+              <span>Score d'intérêt</span>
+              <strong id="analysis-score">—</strong>
+            </div>
+            <section>
+              <h3>Résumé exécutif</h3>
+              <p id="analysis-summary"></p>
+            </section>
+            <section>
+              <h3>Points forts</h3>
+              <ul id="analysis-strengths"></ul>
+            </section>
+            <section>
+              <h3>Risques</h3>
+              <ul id="analysis-risks"></ul>
+            </section>
+            <section>
+              <h3>Actions recommandées</h3>
+              <ol id="analysis-actions"></ol>
+            </section>
+            <div class="result-actions">
+              <button class="button button-primary" id="rerun-analysis" type="button" disabled>Relancer l'analyse</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="workspace-panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Traçabilité</p>
+            <h2>Historique des analyses</h2>
+          </div>
+          <span class="history-context" id="history-context">Aucune opportunité sélectionnée</span>
+        </div>
+        <div class="history-list" id="analysis-history">
+          <p class="empty-message">Sélectionnez « Historique » sur une opportunité pour consulter ses analyses.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/commercial-ai.js" defer></script>
+</body>
+</html>

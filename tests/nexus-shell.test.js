@@ -12,7 +12,7 @@ assert.deepStrictEqual(
   nexusCatalog.modules.map(({ name, statusLabel }) => [name, statusLabel]),
   [
     ["Business Radar", "Actif"],
-    ["Commercial AI", "À venir"],
+    ["Commercial AI", "Actif"],
     ["Achats AI", "À venir"],
     ["Appels d'offres AI", "À venir"],
     ["CRM", "À venir"],
@@ -22,8 +22,9 @@ assert.deepStrictEqual(
   "Le catalogue des modules NEXUS doit rester strictement statique."
 );
 
-assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 1);
+assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 2);
 assert.strictEqual(nexusCatalog.modules[0].route, "/admin/business-radar");
+assert.strictEqual(nexusCatalog.modules[1].route, "/admin/nexus/commercial-ai");
 
 assert.deepStrictEqual(
   nexusCatalog.roles.map((role) => role.name),
@@ -85,6 +86,7 @@ assert.ok(
 
 const shell = read("admin/nexus-shell.html");
 assert.ok(shell.includes('href="/admin/business-radar"'));
+assert.ok(shell.includes('href="/admin/nexus/commercial-ai"'));
 assert.ok(shell.includes('id="activity-journal"'));
 assert.ok(shell.includes('id="panel-ai-actions"'));
 assert.ok(shell.includes('id="panel-daily-summary"'));
@@ -99,4 +101,4 @@ const pageRoute = read("api/nexus-page.js");
 assert.ok(pageRoute.includes('require("../lib/business-radar/auth")'));
 assert.ok(pageRoute.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
 
-console.log("NEXUS AI Phase 2 dashboard tests passed.");
+console.log("NEXUS AI Phase 3 shell tests passed.");

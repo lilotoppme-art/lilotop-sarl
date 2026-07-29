@@ -29,12 +29,63 @@ function setAuthenticated(authenticated) {
 function renderDashboard() {
   const target = document.getElementById("dashboard-metrics");
   target.innerHTML = bootstrap.dashboard.map((metric) => `
-    <article class="metric-card">
+    <article class="metric-card" data-metric-key="${escapeHtml(metric.key)}">
       <span>${escapeHtml(metric.label)}</span>
       <strong>${escapeHtml(metric.value)}</strong>
       <p>${escapeHtml(metric.note)}</p>
     </article>
   `).join("");
+}
+
+async function loadCommercialDashboard() {
+  try {
+    const response = await fetch("/api/commercial-ai?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const alertCard = document.querySelector('[data-metric-key="ai-alerts"]');
+    if (alertCard) {
+      alertCard.querySelector("strong").textContent = summary.priorityToday;
+      alertCard.querySelector("p").textContent = `${summary.analyzedToday} analyse(s) commerciale(s) aujourd'hui`;
+    }
+    if (!summary.latest) return;
+
+    const actionsPanel = document.getElementById("panel-ai-actions");
+    actionsPanel.innerHTML = `
+      <div class="surface-header">
+        <div>
+          <p class="eyebrow">Commercial AI</p>
+          <h2>Actions recommandées par l'IA</h2>
+        </div>
+        <span class="status status-active">${escapeHtml(summary.latest.classification)}</span>
+      </div>
+      <div class="commercial-dashboard-result">
+        <strong>${escapeHtml(summary.latest.opportunityTitle)}</strong>
+        <ol>
+          ${summary.latest.recommendedActions.map((action) => `<li>${escapeHtml(action)}</li>`).join("")}
+        </ol>
+        <a class="button button-primary button-inline" href="/admin/nexus/commercial-ai">Ouvrir Commercial AI</a>
+      </div>
+    `;
+
+    const dailyPanel = document.getElementById("panel-daily-summary");
+    dailyPanel.innerHTML = `
+      <div class="surface-header">
+        <div>
+          <p class="eyebrow">Dernière analyse</p>
+          <h2>Résumé du jour</h2>
+        </div>
+        <span class="status status-neutral">${escapeHtml(summary.latest.score)}/100</span>
+      </div>
+      <div class="commercial-dashboard-result">
+        <strong>${escapeHtml(summary.latest.opportunityTitle)}</strong>
+        <p>${escapeHtml(summary.latest.executiveSummary)}</p>
+      </div>
+    `;
+  } catch {
+    // Les placeholders restent visibles si Commercial AI n'est pas disponible.
+  }
 }
 
 function renderExecutivePanels() {
@@ -147,6 +198,7 @@ async function authenticate(event) {
     loginStatus.textContent = "";
     setAuthenticated(true);
     showView("dashboard");
+    loadCommercialDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -164,6 +216,7 @@ renderModules();
 renderRoles();
 renderSettings();
 setAuthenticated(body.dataset.authenticated === "true");
+if (body.dataset.authenticated === "true") loadCommercialDashboard();
 
 loginForm.addEventListener("submit", authenticate);
 logoutButton.addEventListener("click", logout);

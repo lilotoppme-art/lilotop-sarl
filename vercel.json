@@ -3,6 +3,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/commercial-ai",
+      "destination": "/api/commercial-ai-page"
+    },
+    {
       "source": "/admin/nexus",
       "destination": "/api/nexus-page"
     },
