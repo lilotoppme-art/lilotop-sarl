@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/commercial-ai.css">
+  <link rel="stylesheet" href="/admin/tender-response.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#tender-response-main">Aller au contenu</a>
+
+  <section class="login-screen" id="tender-response-login" aria-labelledby="tender-response-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">NEXUS AI · Accès sécurisé</p>
+      <h1 id="tender-response-login-title">Réponse Appels d'Offres AI</h1>
+      <p>Utilisez votre accès administrateur NEXUS AI.</p>
+      <form id="tender-response-login-form">
+        <label for="tender-response-email">Adresse administrateur</label>
+        <input id="tender-response-email" name="email" type="email" autocomplete="username" required>
+        <label for="tender-response-password">Mot de passe</label>
+        <input id="tender-response-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="tender-response-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="tender-response-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Réponse Appels d'Offres AI</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/nexus/tender-ai">Veille AO</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="tender-response-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="tender-response-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Phase 3.1 · Agent IA spécialisé</p>
+          <h1>Préparation contrôlée des dossiers d'appel d'offres</h1>
+          <p>Importez le dossier source, mesurez la conformité et générez un ensemble de brouillons soumis à validation humaine.</p>
+        </div>
+        <span class="agent-status">Agent actif</span>
+      </section>
+
+      <p class="global-status" id="tender-response-status" role="status" aria-live="polite"></p>
+
+      <section class="workspace-panel upload-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Nouveau dossier</p>
+            <h2>Importer l'appel d'offres</h2>
+          </div>
+          <span class="draft-badge">Brouillons · Validation obligatoire</span>
+        </div>
+        <form id="tender-response-form">
+          <label class="file-drop" for="tender-response-file">
+            <strong>PDF, DOCX ou ZIP</strong>
+            <span>Un fichier, 3 Mo maximum. Les fichiers ne sont pas conservés.</span>
+            <input id="tender-response-file" name="tenderFile" type="file" accept=".pdf,.docx,.zip" required>
+            <span class="selected-file" id="selected-tender-file">Aucun fichier sélectionné</span>
+          </label>
+          <label class="available-documents" for="available-documents">
+            <span>Documents LILOTOP disponibles et validés</span>
+            <textarea id="available-documents" name="availableDocuments" rows="5" placeholder="Ex. RCCM, attestation fiscale, politique HSE, références similaires"></textarea>
+            <small>Un document par ligne. L'IA ne considérera disponible que ce qui est déclaré ici.</small>
+          </label>
+          <div class="prepare-row">
+            <p>Aucune soumission, aucun e-mail et aucun engagement ne sera envoyé automatiquement.</p>
+            <button class="button button-primary" type="submit">Préparer le dossier</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="response-summary" id="tender-response-summary" hidden>
+        <article><span>Conformité</span><strong id="compliance-score">0%</strong></article>
+        <article><span>Client</span><strong id="summary-client">—</strong></article>
+        <article><span>Date limite</span><strong id="summary-deadline">—</strong></article>
+        <article><span>Statut</span><strong>Brouillon</strong></article>
+      </section>
+
+      <section class="workspace-panel result-panel-full" id="tender-response-result-panel" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Dossier préparé</p>
+            <h2 id="response-subject">Résultat de l'analyse</h2>
+          </div>
+          <a class="button button-primary" id="export-tender-response" href="#" download>Exporter le dossier</a>
+        </div>
+
+        <p class="executive-summary" id="response-executive-summary"></p>
+        <div class="information-grid">
+          <dl id="key-information"></dl>
+          <section>
+            <h3>Critères de qualification</h3>
+            <ul id="qualification-criteria"></ul>
+          </section>
+          <section>
+            <h3>Produits demandés</h3>
+            <ul id="requested-products"></ul>
+          </section>
+          <section>
+            <h3>Conditions de livraison</h3>
+            <ul id="delivery-conditions"></ul>
+          </section>
+          <section>
+            <h3>Critères d'évaluation</h3>
+            <ul id="evaluation-criteria"></ul>
+          </section>
+        </div>
+
+        <div class="compliance-grid">
+          <section class="compliance-available">
+            <h3>Documents disponibles</h3>
+            <ul id="available-documents-result"></ul>
+          </section>
+          <section class="compliance-missing">
+            <h3>Documents manquants</h3>
+            <ul id="missing-documents-result"></ul>
+          </section>
+          <section>
+            <h3>Risques</h3>
+            <ul id="response-risks"></ul>
+          </section>
+          <section>
+            <h3>Actions recommandées</h3>
+            <ol id="response-actions"></ol>
+          </section>
+        </div>
+
+        <nav class="document-tabs" aria-label="Documents générés">
+          <button class="is-active" type="button" data-document="submission">Lettre de soumission</button>
+          <button type="button" data-document="technical">Offre technique</button>
+          <button type="button" data-document="financial">Offre financière</button>
+          <button type="button" data-document="checklist">Check-list</button>
+          <button type="button" data-document="planning">Planning</button>
+          <button type="button" data-document="attachments">Pièces jointes</button>
+        </nav>
+        <div class="generated-document">
+          <div class="generated-document-header">
+            <h3 id="generated-document-title">Lettre de soumission</h3>
+            <span>Validation humaine obligatoire</span>
+          </div>
+          <pre id="generated-document-content"></pre>
+        </div>
+      </section>
+
+      <section class="workspace-panel history-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Traçabilité</p>
+            <h2>Historique des dossiers préparés</h2>
+          </div>
+          <button class="button button-secondary" id="refresh-tender-response-history" type="button">Actualiser</button>
+        </div>
+        <div class="response-history" id="tender-response-history">
+          <p class="empty-message">Aucun dossier préparé.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/tender-response.js" defer></script>
+</body>
+</html>

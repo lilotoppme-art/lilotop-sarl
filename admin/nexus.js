@@ -124,6 +124,24 @@ async function loadTenderDashboard() {
   }
 }
 
+async function loadTenderResponseDashboard() {
+  try {
+    const response = await fetch("/api/tender-response-ai?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const responseCard = document.querySelector('[data-metric-key="tender-responses"]');
+    if (!responseCard) return;
+    responseCard.querySelector("strong").textContent = summary.preparedToday;
+    responseCard.querySelector("p").textContent = summary.latest
+      ? `${summary.latest.compliance.compliancePercent}% de conformité · ${summary.latest.keyInformation.client}`
+      : `${summary.total} dossier(s) préparé(s)`;
+  } catch {
+    // Le placeholder reste visible si Réponse Appels d'Offres AI n'est pas disponible.
+  }
+}
+
 async function loadMiningDashboard() {
   try {
     const response = await fetch("/api/mining-watch?action=dashboard");
@@ -255,6 +273,7 @@ async function authenticate(event) {
     loadCommercialDashboard();
     loadProcurementDashboard();
     loadTenderDashboard();
+    loadTenderResponseDashboard();
     loadMiningDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
@@ -277,6 +296,7 @@ if (body.dataset.authenticated === "true") {
   loadCommercialDashboard();
   loadProcurementDashboard();
   loadTenderDashboard();
+  loadTenderResponseDashboard();
   loadMiningDashboard();
 }
 

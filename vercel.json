@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/tender-response-ai",
+      "destination": "/api/nexus-page?handler=tender-response-page"
+    },
+    {
+      "source": "/api/tender-response-ai",
+      "destination": "/api/nexus-page?handler=tender-response-api"
+    },
+    {
       "source": "/admin/nexus/mining-watch",
       "destination": "/api/nexus-page?handler=mining-page"
     },
