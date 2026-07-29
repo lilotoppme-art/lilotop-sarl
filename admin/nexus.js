@@ -142,6 +142,31 @@ async function loadTenderResponseDashboard() {
   }
 }
 
+async function loadSupplierAiDashboard() {
+  try {
+    const response = await fetch("/api/supplier-ai?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const values = {
+      "supplier-ai-found": [summary.suppliersFound, "Fournisseurs documentés par Supplier AI"],
+      "supplier-ai-rfq-prepared": [summary.rfqsPrepared, "Brouillons RFQ enregistrés"],
+      "supplier-ai-rfq-sent": [summary.rfqsSent, "Envois confirmés par un utilisateur"],
+      "supplier-ai-responses": [summary.responsesReceived, "Réponses fournisseurs enregistrées"],
+      "supplier-ai-favorites": [summary.favorites, "Fournisseurs suivis"]
+    };
+    Object.entries(values).forEach(([key, value]) => {
+      const card = document.querySelector(`[data-metric-key="${key}"]`);
+      if (!card) return;
+      card.querySelector("strong").textContent = value[0];
+      card.querySelector("p").textContent = value[1];
+    });
+  } catch {
+    // Les placeholders restent visibles si Fournisseurs AI n'est pas disponible.
+  }
+}
+
 async function loadMiningDashboard() {
   try {
     const response = await fetch("/api/mining-watch?action=dashboard");
@@ -274,6 +299,7 @@ async function authenticate(event) {
     loadProcurementDashboard();
     loadTenderDashboard();
     loadTenderResponseDashboard();
+    loadSupplierAiDashboard();
     loadMiningDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
@@ -297,6 +323,7 @@ if (body.dataset.authenticated === "true") {
   loadProcurementDashboard();
   loadTenderDashboard();
   loadTenderResponseDashboard();
+  loadSupplierAiDashboard();
   loadMiningDashboard();
 }
 

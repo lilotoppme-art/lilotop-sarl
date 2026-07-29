@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/supplier-ai.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#supplier-ai-main">Aller au contenu</a>
+
+  <section class="login-screen" id="supplier-ai-login" aria-labelledby="supplier-ai-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">NEXUS AI · Accès sécurisé</p>
+      <h1 id="supplier-ai-login-title">Fournisseurs AI</h1>
+      <p>Utilisez votre accès administrateur NEXUS AI.</p>
+      <form id="supplier-ai-login-form">
+        <label for="supplier-ai-email">Adresse administrateur</label>
+        <input id="supplier-ai-email" name="email" type="email" autocomplete="username" required>
+        <label for="supplier-ai-password">Mot de passe</label>
+        <input id="supplier-ai-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="supplier-ai-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="supplier-ai-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Fournisseurs AI · RFQ</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/nexus/procurement-ai">Achats AI</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="supplier-ai-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="supplier-ai-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Phase 3.2 · Sourcing international</p>
+          <h1>Agent IA Fournisseurs & RFQ</h1>
+          <p>Identifiez des fournisseurs documentés, préparez vos cotations et conservez une trace vérifiable de chaque validation.</p>
+        </div>
+        <span class="agent-status">Agent actif</span>
+      </section>
+
+      <p class="global-status" id="supplier-ai-status" role="status" aria-live="polite"></p>
+
+      <section class="workspace-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Nouveau sourcing</p><h2>Rechercher des fournisseurs</h2></div>
+          <span class="control-badge">Sources web vérifiables</span>
+        </div>
+        <form class="search-form" id="supplier-search-form">
+          <label>
+            <span>Catégorie prioritaire</span>
+            <select name="category" required>
+              <option value="">Sélectionner</option>
+              <option value="chemical-reagents">Réactifs chimiques</option>
+              <option value="quicklime">Chaux vive</option>
+              <option value="sulfuric-acid">Acide sulfurique</option>
+              <option value="flocculants">Floculants</option>
+              <option value="activated-carbon">Charbon actif</option>
+              <option value="grinding-media">Billes de broyage</option>
+              <option value="industrial-lubricants">Lubrifiants industriels</option>
+              <option value="fuels">Carburants</option>
+              <option value="mining-equipment">Équipements miniers</option>
+              <option value="electrical-equipment">Matériel électrique</option>
+              <option value="cement">Ciment</option>
+              <option value="steel">Acier</option>
+              <option value="generators">Générateurs</option>
+              <option value="spare-parts">Pièces de rechange</option>
+              <option value="other">Autre</option>
+            </select>
+          </label>
+          <label class="field-wide">
+            <span>Produit recherché</span>
+            <input name="product" maxlength="500" placeholder="Ex. billes de broyage forgées 90 mm" required>
+          </label>
+          <label>
+            <span>Pays ciblés</span>
+            <input name="countries" maxlength="500" placeholder="Afrique du Sud, Chine, Allemagne">
+          </label>
+          <label class="field-wide">
+            <span>Exigences techniques</span>
+            <textarea name="requirements" rows="3" maxlength="3000" placeholder="Normes, destination, contraintes qualité et livraison"></textarea>
+          </label>
+          <div class="form-actions field-wide">
+            <button class="button button-primary" type="submit">Rechercher des fournisseurs</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="stats-strip" aria-label="Statistiques fournisseurs">
+        <article><span>Fournisseurs trouvés</span><strong id="stat-suppliers">0</strong></article>
+        <article><span>RFQ préparées</span><strong id="stat-prepared">0</strong></article>
+        <article><span>RFQ envoyées</span><strong id="stat-sent">0</strong></article>
+        <article><span>Réponses reçues</span><strong id="stat-responses">0</strong></article>
+        <article><span>Favoris</span><strong id="stat-favorites">0</strong></article>
+      </section>
+
+      <section class="workspace-panel" id="supplier-results-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Résultats documentés</p><h2 id="supplier-results-title">Fournisseurs identifiés</h2></div>
+          <button class="button button-secondary" id="rerun-supplier-search" type="button" disabled>Relancer</button>
+        </div>
+        <p class="result-summary" id="supplier-result-summary">Lancez une recherche pour afficher les fournisseurs.</p>
+        <div class="supplier-grid" id="supplier-results"></div>
+      </section>
+
+      <section class="workspace-panel rfq-panel" id="rfq-panel" hidden>
+        <div class="panel-heading">
+          <div><p class="eyebrow">Demande de cotation</p><h2 id="rfq-supplier-name">Préparer RFQ</h2></div>
+          <span class="control-badge">Validation humaine obligatoire</span>
+        </div>
+        <form class="rfq-form" id="rfq-form">
+          <input name="searchId" type="hidden">
+          <input name="supplierKey" type="hidden">
+          <label class="field-wide"><span>Description</span><textarea name="description" rows="4" maxlength="4000" required></textarea></label>
+          <label><span>Quantité</span><input name="quantity" maxlength="300" required></label>
+          <label><span>Incoterm</span>
+            <select name="incoterm" required>
+              <option value="EXW">EXW</option><option value="FCA">FCA</option><option value="FOB">FOB</option>
+              <option value="CFR">CFR</option><option value="CIF">CIF</option><option value="CPT">CPT</option>
+              <option value="CIP">CIP</option><option value="DAP" selected>DAP</option><option value="DPU">DPU</option><option value="DDP">DDP</option>
+            </select>
+          </label>
+          <label><span>Délai souhaité</span><input name="desiredDelivery" maxlength="300" placeholder="Ex. livraison sous 45 jours" required></label>
+          <label><span>Conditions de paiement</span><input name="paymentTerms" maxlength="500" placeholder="Ex. à convenir après validation" required></label>
+          <div class="form-actions field-wide">
+            <button class="button button-primary" type="submit">Préparer RFQ</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="workspace-panel rfq-preview" id="rfq-preview" hidden>
+        <div class="panel-heading">
+          <div><p class="eyebrow">Brouillon prêt à valider</p><h2 id="rfq-preview-subject">RFQ</h2></div>
+          <span class="control-badge" id="rfq-status-badge">Brouillon</span>
+        </div>
+        <pre id="rfq-preview-body"></pre>
+        <div class="send-actions">
+          <button class="button button-primary" id="open-rfq-email" type="button">Envoyer le RFQ</button>
+          <button class="button button-secondary" id="confirm-rfq-sent" type="button" hidden>Confirmer l'envoi</button>
+          <button class="button button-secondary" id="mark-rfq-responded" type="button" hidden>Marquer réponse reçue</button>
+        </div>
+        <p class="validation-note">Le bouton ouvre un e-mail prérempli. La RFQ n'est comptée comme envoyée qu'après votre confirmation explicite.</p>
+      </section>
+
+      <section class="workspace-panel history-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Traçabilité</p><h2>Historique des RFQ</h2></div>
+          <button class="button button-secondary" id="refresh-supplier-history" type="button">Actualiser</button>
+        </div>
+        <div class="rfq-history" id="rfq-history"><p class="empty-message">Aucune RFQ préparée.</p></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/supplier-ai.js" defer></script>
+</body>
+</html>

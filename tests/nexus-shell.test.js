@@ -14,6 +14,7 @@ assert.deepStrictEqual(
     ["Business Radar", "Actif"],
     ["Commercial AI", "Actif"],
     ["Réponse Appels d'Offres AI", "Actif"],
+    ["Fournisseurs AI", "Actif"],
     ["Achats AI", "À venir"],
     ["Appels d'offres AI", "À venir"],
     ["CRM", "À venir"],
@@ -23,10 +24,11 @@ assert.deepStrictEqual(
   "Le catalogue des modules NEXUS doit rester strictement statique."
 );
 
-assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 3);
+assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 4);
 assert.strictEqual(nexusCatalog.modules[0].route, "/admin/business-radar");
 assert.strictEqual(nexusCatalog.modules[1].route, "/admin/nexus/commercial-ai");
 assert.strictEqual(nexusCatalog.modules[2].route, "/admin/nexus/tender-response-ai");
+assert.strictEqual(nexusCatalog.modules[3].route, "/admin/nexus/supplier-ai");
 
 assert.deepStrictEqual(
   nexusCatalog.roles.map((role) => role.name),
@@ -55,6 +57,11 @@ assert.deepStrictEqual(
     "Dossiers AO",
     "Clients",
     "Fournisseurs",
+    "Fournisseurs trouvés",
+    "RFQ préparées",
+    "RFQ envoyées",
+    "Réponses reçues",
+    "Fournisseurs favoris",
     "Commandes",
     "Devis",
     "Valeur potentielle",
@@ -91,6 +98,7 @@ const shell = read("admin/nexus-shell.html");
 assert.ok(shell.includes('href="/admin/business-radar"'));
 assert.ok(shell.includes('href="/admin/nexus/commercial-ai"'));
 assert.ok(shell.includes('href="/admin/nexus/tender-response-ai"'));
+assert.ok(shell.includes('href="/admin/nexus/supplier-ai"'));
 assert.ok(shell.includes('id="activity-journal"'));
 assert.ok(shell.includes('id="panel-ai-actions"'));
 assert.ok(shell.includes('id="panel-daily-summary"'));

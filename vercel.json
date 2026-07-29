@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/supplier-ai",
+      "destination": "/api/nexus-page?handler=supplier-page"
+    },
+    {
+      "source": "/api/supplier-ai",
+      "destination": "/api/nexus-page?handler=supplier-api"
+    },
+    {
       "source": "/admin/nexus/tender-response-ai",
       "destination": "/api/nexus-page?handler=tender-response-page"
     },
