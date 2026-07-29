@@ -15,9 +15,9 @@
     "db:migrate:radar": "node scripts/migrate-business-radar.js"
   },
   "dependencies": {
-    "adm-zip": "0.5.16",
+    "adm-zip": "0.6.0",
     "exceljs": "4.4.0",
-    "mammoth": "1.9.1",
+    "mammoth": "1.11.0",
     "pdf-parse": "1.1.1",
     "pg": "8.22.0",
     "resend": "6.18.0"
