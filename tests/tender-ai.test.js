@@ -108,7 +108,7 @@ assert.strictEqual(request.text.format.type, "json_schema");
   assert.ok(client.includes("rerun-tender-search"));
   assert.ok(client.includes("winChanceScore"));
 
-  const api = read("api/tender-ai.js");
+  const api = read("lib/nexus/tender-handler.js");
   assert.ok(api.includes("requireAdmin(req, res)"));
   assert.ok(api.includes('action === "sources"'));
   assert.ok(api.includes('action === "dashboard"'));
@@ -119,7 +119,10 @@ assert.strictEqual(request.text.format.type, "json_schema");
 
   const vercelConfig = JSON.parse(read("vercel.json"));
   assert.ok(vercelConfig.rewrites.some(({ source, destination }) =>
-    source === "/admin/nexus/tender-ai" && destination === "/api/tender-ai-page"
+    source === "/admin/nexus/tender-ai" && destination === "/api/nexus-page?handler=tender-page"
+  ));
+  assert.ok(vercelConfig.rewrites.some(({ source, destination }) =>
+    source === "/api/tender-ai" && destination === "/api/nexus-page?handler=tender-api"
   ));
 
   console.log("Tender AI agent tests passed.");

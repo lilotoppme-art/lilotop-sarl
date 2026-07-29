@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { verifySession } = require("../lib/business-radar/auth");
 const { nexusCatalog } = require("../lib/nexus/catalog");
+const tenderHandler = require("../lib/nexus/tender-handler");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -22,19 +23,14 @@ function serializeForHtml(value) {
     .replace(/&/g, "\\u0026");
 }
 
-module.exports = function handler(req, res) {
-  if (req.method !== "GET") {
-    res.statusCode = 405;
-    return res.end("Method not allowed");
-  }
-
-  const authenticated = Boolean(verifySession(req));
-  const template = fs.readFileSync(path.join(process.cwd(), "admin", "nexus-shell.html"), "utf8");
-  const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
-  const html = template
+function sendPrivateHtml(res, templateName, authenticated, title, bootstrap = null) {
+  const template = fs.readFileSync(path.join(process.cwd(), "admin", templateName), "utf8");
+  let html = template
     .replaceAll("{{AUTHENTICATED}}", authenticated ? "true" : "false")
-    .replace("{{PAGE_TITLE}}", escapeHtml(pageTitle))
-    .replace("{{NEXUS_BOOTSTRAP}}", serializeForHtml(nexusCatalog));
+    .replace("{{PAGE_TITLE}}", escapeHtml(title));
+  if (bootstrap) {
+    html = html.replace("{{NEXUS_BOOTSTRAP}}", serializeForHtml(bootstrap));
+  }
 
   res.statusCode = 200;
   res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -45,4 +41,24 @@ module.exports = function handler(req, res) {
     "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
   );
   res.end(html);
+}
+
+module.exports = async function handler(req, res) {
+  const url = new URL(req.url || "/api/nexus-page", "http://localhost");
+  const delegatedHandler = url.searchParams.get("handler");
+  if (delegatedHandler === "tender-api") {
+    return tenderHandler(req, res);
+  }
+  if (req.method !== "GET") {
+    res.statusCode = 405;
+    return res.end("Method not allowed");
+  }
+
+  const authenticated = Boolean(verifySession(req));
+  if (delegatedHandler === "tender-page") {
+    const title = authenticated ? "Appels d'Offres AI" : "Connexion Appels d'Offres AI";
+    return sendPrivateHtml(res, "tender-ai-shell.html", authenticated, title);
+  }
+  const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
+  return sendPrivateHtml(res, "nexus-shell.html", authenticated, pageTitle, nexusCatalog);
 };

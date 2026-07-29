@@ -4,7 +4,11 @@
   "rewrites": [
     {
       "source": "/admin/nexus/tender-ai",
-      "destination": "/api/tender-ai-page"
+      "destination": "/api/nexus-page?handler=tender-page"
+    },
+    {
+      "source": "/api/tender-ai",
+      "destination": "/api/nexus-page?handler=tender-api"
     },
     {
       "source": "/admin/nexus/procurement-ai",
