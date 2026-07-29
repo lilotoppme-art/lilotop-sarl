@@ -7,6 +7,7 @@ const {
   TENDER_SOURCES,
   buildRequest,
   classifyScore,
+  isExpiredTender,
   normalizeCriteria,
   searchTenders
 } = require("../lib/nexus/tender-ai");
@@ -23,6 +24,9 @@ assert.strictEqual(classifyScore(90), "Très prioritaire");
 assert.strictEqual(classifyScore(75), "Prioritaire");
 assert.strictEqual(classifyScore(60), "Moyen");
 assert.strictEqual(classifyScore(20), "Faible");
+assert.strictEqual(isExpiredTender({ deadline: "2026-07-27 16:00" }, new Date("2026-07-29T12:00:00Z")), true);
+assert.strictEqual(isExpiredTender({ deadline: "2026-08-10" }, new Date("2026-07-29T12:00:00Z")), false);
+assert.strictEqual(isExpiredTender({ deadline: "À confirmer" }, new Date("2026-07-29T12:00:00Z")), false);
 
 const criteria = normalizeCriteria({
   countries: ["RDC"],
