@@ -3,6 +3,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus",
+      "destination": "/api/nexus-page"
+    },
+    {
       "source": "/admin/business-radar",
       "destination": "/api/business-radar-page"
     }

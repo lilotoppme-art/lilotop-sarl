@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/nexus.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#nexus-main">Aller au contenu</a>
+
+  <section class="login-screen" id="login-screen" aria-labelledby="login-title">
+    <div class="login-panel">
+      <img class="login-logo" src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">Accès sécurisé</p>
+      <h1 id="login-title">LILOTOP NEXUS AI</h1>
+      <p class="login-copy">Connectez-vous avec votre compte administrateur Business Radar.</p>
+      <form id="login-form">
+        <label for="email">Adresse administrateur</label>
+        <input id="email" name="email" type="email" autocomplete="username" required>
+        <label for="password">Mot de passe</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div class="nexus-shell" id="nexus-shell" hidden>
+    <aside class="sidebar" aria-label="Navigation NEXUS AI">
+      <div class="brand">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <div>
+          <strong>NEXUS AI</strong>
+          <span>Phase 1</span>
+        </div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-item is-active" type="button" data-view="dashboard" aria-current="page">
+          Tableau de bord
+        </button>
+        <a class="nav-item nav-item-module" href="/admin/business-radar">
+          Business Radar
+          <span>Actif</span>
+        </a>
+        <button class="nav-item" type="button" data-view="modules">Modules</button>
+        <button class="nav-item" type="button" data-view="administration">Administration</button>
+        <button class="nav-item" type="button" data-view="settings">Paramètres</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <p>Environnement privé</p>
+        <button class="button button-secondary" id="logout-button" type="button">Se déconnecter</button>
+      </div>
+    </aside>
+
+    <main class="main-content" id="nexus-main" tabindex="-1">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">LILOTOP SARL</p>
+          <h1 id="view-title">Tableau de bord</h1>
+        </div>
+        <span class="phase-badge">Fondation NEXUS AI</span>
+      </header>
+
+      <section class="view is-visible" id="view-dashboard" data-view-panel="dashboard">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Vue générale</p>
+            <h2>Centre de pilotage</h2>
+          </div>
+          <p>Données de démonstration, sans connexion aux systèmes opérationnels.</p>
+        </div>
+        <div class="metrics-grid" id="dashboard-metrics"></div>
+
+        <div class="content-grid">
+          <section class="surface">
+            <div class="surface-header">
+              <div>
+                <p class="eyebrow">Premier module</p>
+                <h2>Business Radar</h2>
+              </div>
+              <span class="status status-active">Actif</span>
+            </div>
+            <p>Accédez au module existant sans modifier son fonctionnement ni ses données.</p>
+            <a class="button button-primary button-inline" href="/admin/business-radar">Ouvrir Business Radar</a>
+          </section>
+          <section class="surface">
+            <div class="surface-header">
+              <div>
+                <p class="eyebrow">Journal d'activité</p>
+                <h2>Derniers événements</h2>
+              </div>
+            </div>
+            <div class="empty-state">
+              <strong>Aucune activité</strong>
+              <p>Le journal sera alimenté dans une phase ultérieure.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-modules" data-view-panel="modules" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Architecture modulaire</p>
+            <h2>Modules NEXUS AI</h2>
+          </div>
+          <p>Business Radar est le seul module actif pendant la Phase 1.</p>
+        </div>
+        <div class="module-grid" id="module-grid"></div>
+      </section>
+
+      <section class="view" id="view-administration" data-view-panel="administration" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Gouvernance</p>
+            <h2>Administration</h2>
+          </div>
+          <p>Structure de rôles uniquement. Aucun utilisateur réel n'est géré ici.</p>
+        </div>
+        <div class="role-grid" id="role-grid"></div>
+        <section class="surface activity-surface">
+          <div class="surface-header">
+            <div>
+              <p class="eyebrow">Traçabilité</p>
+              <h2>Journal d'activité</h2>
+            </div>
+            <span class="status status-neutral">Vide</span>
+          </div>
+          <div class="empty-state" id="activity-journal">
+            <strong>Aucune entrée enregistrée</strong>
+            <p>La journalisation fonctionnelle sera ajoutée dans une phase dédiée.</p>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" id="view-settings" data-view-panel="settings" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Configuration centralisée</p>
+            <h2>Paramètres</h2>
+          </div>
+          <p>Structure visuelle uniquement. Aucun secret ni aucune valeur réelle n'est affiché ou enregistré.</p>
+        </div>
+        <div class="settings-list" id="settings-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script type="application/json" id="nexus-bootstrap">{{NEXUS_BOOTSTRAP}}</script>
+  <script src="/admin/nexus.js" defer></script>
+</body>
+</html>
