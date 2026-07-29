@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/orchestrator",
+      "destination": "/api/nexus-page?handler=orchestrator-page"
+    },
+    {
+      "source": "/api/nexus-orchestrator",
+      "destination": "/api/nexus-page?handler=orchestrator-api"
+    },
+    {
       "source": "/admin/nexus/supplier-ai",
       "destination": "/api/nexus-page?handler=supplier-page"
     },

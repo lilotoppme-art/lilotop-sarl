@@ -185,6 +185,38 @@ async function loadMiningDashboard() {
   }
 }
 
+async function loadOrchestratorDashboard() {
+  try {
+    const response = await fetch("/api/nexus-orchestrator?action=dashboard");
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const values = {
+      "orchestrator-active": [summary.activeWorkflows, "Workflows en cours ou à reprendre"],
+      "orchestrator-opportunities": [summary.opportunitiesInProgress, "Opportunités prises en charge"],
+      "orchestrator-agents": [summary.activeAgents, "Agents coordonnés par NEXUS"],
+      "orchestrator-average": [
+        summary.averageSeconds < 60 ? `${summary.averageSeconds} s` : `${Math.round(summary.averageSeconds / 60)} min`,
+        "Temps moyen des workflows terminés"
+      ],
+      "orchestrator-value": [
+        new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(summary.potentialValue || 0),
+        "Valeur cumulée des dossiers"
+      ],
+      "orchestrator-alerts": [summary.criticalAlerts, "Workflows en pause ou en échec"]
+    };
+    Object.entries(values).forEach(([key, value]) => {
+      const card = document.querySelector(`[data-metric-key="${key}"]`);
+      if (!card) return;
+      card.querySelector("strong").textContent = value[0];
+      card.querySelector("p").textContent = value[1];
+    });
+  } catch {
+    // Les placeholders restent visibles si l'orchestrateur n'est pas disponible.
+  }
+}
+
 function renderExecutivePanels() {
   bootstrap.executivePanels.forEach((panel) => {
     const target = document.getElementById(`panel-${panel.key}`);
@@ -301,6 +333,7 @@ async function authenticate(event) {
     loadTenderResponseDashboard();
     loadSupplierAiDashboard();
     loadMiningDashboard();
+    loadOrchestratorDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -325,6 +358,7 @@ if (body.dataset.authenticated === "true") {
   loadTenderResponseDashboard();
   loadSupplierAiDashboard();
   loadMiningDashboard();
+  loadOrchestratorDashboard();
 }
 
 loginForm.addEventListener("submit", authenticate);

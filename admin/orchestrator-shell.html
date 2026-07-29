@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/orchestrator.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#orchestrator-main">Aller au contenu</a>
+
+  <section class="login-screen" id="orchestrator-login" aria-labelledby="orchestrator-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">NEXUS AI · Accès sécurisé</p>
+      <h1 id="orchestrator-login-title">Orchestrateur IA</h1>
+      <p>Utilisez votre accès administrateur NEXUS AI.</p>
+      <form id="orchestrator-login-form">
+        <label for="orchestrator-email">Adresse administrateur</label>
+        <input id="orchestrator-email" name="email" type="email" autocomplete="username" required>
+        <label for="orchestrator-password">Mot de passe</label>
+        <input id="orchestrator-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="orchestrator-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="orchestrator-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Orchestrateur multi-agents</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <a href="/admin/nexus/supplier-ai">Fournisseurs AI</a>
+        <button id="orchestrator-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="orchestrator-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Phase 4 · Coordination opérationnelle</p>
+          <h1>Orchestrateur NEXUS AI</h1>
+          <p>Transformez une opportunité qualifiée en dossier commercial traçable, sans action externe automatique.</p>
+        </div>
+        <span class="agent-status">5 agents supervisés</span>
+      </section>
+
+      <p class="global-status" id="orchestrator-status" role="status" aria-live="polite"></p>
+
+      <section class="stats-grid" aria-label="Indicateurs de l'orchestrateur">
+        <article><span>Workflows actifs</span><strong id="stat-active">0</strong></article>
+        <article><span>Opportunités en cours</span><strong id="stat-opportunities">0</strong></article>
+        <article><span>Agents actifs</span><strong id="stat-agents">5</strong></article>
+        <article><span>Temps moyen</span><strong id="stat-average">0 min</strong></article>
+        <article><span>Valeur potentielle</span><strong id="stat-value">0</strong></article>
+        <article><span>Alertes critiques</span><strong id="stat-alerts">0</strong></article>
+      </section>
+
+      <section class="workspace-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Nouveau dossier</p>
+            <h2>Lancer un workflow multi-agents</h2>
+          </div>
+          <span class="control-badge">Validation humaine conservée</span>
+        </div>
+        <form class="workflow-form" id="workflow-form">
+          <label>
+            <span>Opportunité réelle Business Radar</span>
+            <select name="opportunityId" id="opportunity-select" required>
+              <option value="">Sélectionner une opportunité</option>
+            </select>
+          </label>
+          <button class="button button-primary" type="submit">Lancer Workflow Complet</button>
+        </form>
+        <p class="selection-summary" id="opportunity-summary">Sélectionnez une opportunité pour afficher son contexte.</p>
+      </section>
+
+      <section class="workspace-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Supervision</p><h2>Agents coordonnés</h2></div>
+          <span class="control-badge">Journalisation intégrale</span>
+        </div>
+        <div class="agent-grid" id="agent-grid"></div>
+      </section>
+
+      <section class="workspace-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Dossiers commerciaux</p><h2>Workflows</h2></div>
+          <button class="button button-secondary" id="refresh-orchestrator" type="button">Actualiser</button>
+        </div>
+        <div class="workflow-list" id="workflow-list">
+          <p class="empty-message">Aucun workflow enregistré.</p>
+        </div>
+      </section>
+
+      <section class="workspace-panel" id="dossier-panel" hidden>
+        <div class="panel-heading">
+          <div><p class="eyebrow">Dossier commercial unique</p><h2 id="dossier-title">Dossier</h2></div>
+          <span class="control-badge" id="dossier-status">En cours</span>
+        </div>
+        <div class="dossier-grid" id="dossier-content"></div>
+      </section>
+
+      <section class="workspace-panel">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Traçabilité</p><h2>Journal complet</h2></div>
+          <span class="control-badge">Acteur · Agent · Horodatage</span>
+        </div>
+        <div class="activity-log" id="activity-log">
+          <p class="empty-message">Aucune action enregistrée.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/orchestrator.js" defer></script>
+</body>
+</html>
