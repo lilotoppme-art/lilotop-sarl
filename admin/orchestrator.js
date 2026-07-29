@@ -144,7 +144,9 @@ function renderActions(actions = state.actions) {
 
 function listMarkup(items, emptyText) {
   if (!items?.length) return `<p>${escapeHtml(emptyText)}</p>`;
-  return `<ul>${items.map((item) => `<li>${escapeHtml(typeof item === "string" ? item : item.name)}</li>`).join("")}</ul>`;
+  return `<ul>${items.map((item) => `<li>${escapeHtml(
+    typeof item === "string" ? item : item.name || item.title || item.label || ""
+  )}</li>`).join("")}</ul>`;
 }
 
 function renderDossier(workflow, actions) {

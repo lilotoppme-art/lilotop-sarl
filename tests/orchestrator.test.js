@@ -92,6 +92,7 @@ function testInterfaceAndRoutes() {
 
   assert.match(html, /Lancer Workflow Complet/);
   assert.match(client, /Reprendre Workflow/);
+  assert.match(client, /item\.name \|\| item\.title/);
   assert.match(html, /Journal complet/);
   assert.match(html, /Workflows actifs/);
   assert.match(html, /Valeur potentielle/);
