@@ -35,6 +35,13 @@ assert.strictEqual(
   ),
   true
 );
+assert.strictEqual(
+  isExpiredTender(
+    { deadline: "2027-01-20", evidence: "Le statut affiche est annule." },
+    new Date("2026-07-29T12:00:00Z")
+  ),
+  true
+);
 assert.strictEqual(isExpiredTender({ deadline: "À confirmer" }, new Date("2026-07-29T12:00:00Z")), false);
 
 const criteria = normalizeCriteria({
