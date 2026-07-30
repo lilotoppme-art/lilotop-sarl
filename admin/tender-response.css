@@ -190,6 +190,10 @@
   border-top: 3px solid var(--red) !important;
 }
 
+.compliance-expired {
+  border-top: 3px solid var(--amber) !important;
+}
+
 .document-tabs {
   display: flex;
   gap: 2px;

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/admin/commercial-ai.css">
+  <link rel="stylesheet" href="/admin/document-vault.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#vault-main">Aller au contenu</a>
+
+  <section class="login-screen" id="vault-login" aria-labelledby="vault-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+      <p class="eyebrow">NEXUS AI · Accès sécurisé</p>
+      <h1 id="vault-login-title">Coffre documentaire</h1>
+      <p>Utilisez votre accès administrateur NEXUS AI.</p>
+      <form id="vault-login-form">
+        <label for="vault-email">Adresse administrateur</label>
+        <input id="vault-email" name="email" type="email" autocomplete="username" required>
+        <label for="vault-password">Mot de passe</label>
+        <input id="vault-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p class="form-status" id="vault-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="vault-shell" hidden>
+    <header class="app-header">
+      <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
+        <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
+        <span><strong>NEXUS AI</strong><small>Coffre documentaire</small></span>
+      </a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a>
+        <a href="/admin/nexus/tender-response-ai">Réponse AO</a>
+        <a href="/admin/business-radar">Business Radar</a>
+        <button id="vault-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="vault-main" tabindex="-1">
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">Référentiel LILOTOP · Versions maîtrisées</p>
+          <h1>Coffre documentaire</h1>
+          <p>Centralisez les pièces administratives et techniques utilisées pour contrôler la conformité des appels d'offres.</p>
+        </div>
+        <span class="agent-status">Accès privé</span>
+      </section>
+
+      <p class="global-status" id="vault-status" role="status" aria-live="polite"></p>
+
+      <section class="vault-summary" aria-label="État du coffre">
+        <article><span>Documents</span><strong id="vault-total">0</strong></article>
+        <article><span>Valides</span><strong id="vault-valid">0</strong></article>
+        <article><span>À renouveler</span><strong id="vault-expiring">0</strong></article>
+        <article><span>Expirés</span><strong id="vault-expired">0</strong></article>
+      </section>
+
+      <section class="workspace-panel vault-upload-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Import sécurisé</p>
+            <h2 id="vault-form-title">Ajouter un document</h2>
+          </div>
+          <span class="vault-badge">Historique conservé</span>
+        </div>
+        <form id="vault-upload-form">
+          <input id="vault-document-id" name="documentId" type="hidden">
+          <div class="vault-form-grid">
+            <label class="file-drop" for="vault-file">
+              <strong>PDF, DOCX, XLSX ou ZIP</strong>
+              <span>Un fichier, 3 Mo maximum.</span>
+              <input id="vault-file" name="vaultFile" type="file" accept=".pdf,.docx,.xlsx,.zip" required>
+              <span class="selected-file" id="vault-selected-file">Aucun fichier sélectionné</span>
+            </label>
+            <div class="vault-fields">
+              <label>Titre du document
+                <input id="vault-title" name="title" maxlength="240" required>
+              </label>
+              <label>Catégorie
+                <select id="vault-category" name="category" required>
+                  <option value="administrative">Administratif</option>
+                  <option value="legal">Juridique</option>
+                  <option value="fiscal">Fiscal</option>
+                  <option value="hse">HSE</option>
+                  <option value="technical">Technique</option>
+                  <option value="financial">Financier</option>
+                  <option value="certification">Certification</option>
+                  <option value="reference">Référence</option>
+                  <option value="other">Autre</option>
+                </select>
+              </label>
+              <label>Version
+                <input id="vault-version" name="version" maxlength="60" placeholder="Ex. 2026.1 ou v2">
+              </label>
+              <label>Date de délivrance
+                <input id="vault-issued-on" name="issuedOn" type="date">
+              </label>
+              <label>Date d'expiration
+                <input id="vault-expires-on" name="expiresOn" type="date">
+              </label>
+              <label class="wide">Description
+                <textarea id="vault-description" name="description" rows="2" maxlength="2000"></textarea>
+              </label>
+              <label class="wide">Notes internes
+                <textarea id="vault-notes" name="notes" rows="2" maxlength="2000"></textarea>
+              </label>
+            </div>
+          </div>
+          <div class="vault-form-actions">
+            <button class="button button-secondary" id="vault-cancel-replacement" type="button" hidden>Annuler le remplacement</button>
+            <button class="button button-primary" type="submit">Enregistrer la version</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="workspace-panel vault-list-panel">
+        <div class="panel-heading vault-list-heading">
+          <div>
+            <p class="eyebrow">Inventaire</p>
+            <h2>Documents LILOTOP</h2>
+          </div>
+          <div class="vault-filters">
+            <label>
+              <span class="sr-only">Rechercher</span>
+              <input id="vault-search" type="search" placeholder="Rechercher un document">
+            </label>
+            <select id="vault-category-filter" aria-label="Filtrer par catégorie">
+              <option value="">Toutes les catégories</option>
+              <option value="administrative">Administratif</option>
+              <option value="legal">Juridique</option>
+              <option value="fiscal">Fiscal</option>
+              <option value="hse">HSE</option>
+              <option value="technical">Technique</option>
+              <option value="financial">Financier</option>
+              <option value="certification">Certification</option>
+              <option value="reference">Référence</option>
+              <option value="other">Autre</option>
+            </select>
+            <select id="vault-status-filter" aria-label="Filtrer par statut">
+              <option value="">Tous les statuts</option>
+              <option value="valid">Valides</option>
+              <option value="expired">Expirés</option>
+            </select>
+          </div>
+        </div>
+        <div class="vault-list" id="vault-list">
+          <p class="empty-message">Aucun document enregistré.</p>
+        </div>
+      </section>
+
+      <dialog id="vault-preview-dialog">
+        <div class="vault-dialog-header">
+          <div>
+            <p class="eyebrow">Aperçu documentaire</p>
+            <h2 id="vault-preview-title">Document</h2>
+          </div>
+          <button class="icon-button" id="vault-preview-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <div id="vault-preview-content"></div>
+        <div class="vault-dialog-actions">
+          <a class="button button-secondary" id="vault-download" href="#" download>Télécharger</a>
+        </div>
+      </dialog>
+
+      <dialog id="vault-history-dialog">
+        <div class="vault-dialog-header">
+          <div>
+            <p class="eyebrow">Traçabilité</p>
+            <h2 id="vault-history-title">Historique des versions</h2>
+          </div>
+          <button class="icon-button" id="vault-history-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <div class="vault-history" id="vault-history"></div>
+      </dialog>
+    </main>
+  </div>
+
+  <script src="/admin/document-vault.js" defer></script>
+</body>
+</html>

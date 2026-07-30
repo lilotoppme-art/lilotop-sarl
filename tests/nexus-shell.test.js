@@ -11,6 +11,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
 assert.deepStrictEqual(
   nexusCatalog.modules.map(({ name, statusLabel }) => [name, statusLabel]),
   [
+    ["Coffre documentaire", "Actif"],
     ["Orchestrateur NEXUS AI", "Actif"],
     ["Business Radar", "Actif"],
     ["Commercial AI", "Actif"],
@@ -25,12 +26,13 @@ assert.deepStrictEqual(
   "Le catalogue des modules NEXUS doit rester strictement statique."
 );
 
-assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 5);
-assert.strictEqual(nexusCatalog.modules[0].route, "/admin/nexus/orchestrator");
-assert.strictEqual(nexusCatalog.modules[1].route, "/admin/business-radar");
-assert.strictEqual(nexusCatalog.modules[2].route, "/admin/nexus/commercial-ai");
-assert.strictEqual(nexusCatalog.modules[3].route, "/admin/nexus/tender-response-ai");
-assert.strictEqual(nexusCatalog.modules[4].route, "/admin/nexus/supplier-ai");
+assert.strictEqual(nexusCatalog.modules.filter((module) => module.status === "active").length, 6);
+assert.strictEqual(nexusCatalog.modules[0].route, "/admin/nexus/document-vault");
+assert.strictEqual(nexusCatalog.modules[1].route, "/admin/nexus/orchestrator");
+assert.strictEqual(nexusCatalog.modules[2].route, "/admin/business-radar");
+assert.strictEqual(nexusCatalog.modules[3].route, "/admin/nexus/commercial-ai");
+assert.strictEqual(nexusCatalog.modules[4].route, "/admin/nexus/tender-response-ai");
+assert.strictEqual(nexusCatalog.modules[5].route, "/admin/nexus/supplier-ai");
 
 assert.deepStrictEqual(
   nexusCatalog.roles.map((role) => role.name),

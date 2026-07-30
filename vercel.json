@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/document-vault",
+      "destination": "/api/nexus-page?handler=document-vault-page"
+    },
+    {
+      "source": "/api/document-vault",
+      "destination": "/api/nexus-page?handler=document-vault-api"
+    },
+    {
       "source": "/admin/nexus/orchestrator",
       "destination": "/api/nexus-page?handler=orchestrator-page"
     },

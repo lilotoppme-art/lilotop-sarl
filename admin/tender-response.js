@@ -105,6 +105,7 @@ function renderAnalysis(analysis) {
   renderList("evaluation-criteria", info.evaluationCriteria);
   renderList("available-documents-result", compliance.availableDocuments);
   renderList("missing-documents-result", compliance.missingDocuments);
+  renderList("expired-documents-result", compliance.expiredDocuments);
   renderList("response-risks", analysis.risks);
   renderList("response-actions", analysis.recommendedActions, true);
   document.getElementById("export-tender-response").href =

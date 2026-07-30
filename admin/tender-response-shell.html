@@ -38,6 +38,7 @@
       <nav aria-label="Navigation privée">
         <a href="/admin/nexus">Dashboard DG</a>
         <a href="/admin/nexus/tender-ai">Veille AO</a>
+        <a href="/admin/nexus/document-vault">Coffre documentaire</a>
         <a href="/admin/business-radar">Business Radar</a>
         <button id="tender-response-logout" type="button">Se déconnecter</button>
       </nav>
@@ -71,9 +72,9 @@
             <span class="selected-file" id="selected-tender-file">Aucun fichier sélectionné</span>
           </label>
           <label class="available-documents" for="available-documents">
-            <span>Documents LILOTOP disponibles et validés</span>
+            <span>Documents complémentaires hors coffre</span>
             <textarea id="available-documents" name="availableDocuments" rows="5" placeholder="Ex. RCCM, attestation fiscale, politique HSE, références similaires"></textarea>
-            <small>Un document par ligne. L'IA ne considérera disponible que ce qui est déclaré ici.</small>
+            <small>Le coffre documentaire est consulté automatiquement. Ajoutez ici uniquement une pièce validée qui n'y serait pas encore enregistrée.</small>
           </label>
           <div class="prepare-row">
             <p>Aucune soumission, aucun e-mail et aucun engagement ne sera envoyé automatiquement.</p>
@@ -127,6 +128,10 @@
           <section class="compliance-missing">
             <h3>Documents manquants</h3>
             <ul id="missing-documents-result"></ul>
+          </section>
+          <section class="compliance-expired">
+            <h3>Documents expirés</h3>
+            <ul id="expired-documents-result"></ul>
           </section>
           <section>
             <h3>Risques</h3>

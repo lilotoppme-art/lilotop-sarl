@@ -9,6 +9,7 @@ const miningWatchHandler = require("../lib/nexus/mining-watch-handler");
 const tenderResponseHandler = require("../lib/nexus/tender-response-handler");
 const supplierHandler = require("../lib/nexus/supplier-handler");
 const orchestratorHandler = require("../lib/nexus/orchestrator-handler");
+const documentVaultHandler = require("../lib/nexus/document-vault-handler");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -65,6 +66,9 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "orchestrator-api") {
     return orchestratorHandler(req, res);
   }
+  if (delegatedHandler === "document-vault-api") {
+    return documentVaultHandler(req, res);
+  }
   if (req.method !== "GET") {
     res.statusCode = 405;
     return res.end("Method not allowed");
@@ -90,6 +94,10 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "orchestrator-page") {
     const title = authenticated ? "Orchestrateur NEXUS AI" : "Connexion Orchestrateur NEXUS AI";
     return sendPrivateHtml(res, "orchestrator-shell.html", authenticated, title);
+  }
+  if (delegatedHandler === "document-vault-page") {
+    const title = authenticated ? "Coffre documentaire" : "Connexion Coffre documentaire";
+    return sendPrivateHtml(res, "document-vault-shell.html", authenticated, title);
   }
   const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
   return sendPrivateHtml(res, "nexus-shell.html", authenticated, pageTitle, nexusCatalog);

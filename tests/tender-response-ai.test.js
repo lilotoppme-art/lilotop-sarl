@@ -56,6 +56,7 @@ const aiOutput = {
   compliance: {
     availableDocuments: ["RCCM"],
     missingDocuments: ["Attestation fiscale", "Plan HSE"],
+    expiredDocuments: [],
     compliancePercent: 33
   },
   risks: ["Délai court"],
@@ -110,12 +111,20 @@ const aiOutput = {
         json: async () => ({ output_text: JSON.stringify(aiOutput) })
       };
     },
-    config: { openaiApiKey: "test-api-key", openaiModel: "gpt-test" }
+    config: { openaiApiKey: "test-api-key", openaiModel: "gpt-test" },
+    vaultDocuments: [{
+      title: "RCCM",
+      category: "legal",
+      version: "v1",
+      status: "valid",
+      expiresOn: null
+    }]
   });
   assert.strictEqual(captured.url, "https://api.openai.com/v1/responses");
   assert.strictEqual(captured.options.headers.Authorization, "Bearer test-api-key");
   assert.strictEqual(JSON.parse(captured.options.body).text.format.type, "json_schema");
   assert.strictEqual(result.compliance.compliancePercent, 33);
+  assert.deepStrictEqual(result.compliance.expiredDocuments, []);
   assert.strictEqual(result.submissionEnabled, false);
   assert.strictEqual(result.validationRequired, true);
   assert.ok(result.generatedDocuments.financialOfferTemplate.includes("À compléter"));
@@ -153,6 +162,7 @@ const aiOutput = {
 
   const handler = read("lib/nexus/tender-response-handler.js");
   assert.ok(handler.includes("requireAdmin(req, res)"));
+  assert.ok(handler.includes("tenderInventory"));
   assert.ok(handler.includes('action === "export"'));
   assert.ok(handler.includes('action !== "prepare"'));
 
