@@ -10,6 +10,8 @@ const tenderResponseHandler = require("../lib/nexus/tender-response-handler");
 const supplierHandler = require("../lib/nexus/supplier-handler");
 const orchestratorHandler = require("../lib/nexus/orchestrator-handler");
 const documentVaultHandler = require("../lib/nexus/document-vault-handler");
+const emailDeliveryHandler = require("../lib/email/delivery-handler");
+const resendWebhookHandler = require("../lib/email/webhook-handler");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -69,6 +71,12 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "document-vault-api") {
     return documentVaultHandler(req, res);
   }
+  if (delegatedHandler === "email-delivery-api") {
+    return emailDeliveryHandler(req, res);
+  }
+  if (delegatedHandler === "resend-webhook") {
+    return resendWebhookHandler(req, res);
+  }
   if (req.method !== "GET") {
     res.statusCode = 405;
     return res.end("Method not allowed");
@@ -101,4 +109,8 @@ module.exports = async function handler(req, res) {
   }
   const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
   return sendPrivateHtml(res, "nexus-shell.html", authenticated, pageTitle, nexusCatalog);
+};
+
+module.exports.config = {
+  api: { bodyParser: false }
 };

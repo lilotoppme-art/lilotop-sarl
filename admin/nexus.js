@@ -282,6 +282,50 @@ function renderSettings() {
   `).join("");
 }
 
+function deliveryStatusLabel(status) {
+  return ({
+    accepted: "Accepté", sent: "Envoyé", delivered: "Livré", deferred: "En attente",
+    bounced: "Bounce", complained: "Plainte", suppressed: "Supprimé", blocked: "Bloqué", failed: "Échec"
+  })[status] || status;
+}
+
+async function loadEmailDeliveryJournal() {
+  const target = document.getElementById("activity-journal");
+  const summaryTarget = document.getElementById("email-delivery-summary");
+  const statusTarget = document.getElementById("email-delivery-status");
+  try {
+    const response = await fetch("/api/email-delivery");
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) throw new Error(payload.error || "Journal indisponible");
+    const { events, totals } = payload.data;
+    statusTarget.textContent = totals.alerts ? `${totals.alerts} alerte(s)` : "Opérationnel";
+    statusTarget.className = `status ${totals.alerts ? "status-coming" : "status-active"}`;
+    summaryTarget.innerHTML = [
+      ["30 jours", totals.total], ["Livrés", totals.delivered], ["En cours", totals.pending],
+      ["Différés", totals.deferred], ["Alertes", totals.alerts]
+    ].map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("");
+    if (!events.length) return;
+    target.className = "delivery-journal";
+    target.innerHTML = events.map((event) => `
+      <article class="delivery-entry ${["bounced", "complained", "suppressed", "blocked", "failed", "deferred"].includes(event.status) ? "has-alert" : ""}">
+        <div>
+          <strong>${escapeHtml(event.subject || "Sans objet")}</strong>
+          <p>${escapeHtml(event.recipient)} · ${escapeHtml(event.provider)}</p>
+        </div>
+        <div class="delivery-entry-meta">
+          <span class="status ${event.status === "delivered" ? "status-active" : "status-neutral"}">${escapeHtml(deliveryStatusLabel(event.status))}</span>
+          <time>${escapeHtml(new Date(event.event_at || event.created_at).toLocaleString("fr-FR"))}</time>
+        </div>
+        ${event.error_message ? `<p class="delivery-error">${escapeHtml(event.error_code || "Erreur")}: ${escapeHtml(event.error_message)}</p>` : ""}
+      </article>
+    `).join("");
+  } catch (error) {
+    statusTarget.textContent = "Indisponible";
+    statusTarget.className = "status status-coming";
+    target.innerHTML = `<strong>Journal indisponible</strong><p>${escapeHtml(error.message)}</p>`;
+  }
+}
+
 function showView(viewName) {
   const titles = {
     dashboard: "Tableau de bord",
@@ -334,6 +378,7 @@ async function authenticate(event) {
     loadSupplierAiDashboard();
     loadMiningDashboard();
     loadOrchestratorDashboard();
+    loadEmailDeliveryJournal();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -359,6 +404,7 @@ if (body.dataset.authenticated === "true") {
   loadSupplierAiDashboard();
   loadMiningDashboard();
   loadOrchestratorDashboard();
+  loadEmailDeliveryJournal();
 }
 
 loginForm.addEventListener("submit", authenticate);

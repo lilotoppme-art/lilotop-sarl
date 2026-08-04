@@ -55,6 +55,7 @@ dans Git, un fichier `.env` suivi, un ticket ou une documentation.
 | `OPENAI_API_KEY` | Authentification serveur pour l'analyse OpenAI. |
 | `OPENAI_MODEL` | Modele utilise par Business Radar. |
 | `RESEND_API_KEY` | Cle d'envoi Resend limitee au domaine LILOTOP. |
+| `RESEND_WEBHOOK_SECRET` | Signature des evenements de livraison Resend recus par NEXUS. |
 | `EMAIL_FROM` | Expediteur valide par Resend. |
 | `EMAIL_CONTACT_TO` | Destinataire de repli des alertes. |
 | `BUSINESS_RADAR_ALERT_EMAIL` | Destinataire principal des alertes Radar. |
@@ -215,4 +216,3 @@ sauvegarde recente et validation explicite.
 - Revoquer immediatement toute cle exposee et la remplacer dans Vercel.
 - Limiter les cles Resend au seul envoi et au domaine valide lorsque possible.
 - Maintenir toutes les routes metier derriere la session administrateur.
-

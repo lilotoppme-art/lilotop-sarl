@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/api/resend-webhook",
+      "destination": "/api/nexus-page?handler=resend-webhook"
+    },
+    {
+      "source": "/api/email-delivery",
+      "destination": "/api/nexus-page?handler=email-delivery-api"
+    },
+    {
       "source": "/admin/nexus/document-vault",
       "destination": "/api/nexus-page?handler=document-vault-page"
     },
