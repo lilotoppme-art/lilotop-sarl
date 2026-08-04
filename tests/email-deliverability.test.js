@@ -18,9 +18,12 @@ assert.throws(
 );
 
 assert.equal(mapEventStatus("email.delivered"), "delivered");
+assert.equal(mapEventStatus("email.opened"), "opened");
+assert.equal(mapEventStatus("email.clicked"), "clicked");
 assert.equal(mapEventStatus("email.delivery_delayed"), "deferred");
 assert.equal(mapEventStatus("email.bounced"), "bounced");
 assert.equal(mapEventStatus("email.complained"), "complained");
+assert.equal(mapEventStatus("email.failed"), "failed");
 assert.equal(mapEventStatus("email.unknown"), null);
 
 const rawSecret = crypto.randomBytes(32);
