@@ -13,7 +13,9 @@ function capture() {
 
 (async () => {
   const encoded = hashPassword("A-secure-test-password-2026");
+  assert(encoded.startsWith("pbkdf2:"));
   assert(verifyPassword("A-secure-test-password-2026", encoded));
+  assert(verifyPassword("A-secure-test-password-2026", encoded.replaceAll(":", "$")));
   assert(!verifyPassword("wrong", encoded));
 
   process.env.ADMIN_EMAIL = "admin@lilotopsarl.com";
