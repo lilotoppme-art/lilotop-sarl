@@ -110,6 +110,12 @@ main {
   font-size: .78rem;
 }
 .global-status { min-height: 1.4rem; color: var(--steel); font-weight: 700; }
+.global-status.has-error {
+  padding: .8rem 1rem;
+  color: var(--danger);
+  background: #fff0f0;
+  border-left: 3px solid var(--danger);
+}
 
 .stats-grid {
   display: grid;

@@ -104,15 +104,19 @@ function testInterfaceAndRoutes() {
   const page = read("api/nexus-page.js");
   const catalog = read("lib/nexus/catalog.js");
   const dashboard = read("admin/nexus.js");
+  const orchestratorHandler = read("lib/nexus/orchestrator-handler.js");
 
   assert.match(html, /Lancer Workflow Complet/);
   assert.match(client, /Reprendre Workflow/);
   assert.match(client, /item\.name \|\| item\.title/);
-  assert.match(html, /Journal complet/);
+  assert.match(html, /Journal récent/);
+  assert.match(orchestratorHandler, /listActions\(null, 40\)/);
   assert.match(html, /Workflows actifs/);
   assert.match(html, /Valeur potentielle/);
   assert.match(client, /Aucun envoi automatique n'est autorisé/);
   assert.match(html, /Valider la participation/);
+  assert.match(html, /\{\{LOGIN_HIDDEN\}\}/);
+  assert.match(html, /\{\{SHELL_HIDDEN\}\}/);
   assert.match(html, /Valider les prix/);
   assert.match(html, /Autoriser l'envoi/);
   assert.match(html, /Fiche finale de validation/);
@@ -121,6 +125,9 @@ function testInterfaceAndRoutes() {
   assert.match(routes, /\/api\/nexus-orchestrator/);
   assert.match(page, /orchestrator-page/);
   assert.match(page, /orchestrator-api/);
+  assert.match(page, /replaceAll\("\{\{LOGIN_HIDDEN\}\}"/);
+  assert.match(page, /replaceAll\("\{\{SHELL_HIDDEN\}\}"/);
+  assert.match(client, /reportClientFailure/);
   assert.match(catalog, /nexus-orchestrator/);
   assert.match(dashboard, /loadOrchestratorDashboard/);
   assert.match(dashboard, /loadOrchestratorDashboard[\s\S]*workflowPanel/);

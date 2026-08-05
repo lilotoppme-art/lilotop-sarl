@@ -34,6 +34,8 @@ function sendPrivateHtml(res, templateName, authenticated, title, bootstrap = nu
   const template = fs.readFileSync(path.join(process.cwd(), "admin", templateName), "utf8");
   let html = template
     .replaceAll("{{AUTHENTICATED}}", authenticated ? "true" : "false")
+    .replaceAll("{{LOGIN_HIDDEN}}", authenticated ? "hidden" : "")
+    .replaceAll("{{SHELL_HIDDEN}}", authenticated ? "" : "hidden")
     .replace("{{PAGE_TITLE}}", escapeHtml(title));
   if (bootstrap) {
     html = html.replace("{{NEXUS_BOOTSTRAP}}", serializeForHtml(bootstrap));

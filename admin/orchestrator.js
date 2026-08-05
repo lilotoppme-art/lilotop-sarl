@@ -19,6 +19,23 @@ let state = {
 };
 let runningWorkflowId = null;
 
+function reportClientFailure(message) {
+  const safeMessage = String(message || "Erreur d'affichage inconnue").slice(0, 500);
+  statusRegion.textContent = `L'interface n'a pas pu terminer son chargement : ${safeMessage}`;
+  statusRegion.classList.add("has-error");
+  if (body.dataset.authenticated === "true") {
+    loginScreen.hidden = true;
+    shell.hidden = false;
+  }
+}
+
+window.addEventListener("error", (event) => {
+  reportClientFailure(event.message);
+});
+window.addEventListener("unhandledrejection", (event) => {
+  reportClientFailure(event.reason?.message || event.reason);
+});
+
 const STEP_LABELS = {
   analyze: "Analyse OpenAI",
   "source-suppliers": "Recherche fournisseurs",
@@ -280,6 +297,7 @@ async function refresh() {
   renderAgents();
   renderWorkflows();
   renderActions();
+  statusRegion.classList.remove("has-error");
 }
 
 async function viewWorkflow(id) {
@@ -424,5 +442,5 @@ document.getElementById("orchestrator-logout").addEventListener("click", logout)
 
 setAuthenticated(body.dataset.authenticated === "true");
 if (body.dataset.authenticated === "true") {
-  refresh().catch((error) => { statusRegion.textContent = error.message; });
+  refresh().catch((error) => { reportClientFailure(error.message); });
 }

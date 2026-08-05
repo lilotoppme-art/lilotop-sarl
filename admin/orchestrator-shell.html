@@ -11,7 +11,7 @@
 <body data-authenticated="{{AUTHENTICATED}}">
   <a class="skip-link" href="#orchestrator-main">Aller au contenu</a>
 
-  <section class="login-screen" id="orchestrator-login" aria-labelledby="orchestrator-login-title">
+  <section class="login-screen" id="orchestrator-login" aria-labelledby="orchestrator-login-title" {{LOGIN_HIDDEN}}>
     <div class="login-panel">
       <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
       <p class="eyebrow">NEXUS AI · Accès sécurisé</p>
@@ -28,7 +28,7 @@
     </div>
   </section>
 
-  <div id="orchestrator-shell" hidden>
+  <div id="orchestrator-shell" {{SHELL_HIDDEN}}>
     <header class="app-header">
       <a class="brand" href="/admin/nexus" aria-label="Retour à NEXUS AI">
         <img src="/assets/logo-lilotop.svg" alt="LILOTOP SARL">
@@ -136,8 +136,8 @@
 
       <section class="workspace-panel">
         <div class="panel-heading">
-          <div><p class="eyebrow">Traçabilité</p><h2>Journal complet</h2></div>
-          <span class="control-badge">Acteur · Agent · Horodatage</span>
+          <div><p class="eyebrow">Traçabilité</p><h2>Journal récent</h2></div>
+          <span class="control-badge">40 dernières actions · Acteur · Agent · Horodatage</span>
         </div>
         <div class="activity-log" id="activity-log">
           <p class="empty-message">Aucune action enregistrée.</p>
