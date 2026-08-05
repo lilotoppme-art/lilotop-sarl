@@ -105,6 +105,7 @@ function testInterfaceAndRoutes() {
   const catalog = read("lib/nexus/catalog.js");
   const dashboard = read("admin/nexus.js");
   const orchestratorHandler = read("lib/nexus/orchestrator-handler.js");
+  const orchestratorCss = read("admin/orchestrator.css");
 
   assert.match(html, /Lancer Workflow Complet/);
   assert.match(client, /Reprendre Workflow/);
@@ -128,6 +129,8 @@ function testInterfaceAndRoutes() {
   assert.match(page, /replaceAll\("\{\{LOGIN_HIDDEN\}\}"/);
   assert.match(page, /replaceAll\("\{\{SHELL_HIDDEN\}\}"/);
   assert.match(client, /reportClientFailure/);
+  assert.match(orchestratorCss, /max-height: 720px/);
+  assert.match(orchestratorCss, /contain: content/);
   assert.match(catalog, /nexus-orchestrator/);
   assert.match(dashboard, /loadOrchestratorDashboard/);
   assert.match(dashboard, /loadOrchestratorDashboard[\s\S]*workflowPanel/);

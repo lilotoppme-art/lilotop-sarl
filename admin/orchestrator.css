@@ -237,7 +237,14 @@ main {
 .correction-field { margin-top: .8rem; }
 .decision-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
 
-.activity-log { display: grid; gap: .6rem; }
+.activity-log {
+  display: grid;
+  gap: .6rem;
+  max-height: 720px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  contain: content;
+}
 .activity-item {
   display: grid;
   grid-template-columns: 150px minmax(0, 1fr) auto;
