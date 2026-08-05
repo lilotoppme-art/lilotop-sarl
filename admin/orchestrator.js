@@ -304,7 +304,9 @@ async function runUntilComplete(id) {
     }
     await refresh();
     await viewWorkflow(id);
-    statusRegion.textContent = workflow?.status === "completed"
+    statusRegion.textContent = workflow?.dossier?.pipelineStatus === "rejected"
+      ? "Workflow arrêté : l'opportunité a été classée hors cible LILOTOP."
+      : workflow?.status === "completed"
       ? "Workflow complet terminé. Dossier commercial prêt pour validation."
       : "Workflow interrompu avant sa finalisation. Utilisez Reprendre Workflow.";
   } catch (error) {

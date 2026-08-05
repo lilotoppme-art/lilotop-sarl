@@ -48,6 +48,8 @@ async function testOpenAiContract() {
   const request = JSON.parse(captured.options.body);
   assert.equal(request.text.format.type, "json_schema");
   assert.equal(request.text.format.strict, true);
+  assert.match(request.input[0].content, /Mining Supply/);
+  assert.match(request.input[0].content, /Infrastructure/);
   assert.equal(result.products[0].quantity, "100 tonnes");
   assert.equal(result.opportunityScore, 86);
   assert.equal(result.model, "gpt-test");
