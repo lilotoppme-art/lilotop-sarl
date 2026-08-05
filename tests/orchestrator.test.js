@@ -123,6 +123,8 @@ function testInterfaceAndRoutes() {
   assert.match(page, /orchestrator-api/);
   assert.match(catalog, /nexus-orchestrator/);
   assert.match(dashboard, /loadOrchestratorDashboard/);
+  assert.match(dashboard, /loadOrchestratorDashboard[\s\S]*workflowPanel/);
+  assert.match(dashboard, /État des dossiers/);
 }
 
 function testDossierDocuments() {
