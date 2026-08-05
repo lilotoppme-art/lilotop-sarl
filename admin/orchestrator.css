@@ -152,6 +152,7 @@ main {
   border: 1px solid var(--line);
   background: #fff;
 }
+.workflow-launch-actions { display: flex; flex-wrap: wrap; gap: .65rem; }
 .selection-summary { color: var(--steel); margin-bottom: 0; }
 
 .button {
@@ -167,6 +168,7 @@ main {
 .button-primary { background: var(--gold); color: #101820; }
 .button-primary:hover { background: #c69b43; }
 .button-secondary { background: #fff; color: var(--navy); border-color: var(--line); }
+.button-danger { background: #fff; color: var(--danger); border-color: #efc4c4; }
 
 .agent-grid {
   display: grid;
@@ -215,6 +217,20 @@ main {
 .dossier-card p, .dossier-card li { color: #405260; line-height: 1.55; }
 .dossier-card pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; color: #405260; }
 
+.validation-sheet { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--gold); }
+.validation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.validation-grid > article { padding: 1rem; border: 1px solid var(--line); background: #fff; min-width: 0; }
+.validation-grid h3 { margin-top: 0; }
+.validation-grid pre { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #405260; font: inherit; }
+.validation-facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); }
+.validation-facts div { display: grid; gap: .25rem; padding: .9rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.validation-facts span { color: var(--steel); font-size: .78rem; text-transform: uppercase; font-weight: 750; }
+.price-validation { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; margin-top: 1rem; }
+.price-validation label, .correction-field { display: grid; gap: .4rem; color: var(--navy); font-weight: 750; }
+.price-validation input, .correction-field textarea { width: 100%; padding: .7rem; border: 1px solid var(--line); background: #fff; }
+.correction-field { margin-top: .8rem; }
+.decision-actions { display: flex; flex-wrap: wrap; gap: .65rem; margin-top: 1rem; }
+
 .activity-log { display: grid; gap: .6rem; }
 .activity-item {
   display: grid;
@@ -241,7 +257,8 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation { grid-template-columns: 1fr; }
+  .validation-facts { grid-template-columns: 1fr; }
   .workflow-form, .workflow-item, .activity-item { grid-template-columns: 1fr; }
   .workflow-actions { justify-content: flex-start; }
   .activity-time { text-align: left; }

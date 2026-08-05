@@ -49,7 +49,7 @@
           <h1>Orchestrateur NEXUS AI</h1>
           <p>Transformez une opportunité qualifiée en dossier commercial traçable, sans action externe automatique.</p>
         </div>
-        <span class="agent-status">5 agents supervisés</span>
+        <span class="agent-status">7 agents connectés</span>
       </section>
 
       <p class="global-status" id="orchestrator-status" role="status" aria-live="polite"></p>
@@ -78,7 +78,10 @@
               <option value="">Sélectionner une opportunité</option>
             </select>
           </label>
-          <button class="button button-primary" type="submit">Lancer Workflow Complet</button>
+          <div class="workflow-launch-actions">
+            <button class="button button-secondary" id="detect-opportunity" type="button">Détecter une opportunité</button>
+            <button class="button button-primary" type="submit">Lancer Workflow Complet</button>
+          </div>
         </form>
         <p class="selection-summary" id="opportunity-summary">Sélectionnez une opportunité pour afficher son contexte.</p>
       </section>
@@ -107,6 +110,28 @@
           <span class="control-badge" id="dossier-status">En cours</span>
         </div>
         <div class="dossier-grid" id="dossier-content"></div>
+        <section class="validation-sheet" id="validation-sheet" hidden aria-labelledby="validation-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Décision humaine</p><h2 id="validation-title">Fiche finale de validation</h2></div>
+            <span class="control-badge">Aucun envoi automatique</span>
+          </div>
+          <div class="validation-grid" id="validation-content"></div>
+          <div class="price-validation">
+            <label>Coût d'achat validé<input id="purchase-cost" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+            <label>Prix de vente proposé<input id="sale-price" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+            <label>Devise<input id="price-currency" type="text" maxlength="12" value="USD"></label>
+          </div>
+          <label class="correction-field">Commentaire de correction<textarea id="decision-comment" rows="3" maxlength="1000"></textarea></label>
+          <div class="decision-actions" id="decision-actions">
+            <button class="button button-secondary" type="button" data-decision="validate-participation">Valider la participation</button>
+            <button class="button button-danger" type="button" data-decision="reject">Rejeter</button>
+            <button class="button button-secondary" type="button" data-decision="request-correction">Demander correction</button>
+            <button class="button button-secondary" type="button" data-decision="validate-prices">Valider les prix</button>
+            <button class="button button-primary" type="button" data-decision="validate-final">Valider le dossier final</button>
+            <button class="button button-primary" type="button" data-decision="authorize-send">Autoriser l'envoi</button>
+          </div>
+          <p class="selection-summary">L'autorisation enregistre la décision. L'envoi et la soumission restent manuels.</p>
+        </section>
       </section>
 
       <section class="workspace-panel">

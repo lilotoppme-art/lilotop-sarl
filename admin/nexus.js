@@ -162,6 +162,27 @@ async function loadSupplierAiDashboard() {
       card.querySelector("strong").textContent = value[0];
       card.querySelector("p").textContent = value[1];
     });
+    const workflowPanel = document.getElementById("panel-deadlines");
+    if (workflowPanel && summary.recentWorkflows?.length) {
+      const labels = {
+        detected: "Détecté", analyzed: "Analysé", "suppliers-researched": "Fournisseurs recherchés",
+        "rfqs-prepared": "RFQ préparées", "rfqs-sent": "RFQ envoyées",
+        "offer-prepared": "Offre préparée", "validation-required": "Validation requise",
+        "ready-to-send": "Envoi autorisé", submitted: "Soumis", pending: "En attente",
+        won: "Gagné", lost: "Perdu", "purchase-order-received": "Bon de commande reçu",
+        rejected: "Hors cible"
+      };
+      workflowPanel.innerHTML = `
+        <div class="surface-header">
+          <div><p class="eyebrow">Orchestrateur</p><h2>État des dossiers</h2></div>
+          <span class="status status-active">Temps réel</span>
+        </div>
+        <div class="commercial-dashboard-result">
+          <ol>${summary.recentWorkflows.map((workflow) => `<li><strong>${escapeHtml(workflow.title)}</strong> · ${escapeHtml(labels[workflow.pipelineStatus] || workflow.pipelineStatus)}</li>`).join("")}</ol>
+          <a class="button button-primary button-inline" href="/admin/nexus/orchestrator">Ouvrir l'orchestrateur</a>
+        </div>
+      `;
+    }
   } catch {
     // Les placeholders restent visibles si Fournisseurs AI n'est pas disponible.
   }

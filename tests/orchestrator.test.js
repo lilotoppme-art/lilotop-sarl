@@ -22,6 +22,10 @@ async function testOpenAiContract() {
       json: async () => ({
         model: "gpt-test",
         output_text: JSON.stringify({
+          lilotopFit: true,
+          opportunityScore: 86,
+          priority: "tres-prioritaire",
+          fitRationale: "Besoin industriel correspondant aux activites LILOTOP.",
           executiveSummary: "Appel d'offres industriel qualifie.",
           country: "RDC",
           deadline: "2026-09-30",
@@ -45,6 +49,7 @@ async function testOpenAiContract() {
   assert.equal(request.text.format.type, "json_schema");
   assert.equal(request.text.format.strict, true);
   assert.equal(result.products[0].quantity, "100 tonnes");
+  assert.equal(result.opportunityScore, 86);
   assert.equal(result.model, "gpt-test");
 
   global.fetch = previousFetch;
@@ -64,6 +69,11 @@ function testArchitecture() {
   assert.match(service, /analyzeWorkflowOpportunity/);
   assert.match(service, /searchSuppliers/);
   assert.match(service, /buildRfqDraft/);
+  assert.match(service, /prepareTenderResponse/);
+  assert.match(service, /documentVaultStore\.tenderInventory/);
+  assert.match(service, /applyDecision/);
+  assert.match(service, /sendEnabled: false/);
+  assert.match(service, /submissionEnabled: false/);
   assert.match(service, /MAX_SOURCED_PRODUCTS = 3/);
   assert.match(service, /status: "paused"/);
   assert.match(service, /currentStep: "completed"/);
@@ -73,13 +83,16 @@ function testArchitecture() {
   assert.match(store, /is_demo = false/);
   assert.match(store, /nexus_workflow_actions/);
   assert.match(store, /activeWorkflows/);
-  assert.match(store, /activeAgents: 5/);
+  assert.match(store, /activeAgents: 7/);
+  assert.match(store, /updateDossier/);
 
   const handler = read("lib/nexus/orchestrator-handler.js");
   assert.match(handler, /requireAdmin/);
   assert.match(handler, /action === "start"/);
   assert.match(handler, /action === "resume"/);
   assert.match(handler, /action === "dashboard"/);
+  assert.match(handler, /action === "detect"/);
+  assert.match(handler, /action === "decision"/);
 }
 
 function testInterfaceAndRoutes() {
@@ -97,6 +110,11 @@ function testInterfaceAndRoutes() {
   assert.match(html, /Workflows actifs/);
   assert.match(html, /Valeur potentielle/);
   assert.match(client, /Aucun envoi automatique n'est autorisé/);
+  assert.match(html, /Valider la participation/);
+  assert.match(html, /Valider les prix/);
+  assert.match(html, /Autoriser l'envoi/);
+  assert.match(html, /Fiche finale de validation/);
+  assert.match(client, /validation-required/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
   assert.match(routes, /\/api\/nexus-orchestrator/);
   assert.match(page, /orchestrator-page/);
@@ -106,7 +124,7 @@ function testInterfaceAndRoutes() {
 }
 
 function testDossierDocuments() {
-  const { documentsFor } = require("../lib/nexus/orchestrator-service");
+  const { buildFinalValidation, documentsFor, supplierComparisonFor } = require("../lib/nexus/orchestrator-service");
   const documents = documentsFor({
     analysis: {
       executiveSummary: "Resume",
@@ -122,6 +140,31 @@ function testDossierDocuments() {
   assert.equal(documents.length, 5);
   assert.ok(documents.some((item) => item.key === "supplier-report"));
   assert.ok(documents.some((item) => item.key === "rfq-register"));
+
+  const dossier = {
+    opportunity: { title: "AO Pompes", organization: "Client", score: 70, currency: "USD" },
+    analysis: { opportunityScore: 82, priority: "prioritaire", risks: ["Délai court"] },
+    sourcing: [{ product: { name: "Pompe" }, suppliers: [
+      { name: "B", reliabilityScore: 60, certifications: [] },
+      { name: "A", reliabilityScore: 90, certifications: ["ISO"] }
+    ] }]
+  };
+  const comparison = supplierComparisonFor(dossier);
+  assert.equal(comparison[0].supplier, "A");
+  assert.equal(comparison[0].price, null);
+  const sheet = buildFinalValidation(dossier, {
+    compliance: { compliancePercent: 75, missingDocuments: ["RCCM"], expiredDocuments: [] },
+    risks: [],
+    generatedDocuments: {
+      technicalOffer: "Brouillon",
+      financialOfferTemplate: "Prix à valider",
+      submissionLetter: "Lettre"
+    }
+  }, comparison);
+  assert.equal(sheet.purchaseCost, null);
+  assert.equal(sheet.proposedSalePrice, null);
+  assert.equal(sheet.sendEnabled, false);
+  assert.equal(sheet.submissionEnabled, false);
 }
 
 (async () => {
