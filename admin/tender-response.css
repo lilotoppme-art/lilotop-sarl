@@ -1,7 +1,44 @@
 .upload-panel,
-.result-panel-full {
+.result-panel-full,
+.progress-panel {
   margin-top: 20px;
   padding: 26px;
+}
+
+.result-actions,
+.validation-actions,
+.document-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.progress-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+}
+
+.progress-item {
+  display: grid;
+  grid-template-columns: 140px 1fr 46px;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  background: var(--steel-200);
+}
+
+.progress-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--navy-900), var(--gold));
+  transition: width 300ms ease;
 }
 
 .draft-badge,
@@ -194,6 +231,91 @@
   border-top: 3px solid var(--amber) !important;
 }
 
+.document-control,
+.agent-handoffs,
+.validation-panel {
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--steel-200);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.document-control table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.document-control th,
+.document-control td {
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--steel-200);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.document-status {
+  display: inline-flex;
+  min-width: 86px;
+  justify-content: center;
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-weight: 800;
+}
+
+.document-status.available { color: var(--green); background: #eaf7f0; }
+.document-status.expired { color: #8a5a00; background: var(--amber-soft); }
+.document-status.missing { color: var(--red); background: #fcebec; }
+
+.handoff-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.handoff-card {
+  min-height: 120px;
+  padding: 14px;
+  border: 1px solid var(--steel-200);
+  background: #f8fafb;
+}
+
+.handoff-card strong,
+.handoff-card span { display: block; }
+.handoff-card span { margin-top: 6px; color: var(--steel-700); font-size: 12px; }
+
+.document-edit-actions {
+  padding: 14px 18px;
+  border-top: 1px solid var(--steel-200);
+  background: #f8fafb;
+}
+
+.generated-document pre[contenteditable="true"] {
+  outline: 2px solid var(--gold);
+  background: #fffdf7;
+}
+
+.validation-panel label {
+  display: block;
+  margin: 12px 0 6px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.validation-panel textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--steel-300);
+  font: inherit;
+  resize: vertical;
+}
+
+.validation-actions { margin-top: 12px; }
+.validation-panel > p { color: var(--steel-700); font-size: 12px; }
+
 .document-tabs {
   display: flex;
   gap: 2px;
@@ -298,9 +420,12 @@
 @media (max-width: 900px) {
   #tender-response-form,
   .information-grid,
-  .compliance-grid {
+  .compliance-grid,
+  .progress-list {
     grid-template-columns: 1fr;
   }
+
+  .handoff-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .response-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -314,10 +439,14 @@
   }
 
   .prepare-row,
-  .generated-document-header {
+  .generated-document-header,
+  .result-actions {
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .progress-item { grid-template-columns: 110px 1fr 42px; }
+  .handoff-grid { grid-template-columns: 1fr; }
 
   .response-summary {
     grid-template-columns: 1fr;

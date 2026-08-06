@@ -6,11 +6,12 @@ const path = require("path");
 const AdmZip = require("adm-zip");
 const { extractTenderDocument } = require("../lib/nexus/tender-response-documents");
 const {
+  buildDocumentControl,
   prepareTenderResponse,
   responseSchema,
   splitAvailableDocuments
 } = require("../lib/nexus/tender-response-ai");
-const { buildExportArchive } = require("../lib/nexus/tender-response-export");
+const { buildExportArchive, buildPdfExport } = require("../lib/nexus/tender-response-export");
 
 const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
@@ -44,13 +45,25 @@ const aiOutput = {
   keyInformation: {
     subject: "Fourniture de pompes industrielles",
     client: "Client Test",
+    organization: "Direction des achats",
     country: "RDC",
+    project: "Extension usine",
+    tenderNumber: "DAO-2026-001",
+    publicationDate: "2026-08-01",
     deadline: "2026-09-15",
+    currency: "USD",
+    contractType: "Fournitures",
     budget: "Non publié",
     qualificationCriteria: ["RCCM", "Références similaires"],
+    guarantees: ["Garantie de soumission"],
     requiredDocuments: ["Attestation fiscale", "Plan HSE"],
     requestedProducts: ["Pompes industrielles"],
+    requestedServices: ["Mise en service"],
+    quantities: ["12 unités"],
+    technicalStandards: ["ISO 9001"],
     deliveryConditions: ["Livraison à Kolwezi"],
+    incoterms: ["DAP Kolwezi"],
+    paymentTerms: ["30 jours"],
     evaluationCriteria: ["Conformité technique", "Délai"]
   },
   compliance: {
@@ -66,6 +79,7 @@ const aiOutput = {
     technicalOffer: "Brouillon d'offre technique.",
     financialOfferTemplate: "Prix unitaire: [À compléter avec donnée validée]",
     complianceChecklist: ["RCCM: disponible", "Plan HSE: manquant"],
+    conformityTable: ["Pompes industrielles | À confirmer | Revue technique"],
     executionPlan: ["J1: validation interne", "J2: finalisation"],
     attachmentsList: ["RCCM", "Attestation fiscale"]
   }
@@ -77,6 +91,16 @@ const aiOutput = {
     ["RCCM", "Attestation fiscale", "Plan HSE"]
   );
   assert.strictEqual(responseSchema().additionalProperties, false);
+  const control = buildDocumentControl(["RCCM", "Attestation fiscale"], [{
+    id: "doc-1", versionId: "version-1", title: "RCCM LILOTOP", version: "v2",
+    status: "valid", expiresOn: null
+  }, {
+    id: "doc-2", versionId: "version-2", title: "Attestation fiscale", version: "v1",
+    status: "expired", expiresOn: "2026-01-01"
+  }], []);
+  assert.strictEqual(control.rows.find((row) => row.key === "rccm").status, "available");
+  assert.strictEqual(control.rows.find((row) => row.key === "tax").status, "expired");
+  assert.ok(control.missingDocuments.includes("IDNAT"));
 
   const docxBuffer = makeDocx("Appel d'offres pour pompes industrielles en RDC.");
   const docx = await extractTenderDocument({
@@ -98,6 +122,23 @@ const aiOutput = {
   assert.strictEqual(archive.sourceType, "zip");
   assert.strictEqual(archive.files.length, 2);
   assert.ok(archive.text.includes("Client Test"));
+
+  const largeDocx = await extractTenderDocument({
+    filename: "dao-volumineux.docx",
+    buffer: makeDocx("Clause technique DAO volumineux. ".repeat(5000))
+  });
+  assert.ok(largeDocx.text.length > 100000);
+
+  const incompleteDocx = await extractTenderDocument({
+    filename: "dao-incomplet.docx",
+    buffer: makeDocx("DAO incomplet sans date limite ni budget.")
+  });
+  assert.ok(incompleteDocx.text.includes("sans date limite"));
+
+  await assert.rejects(
+    () => extractTenderDocument({ filename: "dao-corrompu.zip", buffer: Buffer.from("not-a-zip") }),
+    (error) => error.code === "DOCUMENT_PARSE_ERROR"
+  );
 
   let captured;
   const result = await prepareTenderResponse(docx, {
@@ -123,8 +164,9 @@ const aiOutput = {
   assert.strictEqual(captured.url, "https://api.openai.com/v1/responses");
   assert.strictEqual(captured.options.headers.Authorization, "Bearer test-api-key");
   assert.strictEqual(JSON.parse(captured.options.body).text.format.type, "json_schema");
-  assert.strictEqual(result.compliance.compliancePercent, 33);
+  assert.strictEqual(result.compliance.compliancePercent, 7);
   assert.deepStrictEqual(result.compliance.expiredDocuments, []);
+  assert.strictEqual(result.compliance.documentControl.length, 14);
   assert.strictEqual(result.submissionEnabled, false);
   assert.strictEqual(result.validationRequired, true);
   assert.ok(result.generatedDocuments.financialOfferTemplate.includes("À compléter"));
@@ -140,10 +182,17 @@ const aiOutput = {
     "02-OFFRE-TECHNIQUE-BROUILLON.md",
     "03-OFFRE-FINANCIERE-MODELE.md",
     "04-CHECKLIST-CONFORMITE.md",
-    "05-PLANNING-EXECUTION.md",
-    "06-PIECES-JOINTES.md",
-    "07-RISQUES-ET-ACTIONS.md"
+    "05-TABLEAU-CONFORMITE.md",
+    "06-PLANNING-EXECUTION.md",
+    "07-PIECES-JOINTES.md",
+    "08-RISQUES-ET-ACTIONS.md"
   ]);
+  const pdf = buildPdfExport(result);
+  assert.ok(pdf.subarray(0, 8).toString("ascii").startsWith("%PDF-1.4"));
+  assert.ok(pdf.includes(Buffer.from("VALIDATION HUMAINE OBLIGATOIRE")));
+  const parsedPdf = await extractTenderDocument({ filename: "dao.pdf", buffer: pdf });
+  assert.strictEqual(parsedPdf.sourceType, "pdf");
+  assert.ok(parsedPdf.text.includes("DOSSIER DE REPONSE AO"));
 
   const migration = read("db/migrations/008_tender_response_ai.sql");
   assert.ok(migration.includes("CREATE TABLE IF NOT EXISTS tender_response_analyses"));
@@ -153,18 +202,31 @@ const aiOutput = {
   const store = read("lib/nexus/tender-response-store.js");
   assert.ok(store.includes("INSERT INTO radar_runs"));
   assert.ok(store.includes('"tender-response-ai"'));
+  assert.ok(store.includes("saveRevision"));
 
   const shell = read("admin/tender-response-shell.html");
   assert.ok(shell.includes("Préparer le dossier"));
-  assert.ok(shell.includes("Exporter le dossier"));
+  assert.ok(shell.includes("Télécharger ZIP"));
+  assert.ok(shell.includes("Télécharger PDF"));
+  assert.ok(shell.includes("Tableau des documents"));
+  assert.ok(shell.includes("Autoriser l'envoi"));
   assert.ok(shell.includes("Validation humaine obligatoire"));
   assert.ok(shell.includes('accept=".pdf,.docx,.zip"'));
 
   const handler = read("lib/nexus/tender-response-handler.js");
   assert.ok(handler.includes("requireAdmin(req, res)"));
-  assert.ok(handler.includes("tenderInventory"));
+  assert.ok(handler.includes("documentVaultStore.listDocuments"));
   assert.ok(handler.includes('action === "export"'));
-  assert.ok(handler.includes('action !== "prepare"'));
+  assert.ok(handler.includes('action === "export-pdf"'));
+  assert.ok(handler.includes('action === "revise"'));
+  assert.ok(handler.includes('action === "decision"'));
+
+  const client = read("admin/tender-response.js");
+  assert.ok(client.includes('cache: "no-store"'));
+  assert.ok(client.includes("synchronizeHistory"));
+  assert.ok(client.includes("renderProgress"));
+  assert.ok(client.includes("renderDocumentControl"));
+  assert.ok(client.includes("setInterval"));
 
   const nexusClient = read("admin/nexus.js");
   assert.ok(nexusClient.includes("loadTenderResponseDashboard"));

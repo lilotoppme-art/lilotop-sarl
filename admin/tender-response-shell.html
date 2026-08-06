@@ -67,7 +67,7 @@
         <form id="tender-response-form">
           <label class="file-drop" for="tender-response-file">
             <strong>PDF, DOCX ou ZIP</strong>
-            <span>Un fichier, 3 Mo maximum. Les fichiers ne sont pas conservés.</span>
+            <span>Un fichier, 4 Mo maximum. Le texte est extrait de façon sécurisée puis le fichier source est supprimé.</span>
             <input id="tender-response-file" name="tenderFile" type="file" accept=".pdf,.docx,.zip" required>
             <span class="selected-file" id="selected-tender-file">Aucun fichier sélectionné</span>
           </label>
@@ -87,7 +87,15 @@
         <article><span>Conformité</span><strong id="compliance-score">0%</strong></article>
         <article><span>Client</span><strong id="summary-client">—</strong></article>
         <article><span>Date limite</span><strong id="summary-deadline">—</strong></article>
-        <article><span>Statut</span><strong>Brouillon</strong></article>
+        <article><span>Statut</span><strong id="summary-status">Brouillon</strong></article>
+      </section>
+
+      <section class="workspace-panel progress-panel" id="tender-progress-panel" hidden aria-labelledby="tender-progress-title">
+        <div class="panel-heading">
+          <div><p class="eyebrow">Avancement</p><h2 id="tender-progress-title">Construction du dossier</h2></div>
+          <strong id="overall-progress">0%</strong>
+        </div>
+        <div class="progress-list" id="tender-progress-list"></div>
       </section>
 
       <section class="workspace-panel result-panel-full" id="tender-response-result-panel" hidden>
@@ -96,7 +104,11 @@
             <p class="eyebrow">Dossier préparé</p>
             <h2 id="response-subject">Résultat de l'analyse</h2>
           </div>
-          <a class="button button-primary" id="export-tender-response" href="#" download>Exporter le dossier</a>
+          <div class="result-actions">
+            <button class="button button-secondary" id="preview-tender-response" type="button">Prévisualiser</button>
+            <a class="button button-secondary" id="export-tender-pdf" href="#" download>Télécharger PDF</a>
+            <a class="button button-primary" id="export-tender-response" href="#" download>Télécharger ZIP</a>
+          </div>
         </div>
 
         <p class="executive-summary" id="response-executive-summary"></p>
@@ -118,6 +130,12 @@
             <h3>Critères d'évaluation</h3>
             <ul id="evaluation-criteria"></ul>
           </section>
+          <section><h3>Garanties demandées</h3><ul id="requested-guarantees"></ul></section>
+          <section><h3>Services demandés</h3><ul id="requested-services"></ul></section>
+          <section><h3>Quantités</h3><ul id="requested-quantities"></ul></section>
+          <section><h3>Normes techniques</h3><ul id="technical-standards"></ul></section>
+          <section><h3>Incoterms</h3><ul id="requested-incoterms"></ul></section>
+          <section><h3>Conditions de paiement</h3><ul id="payment-terms"></ul></section>
         </div>
 
         <div class="compliance-grid">
@@ -143,11 +161,29 @@
           </section>
         </div>
 
+        <section class="document-control" aria-labelledby="document-control-title">
+          <div class="panel-heading">
+            <div><p class="eyebrow">Coffre documentaire</p><h3 id="document-control-title">Tableau des documents</h3></div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Document</th><th>Statut</th><th>Expiration</th><th>Source</th><th>Télécharger</th><th>Remplacer</th></tr></thead>
+              <tbody id="document-control-rows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="agent-handoffs" aria-labelledby="agent-handoffs-title">
+          <div class="panel-heading"><div><p class="eyebrow">Coordination NEXUS</p><h3 id="agent-handoffs-title">Transmission aux autres agents</h3></div></div>
+          <div class="handoff-grid" id="agent-handoff-grid"></div>
+        </section>
+
         <nav class="document-tabs" aria-label="Documents générés">
           <button class="is-active" type="button" data-document="submission">Lettre de soumission</button>
           <button type="button" data-document="technical">Offre technique</button>
           <button type="button" data-document="financial">Offre financière</button>
           <button type="button" data-document="checklist">Check-list</button>
+          <button type="button" data-document="conformity">Tableau de conformité</button>
           <button type="button" data-document="planning">Planning</button>
           <button type="button" data-document="attachments">Pièces jointes</button>
         </nav>
@@ -156,8 +192,25 @@
             <h3 id="generated-document-title">Lettre de soumission</h3>
             <span>Validation humaine obligatoire</span>
           </div>
-          <pre id="generated-document-content"></pre>
+          <pre id="generated-document-content" tabindex="0"></pre>
+          <div class="document-edit-actions">
+            <button class="button button-secondary" id="edit-generated-document" type="button">Modifier</button>
+            <button class="button button-primary" id="save-generated-document" type="button" hidden>Enregistrer la version</button>
+            <button class="button button-secondary" id="cancel-generated-document" type="button" hidden>Retour</button>
+          </div>
         </div>
+
+        <section class="validation-panel" aria-labelledby="validation-title">
+          <div><p class="eyebrow">Décision humaine</p><h3 id="validation-title">Validation du dossier</h3></div>
+          <label for="validation-comment">Commentaire</label>
+          <textarea id="validation-comment" rows="3" placeholder="Motif de validation ou correction demandée"></textarea>
+          <div class="validation-actions">
+            <button class="button button-primary" id="validate-tender-response" type="button">Valider</button>
+            <button class="button button-secondary" id="return-tender-response" type="button">Retour</button>
+            <button class="button button-secondary" id="authorize-tender-send" type="button">Autoriser l'envoi</button>
+          </div>
+          <p>Aucun envoi n'est exécuté par ce module. L'autorisation est uniquement journalisée.</p>
+        </section>
       </section>
 
       <section class="workspace-panel history-panel">

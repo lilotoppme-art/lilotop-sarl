@@ -65,7 +65,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(shell.includes("Historique des versions"));
 
   const tenderHandler = read("lib/nexus/tender-response-handler.js");
-  assert.ok(tenderHandler.includes("documentVaultStore.tenderInventory()"));
+  assert.ok(tenderHandler.includes("documentVaultStore.listDocuments()"));
   const tenderAi = read("lib/nexus/tender-response-ai.js");
   assert.ok(tenderAi.includes("expiredDocuments"));
   assert.ok(tenderAi.includes("vaultDocuments"));
