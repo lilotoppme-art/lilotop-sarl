@@ -97,6 +97,10 @@ assert.ok(!Object.prototype.hasOwnProperty.call(safePayload, "raw_data"));
   assert.ok(client.includes("searchOpportunities"));
   assert.ok(client.includes("loadHistory"));
 
+  const dashboard = read("admin/nexus.js");
+  assert.ok(dashboard.includes("summary.latest.createdAt"));
+  assert.ok(dashboard.includes("formatDateTime"));
+
   const api = read("api/commercial-ai.js");
   assert.ok(api.includes("requireAdmin(req, res)"));
   assert.ok(api.includes('action === "analyze"'));

@@ -69,6 +69,7 @@ function testArchitecture() {
 
   const service = read("lib/nexus/orchestrator-service.js");
   assert.match(service, /analyzeWorkflowOpportunity/);
+  assert.match(service, /commercialStore\.saveAnalysis/);
   assert.match(service, /searchSuppliers/);
   assert.match(service, /buildRfqDraft/);
   assert.match(service, /prepareTenderResponse/);
@@ -181,8 +182,25 @@ function testDossierDocuments() {
   assert.equal(sheet.submissionEnabled, false);
 }
 
+function testCommercialAnalysisBridge() {
+  const { commercialAnalysisFor } = require("../lib/nexus/orchestrator-service");
+  const result = commercialAnalysisFor({
+    opportunityScore: 86,
+    fitRationale: "Correspondance sectorielle confirmee.",
+    executiveSummary: "Opportunite qualifiee.",
+    risks: ["Delai court"],
+    recommendedActions: ["Valider la participation"],
+    model: "gpt-test"
+  });
+  assert.equal(result.score, 86);
+  assert.equal(result.classification, "Très prioritaire");
+  assert.deepEqual(result.strengths, ["Correspondance sectorielle confirmee."]);
+  assert.equal(result.model, "gpt-test");
+}
+
 (async () => {
   testArchitecture();
+  testCommercialAnalysisBridge();
   testInterfaceAndRoutes();
   testDossierDocuments();
   await testOpenAiContract();

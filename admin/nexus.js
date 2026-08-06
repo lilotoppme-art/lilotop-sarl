@@ -19,6 +19,14 @@ function escapeHtml(value) {
   })[character]);
 }
 
+function formatDateTime(value) {
+  if (!value) return "Date non disponible";
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short"
+  }).format(new Date(value));
+}
+
 function setAuthenticated(authenticated) {
   body.dataset.authenticated = String(authenticated);
   loginScreen.hidden = authenticated;
@@ -70,6 +78,7 @@ async function loadCommercialDashboard() {
     `;
 
     const dailyPanel = document.getElementById("panel-daily-summary");
+    const latestDate = formatDateTime(summary.latest.createdAt);
     dailyPanel.innerHTML = `
       <div class="surface-header">
         <div>
@@ -81,6 +90,7 @@ async function loadCommercialDashboard() {
       <div class="commercial-dashboard-result">
         <strong>${escapeHtml(summary.latest.opportunityTitle)}</strong>
         <p>${escapeHtml(summary.latest.executiveSummary)}</p>
+        <time datetime="${escapeHtml(summary.latest.createdAt || "")}">Dernière analyse : ${escapeHtml(latestDate)}</time>
       </div>
     `;
   } catch {
