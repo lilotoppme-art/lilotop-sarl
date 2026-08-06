@@ -97,6 +97,18 @@ assert.strictEqual(request.text.format.schema.additionalProperties, false);
   assert.ok(client.includes('/api/procurement-ai?action='));
   assert.ok(client.includes("rerun-search"));
   assert.ok(client.includes("supplier.qualityScore"));
+  assert.ok(client.includes('cache: "no-store"'));
+  assert.ok(client.includes("Date.now()"));
+  assert.ok(client.includes("syncSequence"));
+  assert.ok(client.includes("synchronizeHistory"));
+  assert.ok(client.includes("setInterval"));
+  assert.ok(client.includes("30000"));
+  assert.ok(client.includes('document.visibilityState === "visible"'));
+  assert.ok(client.includes('document.addEventListener("visibilitychange"'));
+  assert.ok(client.includes("renderSafeLinks"));
+  assert.ok(client.includes('document.createElement("a")'));
+  assert.ok(client.includes('link.rel = "noopener noreferrer"'));
+  assert.ok(!client.includes('getElementById("result-summary").textContent'));
 
   const api = read("api/procurement-ai.js");
   assert.ok(api.includes("requireAdmin(req, res)"));

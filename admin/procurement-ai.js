@@ -7,7 +7,14 @@ const loginForm = document.getElementById("procurement-login-form");
 const loginStatus = document.getElementById("procurement-login-status");
 const globalStatus = document.getElementById("procurement-status");
 const searchForm = document.getElementById("supplier-search-form");
-const state = { history: [], selected: null };
+const state = {
+  history: [],
+  selected: null,
+  busy: false,
+  authenticated: false,
+  syncSequence: 0
+};
+let pollingTimer = null;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -28,23 +35,75 @@ function safeUrl(value) {
   }
 }
 
+function sourceName(value, fallback = "Source") {
+  try {
+    const hostname = new URL(value).hostname.replace(/^www\./, "");
+    const cleanFallback = String(fallback || "")
+      .replace(/^https?:\/\//, "")
+      .replace(/\/$/, "")
+      .trim();
+    return cleanFallback && !cleanFallback.includes("/") ? cleanFallback : hostname;
+  } catch {
+    return String(fallback || "Source").trim() || "Source";
+  }
+}
+
+function stripMarkdownLinks(value) {
+  return String(value || "").replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g, "$1");
+}
+
+function renderSafeLinks(target, value) {
+  const text = String(value || "");
+  const pattern = /\[([^\]\n]{1,200})\]\((https?:\/\/[^)\s]+)\)/g;
+  const fragment = document.createDocumentFragment();
+  let cursor = 0;
+  let match;
+
+  while ((match = pattern.exec(text))) {
+    fragment.append(document.createTextNode(text.slice(cursor, match.index)));
+    const href = safeUrl(match[2]);
+    if (href) {
+      const link = document.createElement("a");
+      link.className = "source-link";
+      link.href = href;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = sourceName(href, match[1]);
+      fragment.append(link);
+    } else {
+      fragment.append(document.createTextNode(match[0]));
+    }
+    cursor = pattern.lastIndex;
+  }
+
+  fragment.append(document.createTextNode(text.slice(cursor)));
+  target.replaceChildren(fragment);
+}
+
 function setAuthenticated(authenticated) {
+  state.authenticated = authenticated;
   body.dataset.authenticated = String(authenticated);
   loginScreen.hidden = authenticated;
   appShell.hidden = !authenticated;
   document.title = `${authenticated ? "Achats AI" : "Connexion Achats AI"} | LILOTOP SARL`;
 }
 
-function setBusy(busy, message = "") {
-  body.classList.toggle("is-busy", busy);
+function setStatus(message = "", type = "") {
   globalStatus.textContent = message;
-  globalStatus.classList.remove("error");
+  globalStatus.classList.remove("error", "success", "syncing");
+  if (type) globalStatus.classList.add(type);
+}
+
+function setBusy(busy, message = "") {
+  state.busy = busy;
+  body.classList.toggle("is-busy", busy);
+  setStatus(message, busy ? "syncing" : "");
 }
 
 function setError(error) {
+  state.busy = false;
   body.classList.remove("is-busy");
-  globalStatus.textContent = error.message || "Une erreur est survenue.";
-  globalStatus.classList.add("error");
+  setStatus(error.message || "Une erreur est survenue.", "error");
 }
 
 function formatDate(value, withTime = false) {
@@ -55,9 +114,16 @@ function formatDate(value, withTime = false) {
 }
 
 async function api(action, options = {}) {
-  const response = await fetch(`/api/procurement-ai?action=${encodeURIComponent(action)}${options.query || ""}`, {
-    method: options.method || "GET",
-    headers: options.body ? { "Content-Type": "application/json" } : {},
+  const method = options.method || "GET";
+  const cacheBuster = method === "GET" ? `&_=${Date.now()}` : "";
+  const response = await fetch(`/api/procurement-ai?action=${encodeURIComponent(action)}${options.query || ""}${cacheBuster}`, {
+    method,
+    cache: "no-store",
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+      ...(options.body ? { "Content-Type": "application/json" } : {})
+    },
     body: options.body ? JSON.stringify(options.body) : undefined
   });
   const payload = await response.json().catch(() => ({ ok: false, error: "Réponse serveur invalide" }));
@@ -72,9 +138,14 @@ async function api(action, options = {}) {
 }
 
 function listItems(targetId, items) {
-  document.getElementById(targetId).innerHTML = items.length
-    ? items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")
-    : "<li>Aucun élément identifié.</li>";
+  const target = document.getElementById(targetId);
+  target.replaceChildren();
+  const values = items.length ? items : ["Aucun élément identifié."];
+  values.forEach((item) => {
+    const listItem = document.createElement("li");
+    renderSafeLinks(listItem, item);
+    target.append(listItem);
+  });
 }
 
 function populateForm(criteria = {}) {
@@ -104,7 +175,7 @@ function renderResult(result) {
   document.getElementById("result-empty").hidden = true;
   document.getElementById("result-content").hidden = false;
   document.getElementById("result-title").textContent = result.criteria.product;
-  document.getElementById("result-summary").textContent = result.summary;
+  renderSafeLinks(document.getElementById("result-summary"), result.summary);
   document.getElementById("rerun-search").disabled = false;
 
   document.getElementById("supplier-rows").innerHTML = result.suppliers.length
@@ -114,7 +185,7 @@ function renderResult(result) {
         <tr>
           <td>
             <span class="supplier-name">${escapeHtml(supplier.name)}</span>
-            <span class="supplier-evidence">${escapeHtml(supplier.evidence)}</span>
+            <span class="supplier-evidence">${escapeHtml(stripMarkdownLinks(supplier.evidence))}</span>
           </td>
           <td>${escapeHtml(supplier.country || "À confirmer")}</td>
           <td><span class="supplier-type">${supplier.supplierType === "manufacturer" ? "Fabricant" : "Distributeur"}</span></td>
@@ -122,7 +193,7 @@ function renderResult(result) {
           <td>${escapeHtml(supplier.estimatedLeadTime || "À confirmer")}</td>
           <td>${escapeHtml(supplier.estimatedPrice || "Sur devis")}</td>
           <td>${sourceUrl
-            ? `<a class="source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">Consulter</a>`
+            ? `<a class="source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(sourceName(sourceUrl, supplier.name))}</a>`
             : "Non disponible"}</td>
         </tr>
       `;
@@ -161,29 +232,78 @@ function renderHistory() {
   document.getElementById("last-search-date").textContent = formatDate(state.history[0]?.createdAt, true);
 }
 
-async function loadHistory() {
-  setBusy(true, "Chargement de l'historique…");
+async function synchronizeHistory({ selectId = null, silent = false } = {}) {
+  const sequence = ++state.syncSequence;
+  if (!silent) setStatus("Synchronisation…", "syncing");
   try {
-    state.history = await api("history");
+    const history = await api("history");
+    if (sequence !== state.syncSequence) return false;
+    state.history = history;
     renderHistory();
-    if (!state.selected && state.history[0]) renderResult(state.history[0]);
-    setBusy(false, "");
+    const selectedId = selectId || state.selected?.id;
+    const selected = state.history.find((item) => item.id === selectedId)
+      || (!state.selected ? state.history[0] : null);
+    if (selected) renderResult(selected);
+    if (!silent) setStatus("Mise à jour réussie.", "success");
+    return true;
+  } catch (error) {
+    if (sequence === state.syncSequence) {
+      setStatus(`Erreur de synchronisation : ${error.message || "réessayez avec Actualiser."}`, "error");
+    }
+    return false;
+  }
+}
+
+async function loadHistory() {
+  setBusy(true, "Synchronisation…");
+  const synchronized = await synchronizeHistory({ silent: true });
+  state.busy = false;
+  body.classList.remove("is-busy");
+  setStatus(
+    synchronized ? "Mise à jour réussie." : "Erreur de synchronisation : réessayez avec Actualiser.",
+    synchronized ? "success" : "error"
+  );
+}
+
+async function runSearch(criteria) {
+  setBusy(true, "Recherche en cours…");
+  try {
+    const result = await api("search", { method: "POST", body: criteria });
+    renderResult(result);
+    setStatus("Synchronisation…", "syncing");
+    const synchronized = await synchronizeHistory({ selectId: result.id, silent: true });
+    state.busy = false;
+    body.classList.remove("is-busy");
+    setStatus(
+      synchronized
+        ? "Mise à jour réussie. Recherche fournisseurs enregistrée."
+        : "Recherche enregistrée, mais la synchronisation a échoué. Utilisez Actualiser pour réessayer.",
+      synchronized ? "success" : "error"
+    );
   } catch (error) {
     setError(error);
   }
 }
 
-async function runSearch(criteria) {
-  setBusy(true, "Recherche et analyse OpenAI en cours…");
-  try {
-    const result = await api("search", { method: "POST", body: criteria });
-    renderResult(result);
-    state.history = await api("history");
-    renderHistory();
-    setBusy(false, "Recherche fournisseurs terminée et enregistrée.");
-  } catch (error) {
-    setError(error);
-  }
+function stopPolling() {
+  if (pollingTimer) clearInterval(pollingTimer);
+  pollingTimer = null;
+}
+
+function startPolling() {
+  stopPolling();
+  if (!state.authenticated || document.visibilityState !== "visible") return;
+  pollingTimer = setInterval(() => {
+    if (!state.busy && document.visibilityState === "visible") {
+      synchronizeHistory().catch(() => {});
+    }
+  }, 30000);
+}
+
+function resumeSynchronization() {
+  if (!state.authenticated || document.visibilityState !== "visible") return;
+  if (!state.busy) synchronizeHistory().catch(() => {});
+  startPolling();
 }
 
 async function authenticate(event) {
@@ -202,6 +322,7 @@ async function authenticate(event) {
     loginStatus.textContent = "";
     setAuthenticated(true);
     await loadHistory();
+    startPolling();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -212,7 +333,7 @@ searchForm.addEventListener("submit", (event) => {
   runSearch(formPayload());
 });
 loginForm.addEventListener("submit", authenticate);
-document.getElementById("refresh-history").addEventListener("click", loadHistory);
+document.getElementById("refresh-history").addEventListener("click", () => synchronizeHistory());
 document.getElementById("rerun-search").addEventListener("click", () => {
   if (state.selected) runSearch(state.selected.criteria);
 });
@@ -223,11 +344,21 @@ document.getElementById("search-history").addEventListener("click", (event) => {
   if (selected) renderResult(selected);
 });
 document.getElementById("procurement-logout").addEventListener("click", async () => {
+  stopPolling();
   await fetch("/api/business-radar-auth", { method: "DELETE" });
   setAuthenticated(false);
   document.getElementById("procurement-email").focus();
 });
 
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") stopPolling();
+  else resumeSynchronization();
+});
+window.addEventListener("focus", resumeSynchronization);
+window.addEventListener("beforeunload", stopPolling);
+
 const initiallyAuthenticated = body.dataset.authenticated === "true";
 setAuthenticated(initiallyAuthenticated);
-if (initiallyAuthenticated) loadHistory();
+if (initiallyAuthenticated) {
+  loadHistory().finally(startPolling);
+}

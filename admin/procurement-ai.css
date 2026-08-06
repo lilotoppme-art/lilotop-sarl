@@ -96,6 +96,18 @@ textarea {
   border-left: 3px solid var(--gold);
 }
 
+.result-summary .source-link {
+  margin-inline: 2px;
+}
+
+.global-status.syncing {
+  color: #24567a;
+}
+
+.global-status.success {
+  color: #24714d;
+}
+
 .supplier-name {
   display: block;
   min-width: 170px;
