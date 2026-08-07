@@ -183,7 +183,7 @@ function listMarkup(items, emptyText) {
   )}</li>`).join("")}</ul>`;
 }
 
-function renderDossier(workflow, actions) {
+function renderDossier(workflow, actions, sourceDocuments = []) {
   const panel = document.getElementById("dossier-panel");
   const dossier = workflow.dossier || {};
   const analysis = dossier.analysis || {};
@@ -191,6 +191,17 @@ function renderDossier(workflow, actions) {
   document.getElementById("dossier-title").textContent = workflow.title;
   document.getElementById("dossier-status").textContent = PIPELINE_LABELS[dossier.pipelineStatus] || workflow.status;
   document.getElementById("dossier-content").innerHTML = `
+    <article class="dossier-card dossier-card-wide">
+      <h3>DAO et source officielle</h3>
+      <p><strong>Référence :</strong> ${escapeHtml(dossier.tenderSource?.reference || "À confirmer")}</p>
+      <p><strong>URL source :</strong> ${dossier.opportunity?.sourceUrl ? `<a href="${escapeHtml(dossier.opportunity.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ouvrir l'avis officiel</a>` : "Non renseignée"}</p>
+      <p><strong>Récupération :</strong> ${escapeHtml(dossier.tenderSource?.retrievalStatus || "En attente")}</p>
+      ${sourceDocuments.length ? sourceDocuments.map((document) => `
+        <p><a class="button button-secondary button-inline" href="/api/nexus-orchestrator?action=document&id=${escapeHtml(document.id)}" download>
+          Télécharger ${escapeHtml(document.filename)} (${escapeHtml(Math.round(document.sizeBytes / 1024))} Ko)
+        </a></p>
+      `).join("") : "<p>Aucun document téléchargé.</p>"}
+    </article>
     <article class="dossier-card">
       <h3>Analyse</h3>
       <p>${escapeHtml(analysis.executiveSummary || "Analyse en attente.")}</p>
@@ -203,7 +214,7 @@ function renderDossier(workflow, actions) {
       <p><strong>Score :</strong> ${escapeHtml(analysis.opportunityScore ?? "—")}/100 · ${escapeHtml(analysis.priority || "Non classé")}</p>
       <p><strong>Pays :</strong> ${escapeHtml(analysis.country || "Non renseigné")}</p>
       <p><strong>Date limite :</strong> ${escapeHtml(analysis.deadline || "Non renseignée")}</p>
-      ${listMarkup(analysis.products, "Aucun produit extrait.")}
+      ${listMarkup((analysis.products || []).map((item) => `${item.name}: ${item.quantity || "À confirmer"}`), "Aucun produit extrait.")}
     </article>
     <article class="dossier-card">
       <h3>Fournisseurs</h3>
@@ -225,11 +236,19 @@ function renderDossier(workflow, actions) {
       ${listMarkup(dossier.tenderResponse?.compliance?.missingDocuments, "Aucun document manquant identifié.")}
       <strong>Documents expirés</strong>
       ${listMarkup(dossier.tenderResponse?.compliance?.expiredDocuments, "Aucun document expiré identifié.")}
+      <div class="document-control-table">
+        ${(dossier.tenderResponse?.compliance?.documentControl || []).map((item) => `
+          <p><strong>${escapeHtml(item.document)}</strong><br>
+          ${escapeHtml(item.status)} · ${escapeHtml(item.expiration || "Sans date")}<br>
+          ${escapeHtml(item.source)} · ${escapeHtml(item.actionRequired || "À confirmer")}</p>
+        `).join("")}
+      </div>
     </article>
     <article class="dossier-card">
       <h3>Comparaison fournisseurs</h3>
       ${(dossier.supplierComparison || []).slice(0, 8).map((item) => `
         <p><strong>${escapeHtml(item.supplier)}</strong> · ${escapeHtml(item.product)} · ${escapeHtml(item.reliabilityScore)}/100<br>
+        ${escapeHtml(item.priceStatus || "EN ATTENTE DE COTATION FOURNISSEUR")}<br>
         Prix, délai et Incoterm : à confirmer par cotation validée.</p>
       `).join("") || "<p>Aucune comparaison disponible.</p>"}
     </article>
@@ -264,7 +283,10 @@ function renderValidationSheet(workflow) {
     ["Fournisseur recommandé", sheet.recommendedSupplier || "À valider"],
     ["Coût d'achat", displayMoney(sheet.purchaseCost, sheet.currency)],
     ["Prix de vente proposé", displayMoney(sheet.proposedSalePrice, sheet.currency)],
-    ["Marge estimée", displayMoney(sheet.estimatedMargin, sheet.currency)]
+    ["Marge estimée", displayMoney(sheet.estimatedMargin, sheet.currency)],
+    ["Cotations reçues", sheet.quotationsReceived ?? 0],
+    ["Cotations manquantes", sheet.quotationsMissing ?? 0],
+    ["Statut final", sheet.finalStatus || "CORRECTION REQUISE"]
   ];
   document.getElementById("validation-content").innerHTML = `
     <div class="validation-facts">${fields.map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}</div>
@@ -275,6 +297,10 @@ function renderValidationSheet(workflow) {
     <article><h3>Lettre de soumission</h3><pre>${escapeHtml(sheet.submissionLetter)}</pre></article>
     <article><h3>E-mail prêt à envoyer</h3><pre>${escapeHtml(sheet.emailDraft)}</pre></article>
     <article><h3>Actions restant à valider</h3>${listMarkup(sheet.remainingActions, "Aucune action restante.")}</article>
+    <article><h3>Lignes en attente de cotation</h3>${listMarkup(
+      (sheet.quotationLines || []).map((item) => `${item.product} · ${item.supplier} · ${item.priceStatus}`),
+      "Aucune ligne de cotation."
+    )}</article>
   `;
   document.getElementById("purchase-cost").value = sheet.purchaseCost ?? "";
   document.getElementById("sale-price").value = sheet.proposedSalePrice ?? "";
@@ -302,7 +328,7 @@ async function refresh() {
 
 async function viewWorkflow(id) {
   const data = await api(`/api/nexus-orchestrator?action=workflow&id=${encodeURIComponent(id)}`);
-  renderDossier(data.workflow, [...data.actions].reverse());
+  renderDossier(data.workflow, [...data.actions].reverse(), data.sourceDocuments || []);
   renderActions(data.actions);
 }
 
@@ -442,5 +468,8 @@ document.getElementById("orchestrator-logout").addEventListener("click", logout)
 
 setAuthenticated(body.dataset.authenticated === "true");
 if (body.dataset.authenticated === "true") {
-  refresh().catch((error) => { reportClientFailure(error.message); });
+  refresh().then(() => {
+    const workflowId = new URLSearchParams(window.location.search).get("workflow");
+    return workflowId ? viewWorkflow(workflowId) : null;
+  }).catch((error) => { reportClientFailure(error.message); });
 }

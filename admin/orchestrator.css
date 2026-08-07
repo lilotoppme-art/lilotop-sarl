@@ -219,9 +219,12 @@ main {
   gap: 1rem;
 }
 .dossier-card { padding: 1.1rem; background: var(--surface-2); border: 1px solid var(--line); }
+.dossier-card-wide { grid-column: 1 / -1; }
 .dossier-card h3 { margin-top: 0; }
 .dossier-card p, .dossier-card li { color: #405260; line-height: 1.55; }
 .dossier-card pre { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; color: #405260; }
+.document-control-table { margin-top: .9rem; border-top: 1px solid var(--line); }
+.document-control-table p { margin: 0; padding: .7rem 0; border-bottom: 1px solid var(--line); }
 
 .validation-sheet { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--gold); }
 .validation-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }

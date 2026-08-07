@@ -66,6 +66,10 @@ function testArchitecture() {
   assert.match(migration, /CREATE TABLE IF NOT EXISTS nexus_workflows/);
   assert.match(migration, /CREATE TABLE IF NOT EXISTS nexus_workflow_actions/);
   assert.doesNotMatch(migration, /\b(DROP|TRUNCATE|ALTER\s+TABLE)\b/i);
+  const documentMigration = read("db/migrations/015_nexus_tender_documents.sql");
+  assert.match(documentMigration, /CREATE TABLE IF NOT EXISTS nexus_workflow_documents/);
+  assert.match(documentMigration, /file_data bytea NOT NULL/);
+  assert.doesNotMatch(documentMigration, /\b(DROP|TRUNCATE|ALTER\s+TABLE)\b/i);
 
   const service = read("lib/nexus/orchestrator-service.js");
   assert.match(service, /analyzeWorkflowOpportunity/);
@@ -74,6 +78,8 @@ function testArchitecture() {
   assert.match(service, /buildRfqDraft/);
   assert.match(service, /prepareTenderResponse/);
   assert.match(service, /documentVaultStore\.tenderInventory/);
+  assert.match(service, /retrieveOfficialDocument/);
+  assert.match(service, /EN ATTENTE DE COTATION FOURNISSEUR/);
   assert.match(service, /applyDecision/);
   assert.match(service, /sendEnabled: false/);
   assert.match(service, /submissionEnabled: false/);
@@ -88,6 +94,7 @@ function testArchitecture() {
   assert.match(store, /activeWorkflows/);
   assert.match(store, /activeAgents: 7/);
   assert.match(store, /updateDossier/);
+  assert.match(store, /saveWorkflowDocument/);
 
   const handler = read("lib/nexus/orchestrator-handler.js");
   assert.match(handler, /requireAdmin/);
@@ -96,6 +103,7 @@ function testArchitecture() {
   assert.match(handler, /action === "dashboard"/);
   assert.match(handler, /action === "detect"/);
   assert.match(handler, /action === "decision"/);
+  assert.match(handler, /action === "document"/);
 }
 
 function testInterfaceAndRoutes() {
@@ -116,6 +124,8 @@ function testInterfaceAndRoutes() {
   assert.match(html, /Workflows actifs/);
   assert.match(html, /Valeur potentielle/);
   assert.match(client, /Aucun envoi automatique n'est autorisé/);
+  assert.match(client, /DAO et source officielle/);
+  assert.match(client, /EN ATTENTE DE COTATION FOURNISSEUR/);
   assert.match(html, /Valider la participation/);
   assert.match(html, /\{\{LOGIN_HIDDEN\}\}/);
   assert.match(html, /\{\{SHELL_HIDDEN\}\}/);
@@ -167,6 +177,7 @@ function testDossierDocuments() {
   const comparison = supplierComparisonFor(dossier);
   assert.equal(comparison[0].supplier, "A");
   assert.equal(comparison[0].price, null);
+  assert.equal(comparison[0].priceStatus, "EN ATTENTE DE COTATION FOURNISSEUR");
   const sheet = buildFinalValidation(dossier, {
     compliance: { compliancePercent: 75, missingDocuments: ["RCCM"], expiredDocuments: [] },
     risks: [],
@@ -180,6 +191,30 @@ function testDossierDocuments() {
   assert.equal(sheet.proposedSalePrice, null);
   assert.equal(sheet.sendEnabled, false);
   assert.equal(sheet.submissionEnabled, false);
+  assert.equal(sheet.finalStatus, "DOCUMENTS MANQUANTS");
+  assert.equal(sheet.quotationsReceived, 0);
+  assert.equal(sheet.quotationsMissing, 2);
+}
+
+function testOfficialTenderSourcePolicy() {
+  const { officialDocumentUrls, officialUrl } = require("../lib/nexus/tender-source");
+  assert.equal(
+    officialUrl("https://www.un.org/Depts/ptd/files/test.pdf").hostname,
+    "www.un.org"
+  );
+  assert.throws(
+    () => officialUrl("https://example.com/test.pdf"),
+    (error) => error.code === "TENDER_SOURCE_NOT_ALLOWED"
+  );
+  assert.deepEqual(officialDocumentUrls({
+    rawData: {
+      documentUrls: [
+        "https://www.un.org/a.pdf",
+        { url: "https://www.un.org/b.pdf" },
+        "https://www.un.org/a.pdf"
+      ]
+    }
+  }), ["https://www.un.org/a.pdf", "https://www.un.org/b.pdf"]);
 }
 
 function testCommercialAnalysisBridge() {
@@ -203,6 +238,7 @@ function testCommercialAnalysisBridge() {
   testCommercialAnalysisBridge();
   testInterfaceAndRoutes();
   testDossierDocuments();
+  testOfficialTenderSourcePolicy();
   await testOpenAiContract();
   console.log("NEXUS Orchestrator tests passed.");
 })().catch((error) => {
