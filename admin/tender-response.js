@@ -19,6 +19,153 @@ function escapeHtml(value) {
   })[character]);
 }
 
+function clamp(value) {
+  return Math.min(100, Math.max(0, Math.round(Number(value) || 0)));
+}
+
+function scoreColor(score) {
+  return score > 85 ? "green" : score >= 70 ? "orange" : "red";
+}
+
+function decisionFor(score) {
+  if (score > 85) return "✓ Repondre";
+  if (score >= 70) return "⚠ Repondre avec reserves";
+  return "✕ Ne pas repondre";
+}
+
+function calculateGlobal(criteria) {
+  return clamp((criteria || []).reduce((sum, item) => sum + item.score * item.weight / 100, 0));
+}
+
+function simulatedEvaluation(evaluation, scenario) {
+  const criteria = (evaluation.criteria || []).map((item) => ({ ...item }));
+  const byKey = Object.fromEntries(criteria.map((item) => [item.key, item]));
+  const price = Math.max(-30, Math.min(30, Number(scenario.priceAdjustment) || 0));
+  const supplier = clamp(scenario.supplierReliability);
+  const delivery = Math.max(-60, Math.min(60, Number(scenario.deliveryAdjustmentDays) || 0));
+  if (byKey.financial) byKey.financial.score = clamp(byKey.financial.score - price * 0.7);
+  if (byKey.suppliers) byKey.suppliers.score = supplier;
+  if (byKey.logistics) byKey.logistics.score = clamp(byKey.logistics.score - delivery * 0.45);
+  if (byKey.competitiveness) {
+    byKey.competitiveness.score = clamp(
+      byKey.competitiveness.score - price * 0.4
+      + (supplier - (evaluation.simulationDefaults?.supplierReliability || 0)) * 0.2
+      - delivery * 0.15
+    );
+  }
+  const globalScore = calculateGlobal(criteria);
+  const probability = clamp(globalScore * 0.9 - (evaluation.alerts?.length || 0));
+  const weakest = [...criteria].sort((left, right) => left.score - right.score).slice(0, 3);
+  return {
+    criteria,
+    globalScore,
+    probability,
+    color: scoreColor(globalScore),
+    decision: {
+      label: decisionFor(globalScore),
+      justification: `Scenario calcule a ${globalScore}/100. Points a renforcer: ${weakest.map((item) => `${item.label} ${item.score}/100`).join(", ")}.`
+    }
+  };
+}
+
+function drawRadar(criteria) {
+  const canvas = document.getElementById("tender-score-radar");
+  const context = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+  const centerX = width / 2;
+  const centerY = height / 2 + 4;
+  const radius = Math.min(width, height) * 0.35;
+  const points = criteria.length;
+  context.clearRect(0, 0, width, height);
+  if (points < 3) return;
+
+  context.font = "12px Segoe UI, Arial";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  for (let level = 1; level <= 5; level += 1) {
+    context.beginPath();
+    criteria.forEach((_, index) => {
+      const angle = -Math.PI / 2 + index * Math.PI * 2 / points;
+      const distance = radius * level / 5;
+      const x = centerX + Math.cos(angle) * distance;
+      const y = centerY + Math.sin(angle) * distance;
+      if (index === 0) context.moveTo(x, y); else context.lineTo(x, y);
+    });
+    context.closePath();
+    context.strokeStyle = "#d7dde3";
+    context.stroke();
+  }
+  criteria.forEach((item, index) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / points;
+    context.beginPath();
+    context.moveTo(centerX, centerY);
+    context.lineTo(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius);
+    context.strokeStyle = "#e1e5e9";
+    context.stroke();
+    const labelRadius = radius + 37;
+    const label = item.label.length > 18 ? `${item.label.slice(0, 17)}…` : item.label;
+    context.fillStyle = "#26384b";
+    context.fillText(label, centerX + Math.cos(angle) * labelRadius, centerY + Math.sin(angle) * labelRadius);
+  });
+  context.beginPath();
+  criteria.forEach((item, index) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / points;
+    const distance = radius * clamp(item.score) / 100;
+    const x = centerX + Math.cos(angle) * distance;
+    const y = centerY + Math.sin(angle) * distance;
+    if (index === 0) context.moveTo(x, y); else context.lineTo(x, y);
+  });
+  context.closePath();
+  context.fillStyle = "rgba(184, 145, 55, 0.22)";
+  context.strokeStyle = "#8d6b1f";
+  context.lineWidth = 2;
+  context.fill();
+  context.stroke();
+}
+
+function renderEvaluation(evaluation) {
+  const section = document.getElementById("tender-evaluation");
+  if (!evaluation?.criteria?.length) {
+    section.hidden = true;
+    return;
+  }
+  section.hidden = false;
+  const color = evaluation.color || scoreColor(evaluation.globalScore);
+  const orb = document.getElementById("global-score-orb");
+  orb.classList.remove("green", "orange", "red");
+  orb.classList.add(color);
+  document.getElementById("global-score").textContent = evaluation.globalScore;
+  document.getElementById("win-probability").textContent = `${evaluation.probability}%`;
+  document.getElementById("tender-decision").textContent = `${evaluation.decision?.symbol === "check" ? "✓" : evaluation.decision?.symbol === "warning" ? "⚠" : "✕"} ${evaluation.decision?.label || decisionFor(evaluation.globalScore)}`;
+  document.getElementById("tender-decision-justification").textContent = evaluation.decision?.justification || "";
+  document.getElementById("score-table-rows").innerHTML = evaluation.criteria.map((item) => `
+    <tr><td>${escapeHtml(item.label)}</td><td>${escapeHtml(item.weight)}%</td>
+    <td><span class="score-value ${scoreColor(item.score)}">${escapeHtml(item.score)}/100</span></td>
+    <td>${escapeHtml(item.observation)}</td></tr>
+  `).join("");
+  renderList("evaluation-alert-list", evaluation.alerts);
+  renderList("evaluation-recommendation-list", evaluation.recommendations);
+  document.getElementById("simulation-supplier").value = evaluation.simulationDefaults?.supplierReliability ?? 50;
+  drawRadar(evaluation.criteria);
+  updateSimulation();
+}
+
+function updateSimulation() {
+  const evaluation = state.selected?.keyInformation?.evaluation;
+  if (!evaluation?.criteria?.length) return;
+  const simulated = simulatedEvaluation(evaluation, {
+    priceAdjustment: document.getElementById("simulation-price").value,
+    supplierReliability: document.getElementById("simulation-supplier").value,
+    deliveryAdjustmentDays: document.getElementById("simulation-delivery").value
+  });
+  document.getElementById("simulation-global-score").textContent = `${simulated.globalScore}/100`;
+  document.getElementById("simulation-probability").textContent = `${simulated.probability}%`;
+  document.getElementById("simulation-decision").textContent = simulated.decision.label;
+  document.getElementById("simulation-justification").textContent = simulated.decision.justification;
+  if (!document.getElementById("tender-simulation").hidden) drawRadar(simulated.criteria);
+}
+
 function setAuthenticated(authenticated) {
   state.authenticated = authenticated;
   body.dataset.authenticated = String(authenticated);
@@ -199,6 +346,7 @@ function renderAnalysis(analysis, scroll = false) {
   renderDocumentControl(compliance.documentControl || []);
   renderHandoffs(info.agentHandoffs);
   renderProgress(analysis);
+  renderEvaluation(info.evaluation);
   document.getElementById("export-tender-response").href = `/api/tender-response-ai?action=export&id=${encodeURIComponent(analysis.id)}`;
   document.getElementById("export-tender-pdf").href = `/api/tender-response-ai?action=export-pdf&id=${encodeURIComponent(analysis.id)}`;
   showGeneratedDocument(state.activeDocument);
@@ -348,6 +496,15 @@ document.getElementById("save-generated-document").addEventListener("click", sav
 document.getElementById("validate-tender-response").addEventListener("click", () => applyDecision("validate"));
 document.getElementById("return-tender-response").addEventListener("click", () => applyDecision("return"));
 document.getElementById("authorize-tender-send").addEventListener("click", () => applyDecision("authorize"));
+document.getElementById("open-tender-simulation").addEventListener("click", () => {
+  const panel = document.getElementById("tender-simulation");
+  panel.hidden = !panel.hidden;
+  if (!panel.hidden) updateSimulation();
+  else drawRadar(state.selected?.keyInformation?.evaluation?.criteria || []);
+});
+["simulation-price", "simulation-supplier", "simulation-delivery"].forEach((id) => {
+  document.getElementById(id).addEventListener("input", updateSimulation);
+});
 document.getElementById("tender-response-logout").addEventListener("click", async () => {
   clearInterval(pollingTimer);
   await fetch("/api/business-radar-auth", { method: "DELETE" });

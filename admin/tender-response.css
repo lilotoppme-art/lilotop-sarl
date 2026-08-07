@@ -231,6 +231,173 @@
   border-top: 3px solid var(--amber) !important;
 }
 
+.tender-evaluation {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid var(--steel-200);
+  background: #f8fafb;
+}
+
+.evaluation-heading,
+.evaluation-summary-grid,
+.evaluation-layout,
+.evaluation-alerts,
+.simulation-results {
+  display: grid;
+  gap: 16px;
+}
+
+.evaluation-heading {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.evaluation-heading h3,
+.simulation-panel h4 {
+  margin: 0;
+}
+
+.score-orb {
+  display: flex;
+  width: 92px;
+  height: 92px;
+  align-items: baseline;
+  justify-content: center;
+  padding-top: 25px;
+  border: 5px solid var(--steel-300);
+  border-radius: 50%;
+  background: var(--white);
+}
+
+.score-orb strong { font-size: 29px; }
+.score-orb span { font-size: 12px; }
+.score-orb.green { border-color: var(--green); color: var(--green); }
+.score-orb.orange { border-color: var(--amber); color: #8a5a00; }
+.score-orb.red { border-color: var(--red); color: var(--red); }
+
+.evaluation-summary-grid {
+  grid-template-columns: minmax(180px, 0.35fr) minmax(300px, 1fr);
+  margin-top: 16px;
+}
+
+.evaluation-summary-grid article {
+  padding: 16px;
+  border-left: 3px solid var(--gold);
+  background: var(--white);
+}
+
+.evaluation-summary-grid span,
+.evaluation-summary-grid strong { display: block; }
+.evaluation-summary-grid span { color: var(--steel-700); font-size: 12px; font-weight: 700; }
+.evaluation-summary-grid strong { margin-top: 5px; font-size: 20px; }
+.evaluation-summary-grid p { margin: 7px 0 0; color: var(--steel-700); font-size: 13px; }
+
+.evaluation-layout {
+  grid-template-columns: minmax(500px, 1.2fr) minmax(340px, 0.8fr);
+  align-items: stretch;
+  margin-top: 18px;
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  font-size: 13px;
+}
+
+.score-table th,
+.score-table td {
+  padding: 11px;
+  border-bottom: 1px solid var(--steel-200);
+  text-align: left;
+  vertical-align: top;
+}
+
+.score-value {
+  display: inline-flex;
+  min-width: 58px;
+  justify-content: center;
+  padding: 4px 7px;
+  border-radius: 3px;
+  color: var(--white);
+  font-weight: 800;
+}
+
+.score-value.green { background: var(--green); }
+.score-value.orange { color: #382600; background: var(--gold); }
+.score-value.red { background: var(--red); }
+
+.radar-wrap {
+  display: grid;
+  min-height: 360px;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid var(--steel-200);
+  background: var(--white);
+}
+
+#tender-score-radar {
+  width: min(100%, 560px);
+  height: auto;
+  aspect-ratio: 28 / 19;
+}
+
+.evaluation-alerts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 16px 0;
+}
+
+.evaluation-alerts section {
+  padding: 16px;
+  border: 1px solid var(--steel-200);
+  background: var(--white);
+}
+
+.evaluation-alerts h4 { margin: 0 0 8px; }
+.evaluation-alerts ul { margin: 0; padding-left: 20px; color: var(--steel-700); font-size: 13px; }
+
+.simulation-panel {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--gold);
+  background: #fffdf7;
+}
+
+.simulation-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.simulation-controls label {
+  color: var(--steel-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.simulation-controls input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid var(--steel-300);
+  font: inherit;
+}
+
+.simulation-results {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.simulation-results span {
+  padding: 10px;
+  background: var(--white);
+  font-size: 12px;
+}
+
+.simulation-results strong { display: block; margin-top: 4px; font-size: 16px; }
+#simulation-justification { color: var(--steel-700); font-size: 13px; }
+
 .document-control,
 .agent-handoffs,
 .validation-panel {
@@ -421,9 +588,14 @@
   #tender-response-form,
   .information-grid,
   .compliance-grid,
-  .progress-list {
+  .progress-list,
+  .evaluation-layout,
+  .evaluation-alerts {
     grid-template-columns: 1fr;
   }
+
+  .simulation-controls,
+  .simulation-results { grid-template-columns: 1fr; }
 
   .handoff-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
@@ -444,6 +616,8 @@
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .evaluation-summary-grid { grid-template-columns: 1fr; }
 
   .progress-item { grid-template-columns: 110px 1fr 42px; }
   .handoff-grid { grid-template-columns: 1fr; }

@@ -74,6 +74,27 @@ const aiOutput = {
   },
   risks: ["Délai court"],
   recommendedActions: ["Obtenir l'attestation fiscale"],
+  assessment: {
+    technicalScore: 82,
+    technicalObservation: "Produits et norme identifiés.",
+    financialScore: 70,
+    financialObservation: "Prix à compléter.",
+    experienceScore: 68,
+    experienceObservation: "Références à documenter.",
+    supplierScore: 55,
+    supplierObservation: "Fournisseurs à confirmer.",
+    logisticsScore: 76,
+    logisticsObservation: "DAP Kolwezi identifié.",
+    competitivenessScore: 65,
+    competitivenessObservation: "Cotations requises.",
+    financialDataValidated: false,
+    insufficientReferences: true,
+    missingSuppliers: true,
+    unavailableProducts: [],
+    majorRisks: ["Délai court"],
+    criticalContractClauses: ["Garantie de soumission"],
+    recommendations: ["Obtenir des cotations fournisseurs."]
+  },
   generatedDocuments: {
     submissionLetter: "Brouillon de lettre de soumission.",
     technicalOffer: "Brouillon d'offre technique.",
@@ -170,6 +191,9 @@ const aiOutput = {
   assert.strictEqual(result.submissionEnabled, false);
   assert.strictEqual(result.validationRequired, true);
   assert.ok(result.generatedDocuments.financialOfferTemplate.includes("À compléter"));
+  assert.strictEqual(result.keyInformation.evaluation.criteria.length, 7);
+  assert.strictEqual(result.keyInformation.evaluation.decision.code, "decline");
+  assert.ok(result.keyInformation.evaluation.recommendations.length > 2);
 
   const exported = new AdmZip(buildExportArchive({
     ...result,
@@ -210,6 +234,8 @@ const aiOutput = {
   assert.ok(shell.includes("Télécharger PDF"));
   assert.ok(shell.includes("Tableau des documents"));
   assert.ok(shell.includes("Autoriser l'envoi"));
+  assert.ok(shell.includes("Lancer une simulation"));
+  assert.ok(shell.includes("Graphique radar des scores"));
   assert.ok(shell.includes("Validation humaine obligatoire"));
   assert.ok(shell.includes('accept=".pdf,.docx,.zip"'));
 
@@ -227,10 +253,13 @@ const aiOutput = {
   assert.ok(client.includes("renderProgress"));
   assert.ok(client.includes("renderDocumentControl"));
   assert.ok(client.includes("setInterval"));
+  assert.ok(client.includes("drawRadar"));
+  assert.ok(client.includes("simulatedEvaluation"));
 
   const nexusClient = read("admin/nexus.js");
   assert.ok(nexusClient.includes("loadTenderResponseDashboard"));
   assert.ok(nexusClient.includes('data-metric-key="tender-responses"'));
+  assert.ok(nexusClient.includes("dashboard-tender-decision"));
 
   const vercel = JSON.parse(read("vercel.json"));
   assert.ok(vercel.rewrites.some(({ source, destination }) =>

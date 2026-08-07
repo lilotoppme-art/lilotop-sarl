@@ -112,6 +112,48 @@
         </div>
 
         <p class="executive-summary" id="response-executive-summary"></p>
+
+        <section class="tender-evaluation" id="tender-evaluation" aria-labelledby="tender-evaluation-title">
+          <div class="evaluation-heading">
+            <div><p class="eyebrow">Evaluation NEXUS</p><h3 id="tender-evaluation-title">Potentiel de participation</h3></div>
+            <div class="score-orb" id="global-score-orb"><strong id="global-score">0</strong><span>/100</span></div>
+          </div>
+          <div class="evaluation-summary-grid">
+            <article><span>Probabilité de gagner</span><strong id="win-probability">0%</strong></article>
+            <article><span>Décision IA</span><strong id="tender-decision">À évaluer</strong><p id="tender-decision-justification"></p></article>
+          </div>
+          <div class="evaluation-layout">
+            <div class="table-scroll">
+              <table class="score-table">
+                <thead><tr><th>Critère</th><th>Poids</th><th>Score</th><th>Observation</th></tr></thead>
+                <tbody id="score-table-rows"></tbody>
+              </table>
+            </div>
+            <div class="radar-wrap">
+              <canvas id="tender-score-radar" width="560" height="380" aria-label="Graphique radar des scores"></canvas>
+            </div>
+          </div>
+          <div class="evaluation-alerts">
+            <section><h4>Alertes identifiées</h4><ul id="evaluation-alert-list"></ul></section>
+            <section><h4>Recommandations IA</h4><ul id="evaluation-recommendation-list"></ul></section>
+          </div>
+          <button class="button button-primary" id="open-tender-simulation" type="button">Lancer une simulation</button>
+          <section class="simulation-panel" id="tender-simulation" hidden aria-labelledby="simulation-title">
+            <div class="panel-heading"><div><p class="eyebrow">Scénario sans engagement</p><h4 id="simulation-title">Simulation de compétitivité</h4></div></div>
+            <div class="simulation-controls">
+              <label for="simulation-price">Variation du prix proposé (%)<input id="simulation-price" type="number" min="-30" max="30" step="1" value="0"></label>
+              <label for="simulation-supplier">Fiabilité fournisseurs (/100)<input id="simulation-supplier" type="number" min="0" max="100" step="1" value="50"></label>
+              <label for="simulation-delivery">Variation du délai (jours)<input id="simulation-delivery" type="number" min="-60" max="60" step="1" value="0"></label>
+            </div>
+            <div class="simulation-results">
+              <span>Score simulé <strong id="simulation-global-score">0/100</strong></span>
+              <span>Probabilité simulée <strong id="simulation-probability">0%</strong></span>
+              <span>Décision <strong id="simulation-decision">À évaluer</strong></span>
+            </div>
+            <p id="simulation-justification"></p>
+          </section>
+        </section>
+
         <div class="information-grid">
           <dl id="key-information"></dl>
           <section>

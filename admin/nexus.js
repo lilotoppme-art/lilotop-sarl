@@ -136,7 +136,7 @@ async function loadTenderDashboard() {
 
 async function loadTenderResponseDashboard() {
   try {
-    const response = await fetch("/api/tender-response-ai?action=dashboard");
+    const response = await fetch(`/api/tender-response-ai?action=dashboard&_=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) return;
     const payload = await response.json();
     if (!payload.ok) return;
@@ -147,6 +147,13 @@ async function loadTenderResponseDashboard() {
     responseCard.querySelector("p").textContent = summary.latest
       ? `${summary.latest.compliance.compliancePercent}% de conformité · ${summary.latest.keyInformation.client}`
       : `${summary.total} dossier(s) préparé(s)`;
+    const evaluation = summary.latest?.keyInformation?.evaluation;
+    if (!evaluation) return;
+    const symbols = { respond: "✓", reserve: "⚠", decline: "✕" };
+    document.getElementById("dashboard-tender-score").textContent = `${evaluation.globalScore}/100 · ${evaluation.probability}%`;
+    document.getElementById("dashboard-tender-score").className = `status ${evaluation.color === "green" ? "status-active" : evaluation.color === "orange" ? "status-coming" : "status-neutral"}`;
+    document.getElementById("dashboard-tender-decision").textContent = `${symbols[evaluation.decision.code] || "⚠"} ${evaluation.decision.label}`;
+    document.getElementById("dashboard-tender-justification").textContent = evaluation.decision.justification;
   } catch {
     // Le placeholder reste visible si Réponse Appels d'Offres AI n'est pas disponible.
   }
