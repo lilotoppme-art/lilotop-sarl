@@ -124,6 +124,14 @@ const aiOutput = {
   assert.strictEqual(control.rows.find((row) => row.key === "rccm").status, "available");
   assert.strictEqual(control.rows.find((row) => row.key === "tax").status, "expired");
   assert.ok(control.missingDocuments.includes("IDNAT"));
+  const contentMatched = buildDocumentControl([], [{
+    id: "doc-3", versionId: "version-3", title: "Document administratif 02", version: "v1",
+    status: "valid", expiresOn: null, filePresent: true, usableForTenders: true,
+    usableInTenders: true, sourceFilename: "scan-02.pdf", storageLocation: "Neon",
+    previewText: "REPUBLIQUE DEMOCRATIQUE DU CONGO - IDENTIFICATION NATIONALE - 01-9-N04151K"
+  }], []);
+  assert.strictEqual(contentMatched.rows.find((row) => row.key === "idnat").status, "available");
+  assert.strictEqual(contentMatched.rows.find((row) => row.key === "idnat").sourceFilename, "scan-02.pdf");
   const declaredOnly = buildDocumentControl(["RCCM"], [], ["RCCM"]);
   assert.strictEqual(declaredOnly.rows.find((row) => row.key === "rccm").status, "missing");
   assert.match(declaredOnly.rows.find((row) => row.key === "rccm").source, /sans fichier accessible/);
