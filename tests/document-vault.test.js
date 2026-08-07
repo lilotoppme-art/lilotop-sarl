@@ -56,6 +56,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(store.includes("tenderInventory"));
   assert.ok(store.includes("usableInTenders"));
   assert.ok(store.includes("octet_length(v.file_data)"));
+  assert.ok(store.includes("ensureInventorySchema"));
   assert.ok(migration.includes("ON DELETE RESTRICT"));
 
   const handler = read("lib/nexus/document-vault-handler.js");
