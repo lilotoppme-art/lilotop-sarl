@@ -54,7 +54,9 @@ function simulatedEvaluation(evaluation, scenario) {
     );
   }
   const globalScore = calculateGlobal(criteria);
-  const probability = clamp(globalScore * 0.9 - (evaluation.alerts?.length || 0));
+  const probability = clamp(
+    Number(evaluation.probability || 0) + (globalScore - Number(evaluation.globalScore || 0)) * 0.9
+  );
   const weakest = [...criteria].sort((left, right) => left.score - right.score).slice(0, 3);
   return {
     criteria,

@@ -105,4 +105,21 @@ const weakerScenario = simulateTenderEvaluation(reservedDao, {
 });
 assert.ok(weakerScenario.globalScore < reservedDao.globalScore);
 
+const alertHeavyDao = computeTenderEvaluation({
+  compliance: {
+    compliancePercent: 10,
+    missingDocuments: Array.from({ length: 20 }, (_, index) => `Document ${index + 1}`),
+    expiredDocuments: []
+  },
+  keyInformation: completeInformation,
+  assessment: assessment(45)
+});
+const alertHeavyImproved = simulateTenderEvaluation(alertHeavyDao, {
+  priceAdjustment: -10,
+  supplierReliability: 90,
+  deliveryAdjustmentDays: -15
+});
+assert.ok(alertHeavyImproved.globalScore > alertHeavyDao.globalScore);
+assert.ok(alertHeavyImproved.probability >= alertHeavyDao.probability);
+
 console.log("Tender Response scoring tests passed.");
