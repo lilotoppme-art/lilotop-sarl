@@ -128,7 +128,10 @@ function renderActivity(items) {
 }
 
 async function loadDashboard() { renderDashboard(await crmApi("dashboard")); }
-async function loadOrganizations(filters = {}) { state.organizations = await crmApi("organizations", { params: filters }); renderOrganizations(); }
+async function loadOrganizations(filters = {}) {
+  state.organizations = await crmApi("organizations", { params: { limit: 40, ...filters } });
+  renderOrganizations();
+}
 async function loadActivity() { renderActivity(await crmApi("activity")); }
 
 async function openOrganization(id) {

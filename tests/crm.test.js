@@ -39,6 +39,7 @@ const shell = read("admin/crm-shell.html");
 ["CRM IA central", "Organisations", "Journal", "Nouvelle organisation", "Synchroniser les agents"].forEach((text) => assert.ok(shell.includes(text)));
 assert.ok(!shell.includes("<script>") && shell.includes('/admin/crm.js'));
 assert.ok(read("lib/nexus/crm-store.js").includes("async function syncExisting"));
+assert.ok(read("admin/crm.js").includes("limit: 40"));
 
 const integrations = [
   ["lib/business-radar/service.js", "syncOpportunity"],
