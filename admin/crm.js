@@ -168,6 +168,20 @@ async function authenticate(event) {
 loginForm.addEventListener("submit", authenticate);
 document.getElementById("crm-logout").addEventListener("click", async () => { await fetch("/api/business-radar-auth", { method: "DELETE" }); setAuthenticated(false); });
 document.getElementById("new-organization").addEventListener("click", () => openDrawer());
+document.getElementById("sync-agents").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  button.disabled = true;
+  setStatus("Synchronisation des agents en coursâ€¦");
+  try {
+    const result = await crmApi("sync-existing", { method: "POST", body: {} });
+    await Promise.all([loadDashboard(), loadOrganizations()]);
+    setStatus(`Synchronisation terminÃ©e: ${result.opportunities} opportunitÃ©(s), ${result.supplierSearches} fournisseur(s).`);
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    button.disabled = false;
+  }
+});
 document.querySelectorAll("[data-close-drawer]").forEach((button) => button.addEventListener("click", closeDrawer));
 document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => showView(button.dataset.view)));
 document.getElementById("refresh-activity").addEventListener("click", loadActivity);

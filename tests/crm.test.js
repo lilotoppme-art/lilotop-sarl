@@ -36,8 +36,9 @@ assert.ok(vercel.rewrites.some((route) => route.source === "/admin/nexus/crm"));
 assert.ok(vercel.rewrites.some((route) => route.source === "/api/crm"));
 
 const shell = read("admin/crm-shell.html");
-["CRM IA central", "Organisations", "Journal", "Nouvelle organisation"].forEach((text) => assert.ok(shell.includes(text)));
+["CRM IA central", "Organisations", "Journal", "Nouvelle organisation", "Synchroniser les agents"].forEach((text) => assert.ok(shell.includes(text)));
 assert.ok(!shell.includes("<script>") && shell.includes('/admin/crm.js'));
+assert.ok(read("lib/nexus/crm-store.js").includes("async function syncExisting"));
 
 const integrations = [
   ["lib/business-radar/service.js", "syncOpportunity"],
