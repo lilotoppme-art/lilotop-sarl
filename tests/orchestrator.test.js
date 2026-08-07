@@ -95,6 +95,7 @@ function testArchitecture() {
   assert.match(store, /activeAgents: 7/);
   assert.match(store, /updateDossier/);
   assert.match(store, /saveWorkflowDocument/);
+  assert.match(store, /ensureDocumentStorage/);
 
   const handler = read("lib/nexus/orchestrator-handler.js");
   assert.match(handler, /requireAdmin/);
@@ -104,6 +105,9 @@ function testArchitecture() {
   assert.match(handler, /action === "detect"/);
   assert.match(handler, /action === "decision"/);
   assert.match(handler, /action === "document"/);
+  assert.match(handler, /action === "start-official"/);
+  assert.match(handler, /businessStore\.upsertOpportunity/);
+  assert.doesNotMatch(handler, /sendOpportunityAlert/);
 }
 
 function testInterfaceAndRoutes() {
