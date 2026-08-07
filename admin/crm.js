@@ -171,11 +171,11 @@ document.getElementById("new-organization").addEventListener("click", () => open
 document.getElementById("sync-agents").addEventListener("click", async (event) => {
   const button = event.currentTarget;
   button.disabled = true;
-  setStatus("Synchronisation des agents en coursâ€¦");
+  setStatus("Synchronisation des agents en cours...");
   try {
     const result = await crmApi("sync-existing", { method: "POST", body: {} });
     await Promise.all([loadDashboard(), loadOrganizations()]);
-    setStatus(`Synchronisation terminÃ©e: ${result.opportunities} opportunitÃ©(s), ${result.supplierSearches} fournisseur(s).`);
+    setStatus(`Synchronisation termin\u00e9e: ${result.opportunities} opportunit\u00e9(s), ${result.supplierSearches} fournisseur(s).`);
   } catch (error) {
     setStatus(error.message, true);
   } finally {
