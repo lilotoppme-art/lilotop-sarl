@@ -70,6 +70,10 @@ function testArchitecture() {
   assert.match(documentMigration, /CREATE TABLE IF NOT EXISTS nexus_workflow_documents/);
   assert.match(documentMigration, /file_data bytea NOT NULL/);
   assert.doesNotMatch(documentMigration, /\b(DROP|TRUNCATE|ALTER\s+TABLE)\b/i);
+  const credentialMigration = read("db/migrations/017_nexus_organization_credentials.sql");
+  assert.match(credentialMigration, /CREATE TABLE IF NOT EXISTS nexus_organization_credentials/);
+  assert.match(credentialMigration, /registration_number text NOT NULL/);
+  assert.doesNotMatch(credentialMigration, /\b(DROP|TRUNCATE)\b|DELETE\s+FROM/i);
 
   const service = read("lib/nexus/orchestrator-service.js");
   assert.match(service, /analyzeWorkflowOpportunity/);
@@ -161,7 +165,7 @@ function testInterfaceAndRoutes() {
 }
 
 function testDossierDocuments() {
-  const { buildFinalValidation, documentsFor, supplierComparisonFor } = require("../lib/nexus/orchestrator-service");
+  const { applyOrganizationCredential, buildFinalValidation, documentMatrixFor, documentsFor, supplierComparisonFor } = require("../lib/nexus/orchestrator-service");
   const documents = documentsFor({
     analysis: {
       executiveSummary: "Resume",
@@ -226,6 +230,26 @@ function testDossierDocuments() {
   assert.equal(official.supplierRfqs[0].commercialEmail, "contact.center@za.abb.com");
   assert.equal(official.supplierRfqs[0].coordinatesVerified, true);
   assert.equal(official.supplierRfqs[0].readyToSend, false);
+
+  const initialCompliance = {
+    rows: Array.from({ length: 17 }, (_, index) => ({
+      key: index === 14 ? "dao-15" : `doc-${index + 1}`,
+      document: index === 14 ? "UNGM registration completed under full legal name" : `Document ${index + 1}`,
+      status: index < 5 ? "available" : "missing"
+    })),
+    availableDocuments: Array.from({ length: 5 }, (_, index) => `Document ${index + 1}`),
+    expiredDocuments: [],
+    missingDocuments: Array.from({ length: 12 }, (_, index) => `Document ${index + 6}`),
+    compliancePercent: 29
+  };
+  const credentialCompliance = applyOrganizationCredential(initialCompliance, {
+    status: "registered", registrationNumber: "673735", evidencePresent: false
+  });
+  assert.equal(credentialCompliance.compliancePercent, 35);
+  assert.equal(credentialCompliance.availableDocuments.length, 6);
+  assert.equal(credentialCompliance.missingDocuments.length, 11);
+  const credentialRow = documentMatrixFor({ compliance: { documentControl: credentialCompliance.rows } })[14];
+  assert.equal(credentialRow.statusLabel, "INFORMATION CONFIRMÉE – PREUVE À AJOUTER");
 }
 
 function testOfficialTenderSourcePolicy() {

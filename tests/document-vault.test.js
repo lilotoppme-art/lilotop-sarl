@@ -50,6 +50,9 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(inventoryMigration.includes("organization_name"));
   assert.ok(!inventoryMigration.includes("DROP TABLE"));
   assert.ok(!inventoryMigration.includes("DELETE FROM"));
+  const profileStore = read("lib/nexus/organization-profile-store.js");
+  assert.ok(profileStore.includes("nexus_organization_credentials"));
+  assert.ok(profileStore.includes("confirmation_source"));
 
   const store = read("lib/nexus/document-vault-store.js");
   assert.ok(store.includes("ORDER BY created_at DESC"));

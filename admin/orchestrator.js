@@ -293,22 +293,19 @@ function renderValidationSheet(workflow) {
     <article class="validation-summary validation-summary-wide">
       <h3>Dashboard DG - situation UNECA</h3>
       <div class="validation-summary-grid">
-        <div><span>DOCUMENTS</span><strong>${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} disponibles</strong><small>${escapeHtml(sheet.documentSummary?.toProcess || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} a traiter</small></div>
+        <div><span>DOCUMENTS</span><strong>${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} exigences satisfaites</strong><small>${escapeHtml(sheet.documentSummary?.toProcess || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} a traiter · Score ${escapeHtml(sheet.compliancePercent || 0)}%</small></div>
         <div><span>RFQ</span><strong>${escapeHtml(sheet.rfqSummary?.prepared || 0)} preparees</strong><small>${escapeHtml(sheet.rfqSummary?.contactsVerified || 0)} coordonnee(s) verifiee(s) · ${escapeHtml(sheet.rfqSummary?.sent || 0)} envoyee</small></div>
         <div><span>PRIX</span><strong>${escapeHtml(sheet.pricingSummary?.quotationsReceived || 0)} cotation recue</strong><small>Cout rendu : ${escapeHtml(sheet.pricingSummary?.landedCost || "EN ATTENTE")} · Marge : ${escapeHtml(sheet.pricingSummary?.margin || "EN ATTENTE")} · Offre financiere : ${escapeHtml(sheet.pricingSummary?.financialOffer || "INCOMPLETE")}</small></div>
       </div>
     </article>
     <article class="validation-documents"><h3>17 exigences documentaires UNECA</h3>
       <div class="responsive-table"><table>
-        <thead><tr><th>Document exige</th><th>Document LILOTOP correspondant</th><th>Nom reel du fichier</th><th>Present / Manquant</th><th>Valide / Expire</th><th>Date d'expiration</th><th>Obligatoire / Conditionnel</th><th>Action necessaire</th></tr></thead>
-        <tbody>${(sheet.documentMatrix || []).map((item) => `<tr>
+        <thead><tr><th>N°</th><th>Document / exigence UNECA</th><th>Statut LILOTOP</th><th>Fichier trouve dans le Coffre</th><th>Action necessaire</th></tr></thead>
+        <tbody>${(sheet.documentMatrix || []).map((item, index) => `<tr>
+          <td>${escapeHtml(index + 1)}</td>
           <td>${escapeHtml(item.requirement)}</td>
-          <td>${escapeHtml(item.matchingDocument || "Aucun")}</td>
-          <td>${escapeHtml(item.filename || "Aucun fichier accessible")}</td>
-          <td><span class="status ${item.availability === "PRESENT" ? "status-completed" : "status-paused"}">${escapeHtml(item.availability)}</span></td>
-          <td>${escapeHtml(item.validity)}</td>
-          <td>${escapeHtml(item.expiration || "Sans date / non applicable")}</td>
-          <td>${escapeHtml(item.requirementLevel)}</td>
+          <td><span class="status ${["DISPONIBLE ET VALIDE", "INFORMATION CONFIRMÉE – PREUVE À AJOUTER"].includes(item.statusLabel) ? "status-completed" : "status-paused"}">${escapeHtml(item.statusLabel)}</span></td>
+          <td>${escapeHtml(item.filename || "Aucun fichier dans le Coffre")}</td>
           <td>${escapeHtml(item.actionRequired)}</td>
         </tr>`).join("")}</tbody>
       </table></div>
