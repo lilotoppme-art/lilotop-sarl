@@ -232,6 +232,15 @@ main {
 .validation-grid h3 { margin-top: 0; }
 .validation-grid pre { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #405260; font: inherit; }
 .validation-rfqs { grid-column: 1 / -1; }
+.validation-documents, .validation-summary-wide { grid-column: 1 / -1; }
+.validation-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.validation-summary-grid > div { display: grid; gap: .35rem; padding: .9rem; border: 1px solid var(--line); background: #f8fafb; }
+.validation-summary-grid span { color: var(--steel); font-size: .76rem; font-weight: 800; }
+.validation-summary-grid small { color: #405260; line-height: 1.45; }
+.responsive-table { width: 100%; overflow-x: auto; }
+.responsive-table table { width: 100%; min-width: 1120px; border-collapse: collapse; }
+.responsive-table th, .responsive-table td { padding: .7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; font-size: .82rem; }
+.responsive-table th { color: var(--navy); background: #edf2f5; }
 .rfq-authorization-row {
   margin-top: 10px;
   padding: 14px;
@@ -283,7 +292,7 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid, .validation-grid, .price-validation { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid { grid-template-columns: 1fr; }
   .validation-facts { grid-template-columns: 1fr; }
   .workflow-form, .workflow-item, .activity-item { grid-template-columns: 1fr; }
   .workflow-actions { justify-content: flex-start; }

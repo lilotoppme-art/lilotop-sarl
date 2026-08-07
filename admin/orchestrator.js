@@ -290,6 +290,29 @@ function renderValidationSheet(workflow) {
   ];
   document.getElementById("validation-content").innerHTML = `
     <div class="validation-facts">${fields.map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}</div>
+    <article class="validation-summary validation-summary-wide">
+      <h3>Dashboard DG - situation UNECA</h3>
+      <div class="validation-summary-grid">
+        <div><span>DOCUMENTS</span><strong>${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} disponibles</strong><small>${escapeHtml(sheet.documentSummary?.toProcess || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} a traiter</small></div>
+        <div><span>RFQ</span><strong>${escapeHtml(sheet.rfqSummary?.prepared || 0)} preparees</strong><small>${escapeHtml(sheet.rfqSummary?.contactsVerified || 0)} coordonnee(s) verifiee(s) · ${escapeHtml(sheet.rfqSummary?.sent || 0)} envoyee</small></div>
+        <div><span>PRIX</span><strong>${escapeHtml(sheet.pricingSummary?.quotationsReceived || 0)} cotation recue</strong><small>Cout rendu : ${escapeHtml(sheet.pricingSummary?.landedCost || "EN ATTENTE")} · Marge : ${escapeHtml(sheet.pricingSummary?.margin || "EN ATTENTE")} · Offre financiere : ${escapeHtml(sheet.pricingSummary?.financialOffer || "INCOMPLETE")}</small></div>
+      </div>
+    </article>
+    <article class="validation-documents"><h3>17 exigences documentaires UNECA</h3>
+      <div class="responsive-table"><table>
+        <thead><tr><th>Document exige</th><th>Document LILOTOP correspondant</th><th>Nom reel du fichier</th><th>Present / Manquant</th><th>Valide / Expire</th><th>Date d'expiration</th><th>Obligatoire / Conditionnel</th><th>Action necessaire</th></tr></thead>
+        <tbody>${(sheet.documentMatrix || []).map((item) => `<tr>
+          <td>${escapeHtml(item.requirement)}</td>
+          <td>${escapeHtml(item.matchingDocument || "Aucun")}</td>
+          <td>${escapeHtml(item.filename || "Aucun fichier accessible")}</td>
+          <td><span class="status ${item.availability === "PRESENT" ? "status-completed" : "status-paused"}">${escapeHtml(item.availability)}</span></td>
+          <td>${escapeHtml(item.validity)}</td>
+          <td>${escapeHtml(item.expiration || "Sans date / non applicable")}</td>
+          <td>${escapeHtml(item.requirementLevel)}</td>
+          <td>${escapeHtml(item.actionRequired)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+    </article>
     <article><h3>Risques</h3>${listMarkup(sheet.risks, "Aucun risque identifié.")}</article>
     <article><h3>Documents manquants</h3>${listMarkup(sheet.missingDocuments, "Aucun document manquant identifié.")}</article>
     <article><h3>Offre technique</h3><pre>${escapeHtml(sheet.technicalOffer)}</pre></article>
@@ -304,13 +327,20 @@ function renderValidationSheet(workflow) {
     <article class="validation-rfqs"><h3>Cotations fournisseurs à autoriser</h3>
       ${(sheet.supplierRfqs || []).map((rfq) => `
         <div class="rfq-authorization-row">
-          <p><strong>${escapeHtml(rfq.supplier)}</strong> · ${escapeHtml(rfq.product)}</p>
-          <p><span>Coordonnées vérifiées :</span> ${rfq.coordinatesVerified ? "Oui - source publique documentée" : "Non - vérification requise"}</p>
-          <p><span>E-mail :</span> ${escapeHtml(rfq.commercialEmail || "Non disponible")} · <span>Téléphone :</span> ${escapeHtml(rfq.phone || "Non disponible")}</p>
+          <p><strong>${escapeHtml(rfq.manufacturer || rfq.supplier)}</strong> · ${escapeHtml(rfq.product)}</p>
+          <p><span>Pays :</span> ${escapeHtml(rfq.country)} · <span>Statut :</span> ${rfq.coordinatesVerified ? "COORDONNEES VERIFIEES" : "A VERIFIER"}</p>
+          <p><span>Destinataire / service :</span> ${escapeHtml(rfq.recipientService || "Non disponible")}</p>
+          <p><span>E-mail :</span> ${escapeHtml(rfq.commercialEmail || "Non disponible")} · <span>Telephone :</span> ${escapeHtml(rfq.phone || "Non disponible")}</p>
+          <p><span>Objet :</span> ${escapeHtml(rfq.subject)}</p>
           <p><span>Spécifications :</span> ${escapeHtml(rfq.specifications)}</p>
-          <p><span>Quantité :</span> ${escapeHtml(rfq.quantity)} · <span>Délai demandé :</span> ${escapeHtml(rfq.desiredDelivery)}</p>
+          <p><span>Quantite :</span> ${escapeHtml(rfq.quantity)} · <span>Incoterm :</span> ${escapeHtml(rfq.incoterm)} · <span>Destination :</span> ${escapeHtml(rfq.destination)}</p>
+          <p><span>Delai souhaite :</span> ${escapeHtml(rfq.desiredDelivery)}</p>
           <p><span>Date limite de réponse :</span> ${escapeHtml(rfq.responseDeadline)}</p>
-          ${rfq.source ? `<p><a href="${escapeHtml(rfq.source)}" target="_blank" rel="noopener noreferrer">Consulter la source fournisseur</a></p>` : ""}
+          <p><span>Pieces jointes prevues :</span> ${escapeHtml((rfq.plannedAttachments || []).join(", ") || "Aucune")}</p>
+          <p><span>RFQ prete :</span> ${rfq.readyToSend ? "Oui" : "Non - quantite/date de reponse a valider"}</p>
+          ${rfq.officialSite ? `<p><a href="${escapeHtml(rfq.officialSite)}" target="_blank" rel="noopener noreferrer">Site officiel</a></p>` : ""}
+          ${rfq.contactForm ? `<p><a href="${escapeHtml(rfq.contactForm)}" target="_blank" rel="noopener noreferrer">Formulaire officiel</a></p>` : ""}
+          ${rfq.verificationSource ? `<p><a href="${escapeHtml(rfq.verificationSource)}" target="_blank" rel="noopener noreferrer">Source de verification</a></p>` : ""}
         </div>
       `).join("") || "<p>Aucune RFQ préparée.</p>"}
       <p><strong>Statut :</strong> ${sheet.rfqSendingAuthorized ? "Autorisation DG enregistrée - aucun envoi déclenché" : "En attente d'autorisation DG"}</p>
@@ -320,11 +350,14 @@ function renderValidationSheet(workflow) {
   document.getElementById("sale-price").value = sheet.proposedSalePrice ?? "";
   document.getElementById("price-currency").value = sheet.currency || "USD";
   const validations = dossier.validations || {};
+  const rfqAuthorizationBlocked = !(sheet.supplierRfqs || []).length
+    || (sheet.supplierRfqs || []).some((rfq) => !rfq.coordinatesVerified || !rfq.readyToSend);
   document.querySelectorAll("[data-decision]").forEach((button) => {
     const key = button.dataset.decision;
     button.disabled = (key === "validate-participation" && validations.participation === "validated")
       || (key === "validate-prices" && validations.prices === "validated")
       || (key === "authorize-rfqs" && validations.rfqSending === "authorized")
+      || (key === "authorize-rfqs" && rfqAuthorizationBlocked)
       || (key === "validate-final" && validations.finalDossier === "validated")
       || (key === "authorize-send" && validations.sending === "authorized")
       || validations.participation === "rejected";

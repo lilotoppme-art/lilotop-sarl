@@ -142,6 +142,9 @@ function testInterfaceAndRoutes() {
   assert.match(html, /Fiche finale de validation/);
   assert.match(client, /validation-required/);
   assert.match(client, /Cotations fournisseurs à autoriser/);
+  assert.match(client, /17 exigences documentaires UNECA/);
+  assert.match(client, /rfqAuthorizationBlocked/);
+  assert.match(client, /COORDONNEES VERIFIEES/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
   assert.match(routes, /\/api\/nexus-orchestrator/);
   assert.match(page, /orchestrator-page/);
@@ -213,6 +216,16 @@ function testDossierDocuments() {
   assert.equal(sheet.supplierRfqs.length, 1);
   assert.equal(sheet.supplierRfqs[0].coordinatesVerified, true);
   assert.equal(sheet.rfqSendingAuthorized, false);
+
+  const official = buildFinalValidation({
+    opportunity: { title: "UNECA", organization: "UNECA", country: "Ethiopia" },
+    analysis: { country: "Ethiopia" },
+    rfqs: [{ product: "Electrical systems", description: "Electrical systems", quantity: "A confirmer",
+      supplier: { name: "ABB", commercialEmail: "product.support@schneider-electric.com", website: "https://example.com" } }]
+  }, { compliance: { documentControl: [] } }, []);
+  assert.equal(official.supplierRfqs[0].commercialEmail, "contact.center@za.abb.com");
+  assert.equal(official.supplierRfqs[0].coordinatesVerified, true);
+  assert.equal(official.supplierRfqs[0].readyToSend, false);
 }
 
 function testOfficialTenderSourcePolicy() {
