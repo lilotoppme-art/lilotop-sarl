@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>{{PAGE_TITLE}} · LILOTOP NEXUS AI</title>
+  <link rel="stylesheet" href="/admin/crm.css">
+</head>
+<body data-authenticated="{{AUTHENTICATED}}">
+  <a class="skip-link" href="#crm-main">Aller au contenu</a>
+  <section class="login-screen" id="crm-login" {{LOGIN_HIDDEN}} aria-labelledby="crm-login-title">
+    <div class="login-panel">
+      <img src="/assets/logo-lilotop-premium.png" alt="LILOTOP SARL">
+      <p>NEXUS AI · Accès sécurisé</p>
+      <h1 id="crm-login-title">CRM IA central</h1>
+      <form id="crm-login-form">
+        <label for="crm-email">Adresse administrateur</label>
+        <input id="crm-email" name="email" type="email" autocomplete="username" required>
+        <label for="crm-password">Mot de passe</label>
+        <input id="crm-password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-primary" type="submit">Se connecter</button>
+        <p id="crm-login-status" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </section>
+
+  <div id="crm-shell" {{SHELL_HIDDEN}}>
+    <header class="topbar">
+      <a class="brand" href="/admin/nexus"><img src="/assets/logo-lilotop-premium.png" alt="LILOTOP SARL"><span><strong>NEXUS AI</strong><small>CRM central</small></span></a>
+      <nav aria-label="Navigation privée">
+        <a href="/admin/nexus">Dashboard DG</a><a href="/admin/business-radar">Business Radar</a>
+        <a href="/admin/nexus/commercial-ai">Commercial AI</a><a href="/admin/nexus/supplier-ai">Fournisseurs AI</a>
+        <button id="crm-logout" type="button">Se déconnecter</button>
+      </nav>
+    </header>
+
+    <main id="crm-main" tabindex="-1">
+      <section class="hero-band">
+        <div><p class="eyebrow">Source unique de vérité</p><h1>CRM IA central</h1><p>Organisations, contacts, interactions et documents réunis dans une fiche de référence.</p></div>
+        <div class="hero-actions"><span class="health" id="crm-health">Synchronisation active</span><button class="button button-gold" id="new-organization" type="button">Nouvelle organisation</button></div>
+      </section>
+      <p class="global-status" id="crm-status" role="status" aria-live="polite"></p>
+
+      <nav class="view-tabs" aria-label="Vues CRM">
+        <button class="is-active" data-view="dashboard" type="button">Vue CRM</button>
+        <button data-view="organizations" type="button">Organisations</button>
+        <button data-view="activity" type="button">Journal</button>
+      </nav>
+
+      <section data-panel="dashboard">
+        <div class="metric-grid" id="crm-metrics">
+          <article><span>Clients</span><strong data-metric="clients">—</strong></article>
+          <article><span>Prospects</span><strong data-metric="prospects">—</strong></article>
+          <article><span>Fournisseurs</span><strong data-metric="suppliers">—</strong></article>
+          <article><span>Partenaires</span><strong data-metric="partners">—</strong></article>
+          <article><span>AO en cours</span><strong data-metric="tenders">—</strong></article>
+          <article><span>Contrats</span><strong data-metric="contracts">—</strong></article>
+          <article><span>Relances</span><strong data-metric="followups">—</strong></article>
+          <article><span>Réunions</span><strong data-metric="meetings">—</strong></article>
+        </div>
+        <div class="dashboard-grid">
+          <section class="surface"><div class="surface-heading"><div><p class="eyebrow">Priorité commerciale</p><h2>Prospects chauds</h2></div></div><div id="hot-prospects" class="rank-list"></div></section>
+          <section class="surface"><div class="surface-heading"><div><p class="eyebrow">Portefeuille</p><h2>Top clients</h2></div></div><div id="top-clients" class="rank-list"></div></section>
+          <section class="surface"><div class="surface-heading"><div><p class="eyebrow">Approvisionnement</p><h2>Top fournisseurs</h2></div></div><div id="top-suppliers" class="rank-list"></div></section>
+          <section class="surface pipeline-surface"><div class="surface-heading"><div><p class="eyebrow">Synthèse DG</p><h2>Valeur pipeline</h2></div><strong id="pipeline-value">—</strong></div><p>Indice agrégé du potentiel et de la priorité des clients et prospects actifs.</p><div class="alert-row"><span>Clients à réactiver</span><strong id="inactive-clients">—</strong><span>Documents expirant</span><strong id="expiring-contracts">—</strong></div></section>
+        </div>
+      </section>
+
+      <section data-panel="organizations" hidden>
+        <section class="surface filter-surface">
+          <form id="crm-search-form" class="filter-grid">
+            <label>Recherche<input name="search" type="search" placeholder="Nom, e-mail, téléphone, secteur, contact"></label>
+            <label>Type<select name="type"><option value="">Tous</option><option value="client">Client</option><option value="prospect">Prospect</option><option value="supplier">Fournisseur</option><option value="manufacturer">Fabricant</option><option value="distributor">Distributeur</option><option value="partner">Partenaire</option><option value="bank">Banque</option><option value="investor">Investisseur</option><option value="administration">Administration</option><option value="international-organization">Organisation internationale</option></select></label>
+            <label>Pays<input name="country" type="text" placeholder="RDC"></label>
+            <label>Tag<input name="tag" type="text" placeholder="Prioritaire"></label>
+            <button class="button button-primary" type="submit">Rechercher</button>
+          </form>
+        </section>
+        <div class="organization-layout">
+          <section class="surface"><div class="surface-heading"><div><p class="eyebrow">Répertoire central</p><h2>Organisations</h2></div><span id="organization-count">0 fiche</span></div><div id="organization-list" class="organization-list"></div></section>
+          <aside class="surface detail-panel" id="organization-detail"><div class="empty-state"><strong>Sélectionnez une organisation</strong><p>La fiche, les contacts, les scores et la timeline apparaîtront ici.</p></div></aside>
+        </div>
+      </section>
+
+      <section data-panel="activity" hidden>
+        <section class="surface"><div class="surface-heading"><div><p class="eyebrow">Observabilité</p><h2>Journal CRM</h2></div><button class="button button-secondary" id="refresh-activity" type="button">Actualiser</button></div><div id="crm-activity" class="activity-list"></div></section>
+      </section>
+    </main>
+  </div>
+
+  <section class="drawer" id="organization-drawer" hidden aria-labelledby="organization-form-title">
+    <div class="drawer-overlay" data-close-drawer></div>
+    <div class="drawer-panel">
+      <div class="surface-heading"><div><p class="eyebrow">Fiche unique</p><h2 id="organization-form-title">Nouvelle organisation</h2></div><button class="icon-button" type="button" data-close-drawer aria-label="Fermer">×</button></div>
+      <form id="organization-form" class="record-form">
+        <label>Nom<input name="name" required maxlength="220"></label>
+        <label>Type<select name="organizationType" required><option value="prospect">Prospect</option><option value="client">Client</option><option value="supplier">Fournisseur</option><option value="manufacturer">Fabricant</option><option value="distributor">Distributeur</option><option value="partner">Partenaire</option><option value="bank">Banque</option><option value="investor">Investisseur</option><option value="administration">Administration</option><option value="international-organization">Organisation internationale</option></select></label>
+        <label>Pays<input name="country" maxlength="120"></label><label>Ville<input name="city" maxlength="120"></label>
+        <label class="span-2">Adresse<input name="address" maxlength="500"></label>
+        <label>Site web<input name="website" type="url"></label><label>E-mail<input name="email" type="email"></label>
+        <label>Téléphone<input name="phone"></label><label>WhatsApp<input name="whatsapp"></label>
+        <label>LinkedIn<input name="linkedin" type="url"></label><label>Secteur<input name="sector"></label>
+        <label class="span-2">Produits<input name="products" placeholder="Pompes, lubrifiants, réactifs"></label>
+        <label class="span-2">Projets<input name="projects"></label><label class="span-2">Tags<input name="tags" placeholder="Prospect, Prioritaire, Actif"></label>
+        <label class="span-2">Notes<textarea name="notes" rows="4"></textarea></label>
+        <div class="form-actions span-2"><button class="button button-secondary" type="button" data-close-drawer>Annuler</button><button class="button button-primary" type="submit">Enregistrer la fiche</button></div>
+      </form>
+    </div>
+  </section>
+
+  <script src="/admin/crm.js" defer></script>
+</body>
+</html>

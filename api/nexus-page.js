@@ -12,6 +12,7 @@ const orchestratorHandler = require("../lib/nexus/orchestrator-handler");
 const documentVaultHandler = require("../lib/nexus/document-vault-handler");
 const emailDeliveryHandler = require("../lib/email/delivery-handler");
 const resendWebhookHandler = require("../lib/email/webhook-handler");
+const crmHandler = require("../lib/nexus/crm-handler");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -79,6 +80,9 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "resend-webhook") {
     return resendWebhookHandler(req, res);
   }
+  if (delegatedHandler === "crm-api") {
+    return crmHandler(req, res);
+  }
   if (req.method !== "GET") {
     res.statusCode = 405;
     return res.end("Method not allowed");
@@ -108,6 +112,10 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "document-vault-page") {
     const title = authenticated ? "Coffre documentaire" : "Connexion Coffre documentaire";
     return sendPrivateHtml(res, "document-vault-shell.html", authenticated, title);
+  }
+  if (delegatedHandler === "crm-page") {
+    const title = authenticated ? "CRM IA" : "Connexion CRM IA";
+    return sendPrivateHtml(res, "crm-shell.html", authenticated, title);
   }
   const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
   return sendPrivateHtml(res, "nexus-shell.html", authenticated, pageTitle, nexusCatalog);

@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/crm",
+      "destination": "/api/nexus-page?handler=crm-page"
+    },
+    {
+      "source": "/api/crm",
+      "destination": "/api/nexus-page?handler=crm-api"
+    },
+    {
       "source": "/api/resend-webhook",
       "destination": "/api/nexus-page?handler=resend-webhook"
     },

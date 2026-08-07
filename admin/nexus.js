@@ -255,6 +255,39 @@ async function loadOrchestratorDashboard() {
   }
 }
 
+async function loadCrmDashboard() {
+  try {
+    const response = await fetch(`/api/crm?action=dashboard&_=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) return;
+    const payload = await response.json();
+    if (!payload.ok) return;
+    const summary = payload.data;
+    const metrics = {
+      clients: [summary.clients, "Clients actifs dans le CRM central"],
+      suppliers: [summary.suppliers, "Fournisseurs et fabricants centralisés"]
+    };
+    Object.entries(metrics).forEach(([key, value]) => {
+      const card = document.querySelector(`[data-metric-key="${key}"]`);
+      if (!card) return;
+      card.querySelector("strong").textContent = value[0];
+      card.querySelector("p").textContent = value[1];
+    });
+    const panel = document.getElementById("panel-crm-summary");
+    panel.innerHTML = `
+      <div class="surface-header">
+        <div><p class="eyebrow">CRM IA central</p><h2>Portefeuille relationnel</h2></div>
+        <span class="status status-active">Synchronisé</span>
+      </div>
+      <div class="commercial-dashboard-result">
+        <p><strong>${escapeHtml(summary.clients)}</strong> client(s) · <strong>${escapeHtml(summary.prospects)}</strong> prospect(s) · <strong>${escapeHtml(summary.suppliers)}</strong> fournisseur(s)</p>
+        <p>Prospects chauds : ${escapeHtml(summary.hotProspects?.length || 0)} · Clients à réactiver : ${escapeHtml(summary.inactive_clients || 0)} · AO en cours : ${escapeHtml(summary.tenders || 0)}</p>
+        <a class="button button-primary button-inline" href="/admin/nexus/crm">Ouvrir le CRM</a>
+      </div>`;
+  } catch {
+    // Le panneau reste en attente si la migration CRM n'est pas disponible.
+  }
+}
+
 function renderExecutivePanels() {
   bootstrap.executivePanels.forEach((panel) => {
     const target = document.getElementById(`panel-${panel.key}`);
@@ -416,6 +449,7 @@ async function authenticate(event) {
     loadSupplierAiDashboard();
     loadMiningDashboard();
     loadOrchestratorDashboard();
+    loadCrmDashboard();
     loadEmailDeliveryJournal();
   } catch (error) {
     loginStatus.textContent = error.message;
@@ -442,6 +476,7 @@ if (body.dataset.authenticated === "true") {
   loadSupplierAiDashboard();
   loadMiningDashboard();
   loadOrchestratorDashboard();
+  loadCrmDashboard();
   loadEmailDeliveryJournal();
 }
 

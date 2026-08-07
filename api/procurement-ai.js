@@ -4,6 +4,7 @@ const validation = require("../lib/business-radar/validation");
 const { json, parseJson, requireAdmin } = require("../lib/business-radar/http");
 const procurementStore = require("../lib/nexus/procurement-store");
 const { searchInternationalSuppliers } = require("../lib/nexus/procurement-ai");
+const crmStore = require("../lib/nexus/crm-store");
 
 function safeError(error) {
   if (error.code === "VALIDATION_ERROR") {
@@ -57,10 +58,9 @@ async function post(req, res, action, session) {
   }
   const body = await parseJson(req);
   const result = await searchInternationalSuppliers(body);
-  return json(res, 201, {
-    ok: true,
-    data: await procurementStore.saveSearch(result, session.email)
-  });
+  const saved = await procurementStore.saveSearch(result, session.email);
+  await crmStore.syncSupplierSearch(saved, session.email);
+  return json(res, 201, { ok: true, data: saved });
 }
 
 module.exports = async function handler(req, res) {

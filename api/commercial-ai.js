@@ -7,6 +7,7 @@ const { json, parseJson, requireAdmin } = require("../lib/business-radar/http");
 const commercialStore = require("../lib/nexus/commercial-store");
 const { analyzeCommercialOpportunity } = require("../lib/nexus/commercial-ai");
 const assistantStore = require("../lib/nexus/commercial-assistant-store");
+const crmStore = require("../lib/nexus/crm-store");
 const {
   WORKFLOW_TYPES,
   assertSendingDisabled,
@@ -115,10 +116,9 @@ async function post(req, res, action, session) {
       throw Object.assign(new Error("Opportunity not found"), { code: "NOT_FOUND" });
     }
     const analysis = await analyzeCommercialOpportunity(opportunity);
-    return json(res, 201, {
-      ok: true,
-      data: await commercialStore.saveAnalysis(opportunity, analysis, session.email)
-    });
+    const saved = await commercialStore.saveAnalysis(opportunity, analysis, session.email);
+    await crmStore.syncCommercialAnalysis(opportunity, saved, session.email);
+    return json(res, 201, { ok: true, data: saved });
   }
   if (action === "search") {
     const run = await radarService.runRadar("manual");
