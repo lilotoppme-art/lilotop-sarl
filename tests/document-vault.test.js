@@ -39,16 +39,23 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(archive.previewText.includes("politique.docx"));
 
   const migration = read("db/migrations/011_document_vault.sql");
+  const inventoryMigration = read("db/migrations/016_document_vault_inventory.sql");
   assert.ok(migration.includes("CREATE TABLE IF NOT EXISTS document_vault_documents"));
   assert.ok(migration.includes("CREATE TABLE IF NOT EXISTS document_vault_versions"));
   assert.ok(migration.includes("file_data bytea NOT NULL"));
   assert.ok(migration.includes("UNIQUE (document_id, version_label)"));
   assert.ok(!migration.includes("DROP TABLE"));
   assert.ok(!migration.includes("DELETE FROM"));
+  assert.ok(inventoryMigration.includes("usable_for_tenders"));
+  assert.ok(inventoryMigration.includes("organization_name"));
+  assert.ok(!inventoryMigration.includes("DROP TABLE"));
+  assert.ok(!inventoryMigration.includes("DELETE FROM"));
 
   const store = read("lib/nexus/document-vault-store.js");
   assert.ok(store.includes("ORDER BY created_at DESC"));
   assert.ok(store.includes("tenderInventory"));
+  assert.ok(store.includes("usableInTenders"));
+  assert.ok(store.includes("octet_length(v.file_data)"));
   assert.ok(migration.includes("ON DELETE RESTRICT"));
 
   const handler = read("lib/nexus/document-vault-handler.js");
@@ -56,6 +63,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(handler.includes('action === "history"'));
   assert.ok(handler.includes('action === "preview"'));
   assert.ok(handler.includes('action === "file"'));
+  assert.ok(handler.includes('action === "inventory"'));
   assert.ok(!handler.includes("DELETE FROM"));
 
   const shell = read("admin/document-vault-shell.html");
@@ -63,6 +71,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(shell.includes("Date de délivrance"));
   assert.ok(shell.includes("Date d'expiration"));
   assert.ok(shell.includes("Historique des versions"));
+  assert.ok(shell.includes("Document officiel LILOTOP SARL utilisable"));
 
   const tenderHandler = read("lib/nexus/tender-response-handler.js");
   assert.ok(tenderHandler.includes("documentVaultStore.listDocuments()"));

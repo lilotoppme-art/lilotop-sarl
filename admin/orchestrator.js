@@ -301,6 +301,20 @@ function renderValidationSheet(workflow) {
       (sheet.quotationLines || []).map((item) => `${item.product} · ${item.supplier} · ${item.priceStatus}`),
       "Aucune ligne de cotation."
     )}</article>
+    <article class="validation-rfqs"><h3>Cotations fournisseurs à autoriser</h3>
+      ${(sheet.supplierRfqs || []).map((rfq) => `
+        <div class="rfq-authorization-row">
+          <p><strong>${escapeHtml(rfq.supplier)}</strong> · ${escapeHtml(rfq.product)}</p>
+          <p><span>Coordonnées vérifiées :</span> ${rfq.coordinatesVerified ? "Oui - source publique documentée" : "Non - vérification requise"}</p>
+          <p><span>E-mail :</span> ${escapeHtml(rfq.commercialEmail || "Non disponible")} · <span>Téléphone :</span> ${escapeHtml(rfq.phone || "Non disponible")}</p>
+          <p><span>Spécifications :</span> ${escapeHtml(rfq.specifications)}</p>
+          <p><span>Quantité :</span> ${escapeHtml(rfq.quantity)} · <span>Délai demandé :</span> ${escapeHtml(rfq.desiredDelivery)}</p>
+          <p><span>Date limite de réponse :</span> ${escapeHtml(rfq.responseDeadline)}</p>
+          ${rfq.source ? `<p><a href="${escapeHtml(rfq.source)}" target="_blank" rel="noopener noreferrer">Consulter la source fournisseur</a></p>` : ""}
+        </div>
+      `).join("") || "<p>Aucune RFQ préparée.</p>"}
+      <p><strong>Statut :</strong> ${sheet.rfqSendingAuthorized ? "Autorisation DG enregistrée - aucun envoi déclenché" : "En attente d'autorisation DG"}</p>
+    </article>
   `;
   document.getElementById("purchase-cost").value = sheet.purchaseCost ?? "";
   document.getElementById("sale-price").value = sheet.proposedSalePrice ?? "";
@@ -310,10 +324,33 @@ function renderValidationSheet(workflow) {
     const key = button.dataset.decision;
     button.disabled = (key === "validate-participation" && validations.participation === "validated")
       || (key === "validate-prices" && validations.prices === "validated")
+      || (key === "authorize-rfqs" && validations.rfqSending === "authorized")
       || (key === "validate-final" && validations.finalDossier === "validated")
       || (key === "authorize-send" && validations.sending === "authorized")
       || validations.participation === "rejected";
   });
+}
+
+async function refreshVaultControl() {
+  const section = document.getElementById("validation-sheet");
+  const id = section.dataset.workflowId;
+  if (!id) return;
+  const button = document.getElementById("refresh-vault-control");
+  button.disabled = true;
+  statusRegion.textContent = "Synchronisation avec les fichiers réels du Coffre…";
+  try {
+    const result = await api("/api/nexus-orchestrator?action=refresh-vault", {
+      method: "POST",
+      body: JSON.stringify({ id })
+    });
+    await refresh();
+    await viewWorkflow(id);
+    statusRegion.textContent = `Contrôle mis à jour : ${result.comparison.afterAvailable}/${result.comparison.totalRequirements} document(s) disponible(s), contre ${result.comparison.beforeAvailable}/${result.comparison.totalRequirements} avant synchronisation.`;
+  } catch (error) {
+    statusRegion.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function refresh() {
@@ -457,6 +494,7 @@ document.getElementById("decision-actions").addEventListener("click", (event) =>
   const button = event.target.closest("[data-decision]");
   if (button) submitDecision(button);
 });
+document.getElementById("refresh-vault-control").addEventListener("click", refreshVaultControl);
 document.getElementById("workflow-list").addEventListener("click", (event) => {
   const view = event.target.closest("[data-view-workflow]");
   const resume = event.target.closest("[data-resume-workflow]");

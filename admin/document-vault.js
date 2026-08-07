@@ -86,11 +86,17 @@ function updateSummary() {
 function renderDocuments() {
   const target = document.getElementById("vault-list");
   target.innerHTML = state.documents.length ? state.documents.map((item) => `
-    <article class="vault-document ${item.status === "expired" ? "is-expired" : ""}">
+    <article class="vault-document ${item.status === "expired" ? "is-expired" : ""} ${item.usableInTenders ? "is-usable" : "is-unusable"}">
       <div>
         <h3>${escapeHtml(item.title)}</h3>
         <p>${escapeHtml(categoryLabels[item.category] || item.category)} · ${escapeHtml(item.sourceFilename)}</p>
         <small>${escapeHtml(item.description || "Aucune description")}</small>
+        <div class="vault-proof">
+          <span>Fichier réel : <strong>${item.filePresent ? "Oui" : "Non"}</strong></span>
+          <span>Organisation : <strong>${escapeHtml(item.organizationName || "Non associée")}</strong></span>
+          <span>Emplacement : <strong>${escapeHtml(item.storageLocation || "Non renseigné")}</strong></span>
+          <span>Utilisable AO : <strong>${item.usableInTenders ? "Oui" : "Non"}</strong></span>
+        </div>
       </div>
       <div class="vault-meta"><span>Version</span><strong>${escapeHtml(item.version)}</strong></div>
       <div class="vault-meta"><span>Délivré</span><strong>${escapeHtml(item.issuedOn ? formatDate(item.issuedOn) : "Non renseigné")}</strong></div>
@@ -139,6 +145,7 @@ function startReplacement(documentId) {
   document.getElementById("vault-issued-on").value = item.issuedOn ? String(item.issuedOn).slice(0, 10) : "";
   document.getElementById("vault-expires-on").value = item.expiresOn ? String(item.expiresOn).slice(0, 10) : "";
   document.getElementById("vault-notes").value = "";
+  document.getElementById("vault-usable").checked = Boolean(item.usableForTenders);
   document.getElementById("vault-form-title").textContent = `Nouvelle version · ${item.title}`;
   document.getElementById("vault-cancel-replacement").hidden = false;
   uploadForm.scrollIntoView({ behavior: "smooth", block: "start" });

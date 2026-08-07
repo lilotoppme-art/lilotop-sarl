@@ -114,14 +114,19 @@ const aiOutput = {
   assert.strictEqual(responseSchema().additionalProperties, false);
   const control = buildDocumentControl(["RCCM", "Attestation fiscale"], [{
     id: "doc-1", versionId: "version-1", title: "RCCM LILOTOP", version: "v2",
-    status: "valid", expiresOn: null
+    status: "valid", expiresOn: null, filePresent: true, usableForTenders: true,
+    usableInTenders: true, sourceFilename: "RCCM.pdf", storageLocation: "Neon"
   }, {
     id: "doc-2", versionId: "version-2", title: "Attestation fiscale", version: "v1",
-    status: "expired", expiresOn: "2026-01-01"
+    status: "expired", expiresOn: "2026-01-01", filePresent: true, usableForTenders: true,
+    usableInTenders: false, sourceFilename: "fiscal.pdf", storageLocation: "Neon"
   }], []);
   assert.strictEqual(control.rows.find((row) => row.key === "rccm").status, "available");
   assert.strictEqual(control.rows.find((row) => row.key === "tax").status, "expired");
   assert.ok(control.missingDocuments.includes("IDNAT"));
+  const declaredOnly = buildDocumentControl(["RCCM"], [], ["RCCM"]);
+  assert.strictEqual(declaredOnly.rows.find((row) => row.key === "rccm").status, "missing");
+  assert.match(declaredOnly.rows.find((row) => row.key === "rccm").source, /sans fichier accessible/);
 
   const docxBuffer = makeDocx("Appel d'offres pour pompes industrielles en RDC.");
   const docx = await extractTenderDocument({
@@ -179,7 +184,12 @@ const aiOutput = {
       category: "legal",
       version: "v1",
       status: "valid",
-      expiresOn: null
+      expiresOn: null,
+      filePresent: true,
+      usableForTenders: true,
+      usableInTenders: true,
+      sourceFilename: "RCCM.pdf",
+      storageLocation: "Neon"
     }]
   });
   assert.strictEqual(captured.url, "https://api.openai.com/v1/responses");

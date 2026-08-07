@@ -231,6 +231,16 @@ main {
 .validation-grid > article { padding: 1rem; border: 1px solid var(--line); background: #fff; min-width: 0; }
 .validation-grid h3 { margin-top: 0; }
 .validation-grid pre { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #405260; font: inherit; }
+.validation-rfqs { grid-column: 1 / -1; }
+.rfq-authorization-row {
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  background: #f8fafb;
+}
+.rfq-authorization-row p { margin: 5px 0; }
+.rfq-authorization-row span { color: #405260; font-weight: 700; }
 .validation-facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); }
 .validation-facts div { display: grid; gap: .25rem; padding: .9rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .validation-facts span { color: var(--steel); font-size: .78rem; text-transform: uppercase; font-weight: 750; }

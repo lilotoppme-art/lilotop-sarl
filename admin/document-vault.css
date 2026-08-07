@@ -70,6 +70,14 @@
 }
 
 .vault-fields .wide { grid-column: 1 / -1; }
+.vault-usable-field {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  padding: 11px;
+  border: 1px solid var(--steel-200);
+  background: #f8fafb;
+}
+.vault-usable-field input { width: 18px; height: 18px; }
 .vault-fields input, .vault-fields select, .vault-fields textarea,
 .vault-filters input, .vault-filters select {
   width: 100%;
@@ -110,8 +118,11 @@
 }
 
 .vault-document.is-expired { border-left-color: var(--red); }
+.vault-document.is-unusable { border-left-color: var(--steel-400); }
 .vault-document h3 { margin: 0 0 4px; font-size: 15px; }
 .vault-document p, .vault-document small { margin: 0; color: var(--steel-700); font-size: 12px; }
+.vault-proof { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 10px; color: var(--steel-700); font-size: 11px; }
+.vault-proof strong { color: var(--navy-900); }
 .vault-meta span { display: block; color: var(--steel-500); font-size: 10px; font-weight: 800; text-transform: uppercase; }
 .vault-meta strong { display: block; margin-top: 3px; font-size: 12px; }
 .vault-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }

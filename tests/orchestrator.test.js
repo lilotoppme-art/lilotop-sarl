@@ -81,6 +81,8 @@ function testArchitecture() {
   assert.match(service, /retrieveOfficialDocument/);
   assert.match(service, /EN ATTENTE DE COTATION FOURNISSEUR/);
   assert.match(service, /applyDecision/);
+  assert.match(service, /refreshVaultControl/);
+  assert.match(service, /supplierRfqs/);
   assert.match(service, /sendEnabled: false/);
   assert.match(service, /submissionEnabled: false/);
   assert.match(service, /MAX_SOURCED_PRODUCTS = 3/);
@@ -104,6 +106,7 @@ function testArchitecture() {
   assert.match(handler, /action === "dashboard"/);
   assert.match(handler, /action === "detect"/);
   assert.match(handler, /action === "decision"/);
+  assert.match(handler, /action === "refresh-vault"/);
   assert.match(handler, /action === "document"/);
   assert.match(handler, /action === "start-official"/);
   assert.match(handler, /businessStore\.upsertOpportunity/);
@@ -135,8 +138,10 @@ function testInterfaceAndRoutes() {
   assert.match(html, /\{\{SHELL_HIDDEN\}\}/);
   assert.match(html, /Valider les prix/);
   assert.match(html, /Autoriser l'envoi/);
+  assert.match(html, /AUTORISER L'ENVOI DES RFQ/);
   assert.match(html, /Fiche finale de validation/);
   assert.match(client, /validation-required/);
+  assert.match(client, /Cotations fournisseurs à autoriser/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
   assert.match(routes, /\/api\/nexus-orchestrator/);
   assert.match(page, /orchestrator-page/);
@@ -164,7 +169,10 @@ function testDossierDocuments() {
       product: { name: "Pompe" },
       suppliers: [{ name: "Supplier", country: "ZA", reliabilityScore: 88 }]
     }],
-    rfqs: [{ subject: "RFQ Pompe", supplier: { name: "Supplier" } }]
+    rfqs: [{ subject: "RFQ Pompe", product: "Pompe", description: "Pompe industrielle",
+      quantity: "2", desiredDelivery: "Avant le 30 septembre", supplier: {
+        name: "Supplier", commercialEmail: "sales@example.com", website: "https://example.com"
+      } }]
   });
   assert.equal(documents.length, 5);
   assert.ok(documents.some((item) => item.key === "supplier-report"));
@@ -173,6 +181,10 @@ function testDossierDocuments() {
   const dossier = {
     opportunity: { title: "AO Pompes", organization: "Client", score: 70, currency: "USD" },
     analysis: { opportunityScore: 82, priority: "prioritaire", risks: ["Délai court"] },
+    rfqs: [{ subject: "RFQ Pompe", product: "Pompe", description: "Pompe industrielle",
+      quantity: "2", desiredDelivery: "Avant le 30 septembre", supplier: {
+        name: "Supplier", commercialEmail: "sales@example.com", website: "https://example.com"
+      } }],
     sourcing: [{ product: { name: "Pompe" }, suppliers: [
       { name: "B", reliabilityScore: 60, certifications: [] },
       { name: "A", reliabilityScore: 90, certifications: ["ISO"] }
@@ -198,6 +210,9 @@ function testDossierDocuments() {
   assert.equal(sheet.finalStatus, "DOCUMENTS MANQUANTS");
   assert.equal(sheet.quotationsReceived, 0);
   assert.equal(sheet.quotationsMissing, 2);
+  assert.equal(sheet.supplierRfqs.length, 1);
+  assert.equal(sheet.supplierRfqs[0].coordinatesVerified, true);
+  assert.equal(sheet.rfqSendingAuthorized, false);
 }
 
 function testOfficialTenderSourcePolicy() {
