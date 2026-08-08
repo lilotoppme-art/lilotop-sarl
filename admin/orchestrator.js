@@ -187,6 +187,7 @@ function renderDossier(workflow, actions, sourceDocuments = []) {
   const panel = document.getElementById("dossier-panel");
   const dossier = workflow.dossier || {};
   const analysis = dossier.analysis || {};
+  const officialSourceDocuments = sourceDocuments.filter((document) => !String(document.finalUrl || "").startsWith("nexus://"));
   panel.hidden = false;
   document.getElementById("dossier-title").textContent = workflow.title;
   document.getElementById("dossier-status").textContent = PIPELINE_LABELS[dossier.pipelineStatus] || workflow.status;
@@ -196,7 +197,7 @@ function renderDossier(workflow, actions, sourceDocuments = []) {
       <p><strong>Référence :</strong> ${escapeHtml(dossier.tenderSource?.reference || "À confirmer")}</p>
       <p><strong>URL source :</strong> ${dossier.opportunity?.sourceUrl ? `<a href="${escapeHtml(dossier.opportunity.sourceUrl)}" target="_blank" rel="noopener noreferrer">Ouvrir l'avis officiel</a>` : "Non renseignée"}</p>
       <p><strong>Récupération :</strong> ${escapeHtml(dossier.tenderSource?.retrievalStatus || "En attente")}</p>
-      ${sourceDocuments.length ? sourceDocuments.map((document) => `
+      ${officialSourceDocuments.length ? officialSourceDocuments.map((document) => `
         <p><a class="button button-secondary button-inline" href="/api/nexus-orchestrator?action=document&id=${escapeHtml(document.id)}" download>
           Télécharger ${escapeHtml(document.filename)} (${escapeHtml(Math.round(document.sizeBytes / 1024))} Ko)
         </a></p>
@@ -275,6 +276,8 @@ function renderValidationSheet(workflow) {
   const dossier = workflow.dossier || {};
   const sheet = dossier.finalValidation;
   const unece = sheet?.uneceSubmissionReview;
+  const eoi = sheet?.uneceEoiSubmission;
+  const eoiPackage = sheet?.uneceEoiPackage;
   section.hidden = !sheet;
   section.dataset.workflowId = workflow.id;
   if (!sheet) return;
@@ -304,6 +307,30 @@ function renderValidationSheet(workflow) {
         <div><p class="section-kicker">EOIUNECA24536</p><h3>UNECA - CONDITIONS AVANT SOUMISSION</h3></div>
         <div class="unece-progress" aria-label="Avancement operationnel ${escapeHtml(unece.progressPercent)} pour cent"><strong>${escapeHtml(unece.progressPercent)}%</strong><span>Avancement operationnel</span></div>
       </div>
+      ${eoi ? `<section class="eoi-dg-card">
+        <div class="section-heading-inline"><div><p class="section-kicker">Fiche DG simplifiee</p><h4>UNECA EOIUNECA24536</h4></div><span class="status status-paused">NON SOUMIS</span></div>
+        <div class="eoi-dg-grid">
+          <div><span>Echeance</span><strong>${escapeHtml(eoi.deadline)}</strong></div>
+          <div><span>UNGM</span><strong>673735</strong></div>
+          <div><span>Eligibilite</span><strong>${escapeHtml(eoi.eligibilityPercent)}%</strong></div>
+          <div><span>Dossier EOI</span><strong>${escapeHtml(eoi.dossierPercent)}%</strong></div>
+          <div><span>Documents a fournir</span><strong>0</strong></div>
+          <div><span>Risque de rejet</span><strong>${escapeHtml(eoi.rejectionRisk)}</strong></div>
+        </div>
+        <p><strong>Recommandation :</strong> ${escapeHtml(eoi.recommendation)}</p>
+        <p><strong>Canal officiel :</strong> ${escapeHtml(eoi.channel)}</p>
+        <div class="decision-actions eoi-package-actions">
+          ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&disposition=inline&id=${encodeURIComponent(eoiPackage.pdf.id)}" target="_blank" rel="noopener">PREVISUALISER LE DOSSIER</a>` : ""}
+          ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&id=${encodeURIComponent(eoiPackage.pdf.id)}" download>TELECHARGER PDF</a>` : ""}
+          ${eoiPackage?.zip?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&id=${encodeURIComponent(eoiPackage.zip.id)}" download>TELECHARGER ZIP</a>` : ""}
+        </div>
+        <p><small>La validation DG enregistre une decision interne. Elle ne clique pas sur Express interest et n'envoie aucun e-mail.</small></p>
+      </section>
+      <section><h4>Champs restant a completer par le DG</h4>${listMarkup(eoi.dgFields, "Aucun champ restant.")}</section>
+      <section><h4>Controle final ligne par ligne</h4><div class="responsive-table"><table class="compact-table">
+        <thead><tr><th>Controle</th><th>Statut</th><th>Action</th></tr></thead>
+        <tbody>${eoi.control.map((item) => `<tr><td>${escapeHtml(item.label)}</td><td><span class="status ${item.status === "CONFORME" ? "status-completed" : item.status === "BLOQUANT" ? "status-failed" : "status-paused"}">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.action)}</td></tr>`).join("")}</tbody>
+      </table></div></section>` : ""}
       <div class="responsive-table"><table>
         <thead><tr><th>Condition</th><th>Texte du DAO</th><th>Page</th><th>Statut LILOTOP</th><th>Preuve disponible</th><th>Action restante</th></tr></thead>
         <tbody>${unece.conditions.map((condition, index) => `<tr>
@@ -332,6 +359,9 @@ function renderValidationSheet(workflow) {
         <thead><tr><th>Condition</th><th>Exigence</th><th>Reponse LILOTOP</th><th>Preuve / controle</th><th>Statut</th><th>Declaration brouillon</th></tr></thead>
         <tbody>${unece.eligibility.map((item) => `<tr><td><strong>${escapeHtml(item.key)}</strong></td><td>${escapeHtml(item.requirement)}</td><td>${escapeHtml(item.response)}</td><td>${escapeHtml(item.proof)}</td><td><span class="status status-paused">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.declarationDraft)}</td></tr>`).join("")}</tbody>
       </table></div></section>
+      ${eoi ? `<section><h4>Expression of Interest - brouillon professionnel</h4><pre>${escapeHtml(eoi.letter)}</pre></section>
+      <section><h4>Documents reellement requis</h4><p><strong>Aucun document a joindre a cette etape.</strong> Le PDF et le ZIP sont des dossiers internes de validation DG, pas des pieces exigees par UNECA.</p></section>
+      <section><h4>E-mail de secours pret</h4><pre>${escapeHtml(eoi.emailDraft)}</pre><p><small>A utiliser uniquement si la reponse electronique UNGM est techniquement impossible.</small></p></section>` : ""}
       <section><h4>Perimetre commercial confirme par l'avis public</h4>
         <div class="commercial-family-grid">${unece.commercialScope.families.map((family) => `<div><strong>${escapeHtml(family.code)}</strong><span>${escapeHtml(family.label)}</span></div>`).join("")}</div>
         <p><strong>Specifications :</strong> ${escapeHtml(unece.commercialScope.specifications)}</p>
@@ -400,16 +430,22 @@ function renderValidationSheet(workflow) {
   document.getElementById("purchase-cost").value = sheet.purchaseCost ?? "";
   document.getElementById("sale-price").value = sheet.proposedSalePrice ?? "";
   document.getElementById("price-currency").value = sheet.currency || "USD";
+  document.querySelector(".price-validation").hidden = Boolean(eoi);
   const validations = dossier.validations || {};
   const rfqAuthorizationBlocked = !(sheet.supplierRfqs || []).length
     || (sheet.supplierRfqs || []).some((rfq) => !rfq.coordinatesVerified || !rfq.readyToSend);
   document.querySelectorAll("[data-decision]").forEach((button) => {
     const key = button.dataset.decision;
+    button.hidden = eoi
+      ? ["validate-participation", "validate-prices", "authorize-rfqs", "validate-final", "authorize-send"].includes(key)
+      : key === "validate-eoi";
+    if (key === "reject") button.textContent = eoi ? "REFUSER" : "Rejeter";
     button.disabled = (key === "validate-participation" && validations.participation === "validated")
       || (key === "validate-prices" && validations.prices === "validated")
       || (key === "authorize-rfqs" && validations.rfqSending === "authorized")
       || (key === "authorize-rfqs" && rfqAuthorizationBlocked)
       || (key === "validate-final" && validations.finalDossier === "validated")
+      || (key === "validate-eoi" && validations.eoiSubmission === "validated-for-manual-submission")
       || (key === "authorize-send" && validations.sending === "authorized")
       || validations.participation === "rejected";
   });

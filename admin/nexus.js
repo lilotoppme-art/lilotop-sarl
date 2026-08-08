@@ -253,6 +253,11 @@ async function loadOrchestratorDashboard() {
             <p><strong>UNECA — CONDITIONS AVANT SOUMISSION</strong> · Avancement ${escapeHtml(summary.latestValidation.uneceSubmissionReview.progressPercent)}%</p>
             <ol>${summary.latestValidation.uneceSubmissionReview.conditions.map((condition, index) => `<li><strong>Condition ${escapeHtml(index + 1)} :</strong> ${escapeHtml(condition.title)} · ${escapeHtml(condition.status)}</li>`).join("")}</ol>
             <p><strong>Actions DG :</strong> ${escapeHtml(summary.latestValidation.uneceSubmissionReview.dgActions.join(" · "))}</p>
+            ${summary.latestValidation.uneceEoiSubmission ? `<p><strong>Échéance :</strong> ${escapeHtml(summary.latestValidation.uneceEoiSubmission.deadline)} · <strong>UNGM :</strong> 673735</p>
+            <p><strong>Éligibilité :</strong> ${escapeHtml(summary.latestValidation.uneceEoiSubmission.eligibilityPercent)}% · <strong>Dossier EOI :</strong> ${escapeHtml(summary.latestValidation.uneceEoiSubmission.dossierPercent)}%</p>
+            <p><strong>Champs DG :</strong> ${escapeHtml(summary.latestValidation.uneceEoiSubmission.dgFields.join(" · "))}</p>
+            <p><strong>Documents à fournir :</strong> Aucun à cette étape · <strong>Risque :</strong> ${escapeHtml(summary.latestValidation.uneceEoiSubmission.rejectionRisk)}</p>
+            <p><strong>Recommandation :</strong> ${escapeHtml(summary.latestValidation.uneceEoiSubmission.recommendation)}</p>` : ""}
           </div>` : ""}` : ""}
           <a class="button button-primary button-inline" href="/admin/nexus/orchestrator">Ouvrir l'orchestrateur</a>
         </div>

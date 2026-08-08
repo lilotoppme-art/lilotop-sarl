@@ -250,6 +250,12 @@ main {
 .commercial-family-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
 .commercial-family-grid > div { display: grid; gap: .35rem; padding: .85rem; border: 1px solid var(--line); background: #f8fafb; }
 .commercial-family-grid span { color: var(--steel); line-height: 1.45; }
+.eoi-dg-card { border-top: 0 !important; padding: 1rem !important; border: 1px solid var(--line) !important; background: #f8fafb; }
+.eoi-dg-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: 1rem 0; }
+.eoi-dg-grid > div { display: grid; gap: .35rem; padding: .8rem; border-left: 3px solid var(--gold); background: #fff; }
+.eoi-dg-grid span { color: var(--steel); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
+.eoi-dg-grid strong { color: var(--navy); line-height: 1.35; overflow-wrap: anywhere; }
+.eoi-package-actions { margin-top: .75rem; }
 .organization-chart-preview { grid-column: 1 / -1; }
 .organization-chart { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; align-items: start; }
 .organization-node { display: grid; gap: .35rem; min-height: 92px; padding: 1rem; border: 1px solid var(--line); border-top: 3px solid var(--gold); background: #f8fafb; text-align: center; }
@@ -316,7 +322,7 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid, .eoi-dg-grid { grid-template-columns: 1fr; }
   .unece-readiness-heading, .section-heading-inline { align-items: flex-start; flex-direction: column; }
   .unece-progress { width: 100%; text-align: left; }
   .validation-facts { grid-template-columns: 1fr; }

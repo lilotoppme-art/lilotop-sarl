@@ -85,6 +85,7 @@ function testArchitecture() {
   assert.match(service, /retrieveOfficialDocument/);
   assert.match(service, /EN ATTENTE DE COTATION FOURNISSEUR/);
   assert.match(service, /applyDecision/);
+  assert.match(service, /validate-eoi/);
   assert.match(service, /refreshVaultControl/);
   assert.match(service, /document\\\(s\\\) restent manquants ou non utilisables/);
   assert.match(service, /supplierRfqs/);
@@ -113,6 +114,7 @@ function testArchitecture() {
   assert.match(handler, /action === "decision"/);
   assert.match(handler, /action === "refresh-vault"/);
   assert.match(handler, /action === "document"/);
+  assert.match(handler, /disposition"\) === "inline"/);
   assert.match(handler, /action === "start-official"/);
   assert.match(handler, /businessStore\.upsertOpportunity/);
   assert.doesNotMatch(handler, /sendOpportunityAlert/);
@@ -153,6 +155,10 @@ function testInterfaceAndRoutes() {
   assert.match(client, /Vendor Response Form - Preview pre-remplie/);
   assert.match(client, /Conditions d'eligibilite A-F/);
   assert.match(client, /Perimetre commercial confirme/);
+  assert.match(client, /PREVISUALISER LE DOSSIER/);
+  assert.match(client, /Controle final ligne par ligne/);
+  assert.match(client, /Aucun document a joindre a cette etape/);
+  assert.match(html, /data-decision="validate-eoi"/);
   assert.match(client, /rfqAuthorizationBlocked/);
   assert.match(client, /COORDONNEES VERIFIEES/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
@@ -176,6 +182,7 @@ function testDossierDocuments() {
   const {
     applyOrganizationCredential,
     buildFinalValidation,
+    buildUnecaEoiSubmission,
     buildUnecaSubmissionReview,
     buildUnecaEoiCompliance,
     documentMatrixFor,
@@ -317,8 +324,29 @@ function testDossierDocuments() {
   assert.equal(submissionReview.commercialScope.rfqs.length, 3);
   assert.equal(submissionReview.organizationChart.status, "BROUILLON CONSERVE DANS LE COFFRE - NON JOINT A UNECA");
 
-  const { organizationChartDraftDocx } = require("../lib/nexus/generated-documents");
+  const eoiSubmission = buildUnecaEoiSubmission(submissionReview);
+  assert.equal(eoiSubmission.reference, "EOIUNECA24536");
+  assert.equal(eoiSubmission.deadline, "14 August 2026, 23:59 (GMT-4)");
+  assert.equal(eoiSubmission.requiredDocuments.length, 0);
+  assert.equal(eoiSubmission.eligibilityPercent, 0);
+  assert.equal(eoiSubmission.submissionPerformed, false);
+  assert.equal(eoiSubmission.emailSent, false);
+  assert.match(eoiSubmission.channel, /Express interest/);
+  assert.match(eoiSubmission.letter, /UNGM Vendor Number 673735/);
+  assert.doesNotMatch(eoiSubmission.letter, /ISO|CNSS|INPP|ARSP|price quote/i);
+  assert.ok(eoiSubmission.control.some((item) => item.label === "Required attachments at EOI stage" && item.status === "CONFORME"));
+
   const AdmZip = require("adm-zip");
+  const { buildUnecaEoiArtifacts } = require("../lib/nexus/generated-eoi-package");
+  const eoiArtifacts = buildUnecaEoiArtifacts(eoiSubmission);
+  assert.equal(eoiArtifacts.pdf.subarray(0, 8).toString("latin1"), "%PDF-1.4");
+  const packageZip = new AdmZip(eoiArtifacts.zip);
+  assert.ok(packageZip.getEntry("UNECA-EOIUNECA24536-DG-Review.pdf"));
+  assert.ok(packageZip.getEntry("01-Vendor-Response-Information.txt"));
+  assert.ok(packageZip.getEntry("03-Eligibility-Declarations-A-F.txt"));
+  assert.ok(packageZip.getEntry("05-Email-Fallback-Draft.txt"));
+
+  const { organizationChartDraftDocx } = require("../lib/nexus/generated-documents");
   const chartZip = new AdmZip(organizationChartDraftDocx());
   const chartXml = chartZip.readAsText("word/document.xml");
   assert.match(chartXml, /Organigramme LILOTOP SARL/);
