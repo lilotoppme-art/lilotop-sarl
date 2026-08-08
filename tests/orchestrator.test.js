@@ -136,7 +136,7 @@ function testInterfaceAndRoutes() {
   assert.match(client, /item\.name \|\| item\.title/);
   assert.match(html, /Journal récent/);
   assert.match(orchestratorHandler, /listActions\(null, 40\)/);
-  assert.match(orchestratorStore, /external_id = 'EOIUNECA24536'/);
+  assert.match(orchestratorStore, /source_url = 'https:\/\/www\.ungm\.org\/Public\/Notice\/306489'/);
   assert.match(html, /Workflows actifs/);
   assert.match(html, /Valeur potentielle/);
   assert.match(client, /Aucun envoi automatique n'est autorisé/);
