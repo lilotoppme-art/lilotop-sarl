@@ -279,6 +279,14 @@ function testDossierDocuments() {
   const chart = organizationChartDraft();
   assert.equal(chart.nodes[0].name, "Joël Kongolo");
   assert.ok(chart.nodes.slice(1).every((node) => node.name === "À COMPLÉTER"));
+  const uneceSheet = buildFinalValidation({
+    opportunity: { reference: "EOIUNECA24536" },
+    analysis: { risks: ["12 document(s) restent manquants ou non utilisables pour cet appel d'offres."] }
+  }, {
+    compliance: { ...uneceCompliance, documentControl: uneceCompliance.rows },
+    risks: ["1 document(s) restent manquants ou non utilisables pour cet appel d'offres."]
+  }, []);
+  assert.equal(uneceSheet.risks.length, 0);
 }
 
 function testOfficialTenderSourcePolicy() {
