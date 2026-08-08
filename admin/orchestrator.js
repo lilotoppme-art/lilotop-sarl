@@ -293,22 +293,33 @@ function renderValidationSheet(workflow) {
     <article class="validation-summary validation-summary-wide">
       <h3>Dashboard DG - situation UNECA</h3>
       <div class="validation-summary-grid">
-        <div><span>DOCUMENTS</span><strong>${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} exigences satisfaites</strong><small>${escapeHtml(sheet.documentSummary?.toProcess || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} a traiter · Score ${escapeHtml(sheet.compliancePercent || 0)}%</small></div>
+        <div><span>DOCUMENTS</span><strong>${sheet.documentSubmissionRequired === false ? "Aucun document à joindre à cette EOI" : `${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} exigences satisfaites`}</strong><small>${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} condition(s) confirmée(s) · Préparation documentaire ${escapeHtml(sheet.documentaryReadinessPercent || 0)}%</small></div>
         <div><span>RFQ</span><strong>${escapeHtml(sheet.rfqSummary?.prepared || 0)} preparees</strong><small>${escapeHtml(sheet.rfqSummary?.contactsVerified || 0)} coordonnee(s) verifiee(s) · ${escapeHtml(sheet.rfqSummary?.sent || 0)} envoyee</small></div>
         <div><span>PRIX</span><strong>${escapeHtml(sheet.pricingSummary?.quotationsReceived || 0)} cotation recue</strong><small>Cout rendu : ${escapeHtml(sheet.pricingSummary?.landedCost || "EN ATTENTE")} · Marge : ${escapeHtml(sheet.pricingSummary?.margin || "EN ATTENTE")} · Offre financiere : ${escapeHtml(sheet.pricingSummary?.financialOffer || "INCOMPLETE")}</small></div>
       </div>
     </article>
-    <article class="validation-documents"><h3>17 exigences documentaires UNECA</h3>
+    <article class="validation-documents"><h3>${escapeHtml(sheet.documentSummary?.total || 0)} exigences réelles UNECA</h3>
       <div class="responsive-table"><table>
-        <thead><tr><th>N°</th><th>Document / exigence UNECA</th><th>Statut LILOTOP</th><th>Fichier trouve dans le Coffre</th><th>Action necessaire</th></tr></thead>
+        <thead><tr><th>N°</th><th>Document / exigence UNECA</th><th>Statut LILOTOP</th><th>Fichier trouvé dans le Coffre</th><th>Justification DAO</th><th>Action nécessaire</th></tr></thead>
         <tbody>${(sheet.documentMatrix || []).map((item, index) => `<tr>
           <td>${escapeHtml(index + 1)}</td>
           <td>${escapeHtml(item.requirement)}</td>
           <td><span class="status ${["DISPONIBLE ET VALIDE", "INFORMATION CONFIRMÉE – PREUVE À AJOUTER"].includes(item.statusLabel) ? "status-completed" : "status-paused"}">${escapeHtml(item.statusLabel)}</span></td>
           <td>${escapeHtml(item.filename || "Aucun fichier dans le Coffre")}</td>
+          <td>${escapeHtml(item.sourcePage || "Non précisé")}</td>
           <td>${escapeHtml(item.actionRequired)}</td>
         </tr>`).join("")}</tbody>
       </table></div>
+    </article>
+    <article id="organization-chart-preview" class="organization-chart-preview">
+      <h3>${escapeHtml(sheet.organizationChartDraft?.title || "Organigramme LILOTOP SARL")}</h3>
+      <p><strong>${escapeHtml(sheet.organizationChartDraft?.status || "À VALIDER")}</strong></p>
+      <div class="organization-chart">
+        ${(sheet.organizationChartDraft?.nodes || []).map((node) => `<div class="organization-node organization-level-${escapeHtml(node.level)}">
+          <strong>${escapeHtml(node.name)}</strong><span>${escapeHtml(node.role)}</span>
+        </div>`).join("")}
+      </div>
+      <p class="organization-note">${escapeHtml(sheet.organizationChartDraft?.note || "")}</p>
     </article>
     <article><h3>Risques</h3>${listMarkup(sheet.risks, "Aucun risque identifié.")}</article>
     <article><h3>Documents manquants</h3>${listMarkup(sheet.missingDocuments, "Aucun document manquant identifié.")}</article>

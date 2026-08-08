@@ -233,6 +233,13 @@ main {
 .validation-grid pre { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #405260; font: inherit; }
 .validation-rfqs { grid-column: 1 / -1; }
 .validation-documents, .validation-summary-wide { grid-column: 1 / -1; }
+.organization-chart-preview { grid-column: 1 / -1; }
+.organization-chart { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; align-items: start; }
+.organization-node { display: grid; gap: .35rem; min-height: 92px; padding: 1rem; border: 1px solid var(--line); border-top: 3px solid var(--gold); background: #f8fafb; text-align: center; }
+.organization-node span { color: var(--steel); font-size: .84rem; }
+.organization-level-0 { grid-column: 1 / -1; width: min(360px, 100%); margin-inline: auto; background: var(--navy); color: #fff; }
+.organization-level-0 span { color: #dbe5eb; }
+.organization-note { margin-bottom: 0; color: var(--steel); }
 .validation-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
 .validation-summary-grid > div { display: grid; gap: .35rem; padding: .9rem; border: 1px solid var(--line); background: #f8fafb; }
 .validation-summary-grid span { color: var(--steel); font-size: .76rem; font-weight: 800; }
@@ -292,7 +299,7 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart { grid-template-columns: 1fr; }
   .validation-facts { grid-template-columns: 1fr; }
   .workflow-form, .workflow-item, .activity-item { grid-template-columns: 1fr; }
   .workflow-actions { justify-content: flex-start; }

@@ -146,7 +146,8 @@ function testInterfaceAndRoutes() {
   assert.match(html, /Fiche finale de validation/);
   assert.match(client, /validation-required/);
   assert.match(client, /Cotations fournisseurs à autoriser/);
-  assert.match(client, /17 exigences documentaires UNECA/);
+  assert.match(client, /exigences réelles UNECA/);
+  assert.match(client, /organization-chart-preview/);
   assert.match(client, /rfqAuthorizationBlocked/);
   assert.match(client, /COORDONNEES VERIFIEES/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
@@ -165,7 +166,16 @@ function testInterfaceAndRoutes() {
 }
 
 function testDossierDocuments() {
-  const { applyOrganizationCredential, buildFinalValidation, documentMatrixFor, documentsFor, supplierComparisonFor } = require("../lib/nexus/orchestrator-service");
+  const {
+    applyOrganizationCredential,
+    buildFinalValidation,
+    buildUnecaEoiCompliance,
+    documentMatrixFor,
+    documentsFor,
+    isUnecaEoi24536,
+    organizationChartDraft,
+    supplierComparisonFor
+  } = require("../lib/nexus/orchestrator-service");
   const documents = documentsFor({
     analysis: {
       executiveSummary: "Resume",
@@ -250,6 +260,24 @@ function testDossierDocuments() {
   assert.equal(credentialCompliance.missingDocuments.length, 11);
   const credentialRow = documentMatrixFor({ compliance: { documentControl: credentialCompliance.rows } })[14];
   assert.equal(credentialRow.statusLabel, "INFORMATION CONFIRMÉE – PREUVE À AJOUTER");
+
+  assert.equal(isUnecaEoi24536({ opportunity: { reference: "EOIUNECA24536" } }), true);
+  assert.equal(isUnecaEoi24536({ opportunity: { title: "Autre appel d'offres" } }), false);
+  const uneceCompliance = buildUnecaEoiCompliance({
+    status: "registered", registrationNumber: "673735", evidencePresent: false
+  });
+  assert.equal(uneceCompliance.rows.length, 4);
+  assert.equal(uneceCompliance.compliancePercent, 25);
+  assert.equal(uneceCompliance.documentaryReadinessPercent, 100);
+  assert.equal(uneceCompliance.documentSubmissionRequired, false);
+  assert.equal(uneceCompliance.missingDocuments.length, 1);
+  assert.equal(uneceCompliance.generableDocuments.length, 2);
+  const uneceMatrix = documentMatrixFor({ compliance: { documentControl: uneceCompliance.rows } });
+  assert.equal(uneceMatrix[2].statusLabel, "GÉNÉRABLE PAR NEXUS");
+  assert.match(uneceMatrix[2].sourcePage, /pages 2 et 3/);
+  const chart = organizationChartDraft();
+  assert.equal(chart.nodes[0].name, "Joël Kongolo");
+  assert.ok(chart.nodes.slice(1).every((node) => node.name === "À COMPLÉTER"));
 }
 
 function testOfficialTenderSourcePolicy() {
