@@ -232,7 +232,24 @@ main {
 .validation-grid h3 { margin-top: 0; }
 .validation-grid pre { max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; color: #405260; font: inherit; }
 .validation-rfqs { grid-column: 1 / -1; }
-.validation-documents, .validation-summary-wide { grid-column: 1 / -1; }
+.validation-documents, .validation-summary-wide, .unece-readiness { grid-column: 1 / -1; }
+.unece-readiness { border-top: 4px solid var(--gold) !important; }
+.unece-readiness-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.unece-readiness-heading h3 { margin-bottom: 0; }
+.section-kicker { margin: 0 0 .35rem; color: var(--gold); font-size: .74rem; font-weight: 850; text-transform: uppercase; }
+.unece-progress { display: grid; min-width: 150px; padding: .75rem 1rem; border: 1px solid var(--line); background: #f8fafb; text-align: right; }
+.unece-progress strong { color: var(--navy); font-size: 1.55rem; }
+.unece-progress span { color: var(--steel); font-size: .75rem; }
+.unece-review-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+.unece-review-columns section, .unece-form-preview, .unece-readiness > section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.unece-review-columns section { margin-top: 0; padding: 1rem; border: 1px solid var(--line); background: #f8fafb; }
+.unece-readiness h4 { margin: 0 0 .75rem; color: var(--navy); }
+.section-heading-inline { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.text-link { color: #0c5c8f; font-weight: 750; }
+.compact-table { min-width: 680px !important; }
+.commercial-family-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.commercial-family-grid > div { display: grid; gap: .35rem; padding: .85rem; border: 1px solid var(--line); background: #f8fafb; }
+.commercial-family-grid span { color: var(--steel); line-height: 1.45; }
 .organization-chart-preview { grid-column: 1 / -1; }
 .organization-chart { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; align-items: start; }
 .organization-node { display: grid; gap: .35rem; min-height: 92px; padding: 1rem; border: 1px solid var(--line); border-top: 3px solid var(--gold); background: #f8fafb; text-align: center; }
@@ -299,7 +316,9 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid { grid-template-columns: 1fr; }
+  .unece-readiness-heading, .section-heading-inline { align-items: flex-start; flex-direction: column; }
+  .unece-progress { width: 100%; text-align: left; }
   .validation-facts { grid-template-columns: 1fr; }
   .workflow-form, .workflow-item, .activity-item { grid-template-columns: 1fr; }
   .workflow-actions { justify-content: flex-start; }

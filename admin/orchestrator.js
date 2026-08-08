@@ -274,6 +274,7 @@ function renderValidationSheet(workflow) {
   const section = document.getElementById("validation-sheet");
   const dossier = workflow.dossier || {};
   const sheet = dossier.finalValidation;
+  const unece = sheet?.uneceSubmissionReview;
   section.hidden = !sheet;
   section.dataset.workflowId = workflow.id;
   if (!sheet) return;
@@ -298,6 +299,48 @@ function renderValidationSheet(workflow) {
         <div><span>PRIX</span><strong>${escapeHtml(sheet.pricingSummary?.quotationsReceived || 0)} cotation recue</strong><small>Cout rendu : ${escapeHtml(sheet.pricingSummary?.landedCost || "EN ATTENTE")} · Marge : ${escapeHtml(sheet.pricingSummary?.margin || "EN ATTENTE")} · Offre financiere : ${escapeHtml(sheet.pricingSummary?.financialOffer || "INCOMPLETE")}</small></div>
       </div>
     </article>
+    ${unece ? `<article id="unece-submission-readiness" class="unece-readiness">
+      <div class="unece-readiness-heading">
+        <div><p class="section-kicker">EOIUNECA24536</p><h3>UNECA - CONDITIONS AVANT SOUMISSION</h3></div>
+        <div class="unece-progress" aria-label="Avancement operationnel ${escapeHtml(unece.progressPercent)} pour cent"><strong>${escapeHtml(unece.progressPercent)}%</strong><span>Avancement operationnel</span></div>
+      </div>
+      <div class="responsive-table"><table>
+        <thead><tr><th>Condition</th><th>Texte du DAO</th><th>Page</th><th>Statut LILOTOP</th><th>Preuve disponible</th><th>Action restante</th></tr></thead>
+        <tbody>${unece.conditions.map((condition, index) => `<tr>
+          <td><strong>Condition ${escapeHtml(index + 1)}</strong><br>${escapeHtml(condition.title)}</td>
+          <td>${escapeHtml(condition.daoText)}</td><td>${escapeHtml(condition.page)}</td>
+          <td><span class="status ${condition.completed ? "status-completed" : "status-paused"}">${escapeHtml(condition.status)}</span></td>
+          <td>${escapeHtml(condition.proof)}</td><td>${escapeHtml(condition.action)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+      <div class="unece-review-columns">
+        <section><h4>Actions requises de la Direction Generale</h4>${listMarkup(unece.dgActions, "Aucune action manuelle restante.")}</section>
+        <section><h4>Organigramme conserve dans le Coffre</h4><p>${escapeHtml(unece.organizationChart?.status || "Brouillon en cours de creation")}</p>
+          ${unece.organizationChart?.versionId ? `<a class="text-link" href="/api/document-vault?action=file&version=${encodeURIComponent(unece.organizationChart.versionId)}">Telecharger le brouillon DOCX</a>` : ""}
+          <p><small>Ce document n'est pas joint a UNECA, car il n'est pas exige a cette etape.</small></p>
+        </section>
+      </div>
+      <section class="unece-form-preview">
+        <div class="section-heading-inline"><h4>Vendor Response Form - Preview pre-remplie</h4><span class="status status-paused">${escapeHtml(unece.vendorResponseForm.status)}</span></div>
+        <p>${escapeHtml(unece.vendorResponseForm.submissionMode)}</p>
+        <div class="responsive-table"><table class="compact-table"><thead><tr><th>Champ</th><th>Valeur preparee</th></tr></thead>
+          <tbody>${unece.vendorResponseForm.fields.map(([label, value]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td>${escapeHtml(value)}</td></tr>`).join("")}</tbody>
+        </table></div>
+        <p><strong>Adresses LILOTOP connues a departager par le DG :</strong> ${escapeHtml(unece.vendorResponseForm.knownAddresses.join(" | "))}</p>
+      </section>
+      <section><h4>Conditions d'eligibilite A-F</h4><div class="responsive-table"><table>
+        <thead><tr><th>Condition</th><th>Exigence</th><th>Reponse LILOTOP</th><th>Preuve / controle</th><th>Statut</th><th>Declaration brouillon</th></tr></thead>
+        <tbody>${unece.eligibility.map((item) => `<tr><td><strong>${escapeHtml(item.key)}</strong></td><td>${escapeHtml(item.requirement)}</td><td>${escapeHtml(item.response)}</td><td>${escapeHtml(item.proof)}</td><td><span class="status status-paused">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.declarationDraft)}</td></tr>`).join("")}</tbody>
+      </table></div></section>
+      <section><h4>Perimetre commercial confirme par l'avis public</h4>
+        <div class="commercial-family-grid">${unece.commercialScope.families.map((family) => `<div><strong>${escapeHtml(family.code)}</strong><span>${escapeHtml(family.label)}</span></div>`).join("")}</div>
+        <p><strong>Specifications :</strong> ${escapeHtml(unece.commercialScope.specifications)}</p>
+        <p><strong>Quantites :</strong> ${escapeHtml(unece.commercialScope.quantities)}</p>
+        <div class="responsive-table"><table class="compact-table"><thead><tr><th>Fournisseur</th><th>Famille / produit</th><th>Statut RFQ</th></tr></thead>
+          <tbody>${unece.commercialScope.rfqs.map((rfq) => `<tr><td>${escapeHtml(rfq.supplier)}</td><td>${escapeHtml(rfq.product)}</td><td>${escapeHtml(rfq.status)}</td></tr>`).join("") || `<tr><td colspan="3">Aucune RFQ preparee.</td></tr>`}</tbody>
+        </table></div>
+      </section>
+    </article>` : ""}
     <article class="validation-documents"><h3>${escapeHtml(sheet.documentSummary?.total || 0)} exigences réelles UNECA</h3>
       <div class="responsive-table"><table>
         <thead><tr><th>N°</th><th>Document / exigence UNECA</th><th>Statut LILOTOP</th><th>Fichier trouvé dans le Coffre</th><th>Justification DAO</th><th>Action nécessaire</th></tr></thead>

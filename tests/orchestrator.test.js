@@ -149,6 +149,10 @@ function testInterfaceAndRoutes() {
   assert.match(client, /Cotations fournisseurs à autoriser/);
   assert.match(client, /exigences réelles UNECA/);
   assert.match(client, /organization-chart-preview/);
+  assert.match(client, /UNECA - CONDITIONS AVANT SOUMISSION/);
+  assert.match(client, /Vendor Response Form - Preview pre-remplie/);
+  assert.match(client, /Conditions d'eligibilite A-F/);
+  assert.match(client, /Perimetre commercial confirme/);
   assert.match(client, /rfqAuthorizationBlocked/);
   assert.match(client, /COORDONNEES VERIFIEES/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
@@ -170,6 +174,7 @@ function testDossierDocuments() {
   const {
     applyOrganizationCredential,
     buildFinalValidation,
+    buildUnecaSubmissionReview,
     buildUnecaEoiCompliance,
     documentMatrixFor,
     documentsFor,
@@ -287,6 +292,36 @@ function testDossierDocuments() {
     risks: ["1 document(s) restent manquants ou non utilisables pour cet appel d'offres."]
   }, []);
   assert.equal(uneceSheet.risks.length, 0);
+
+  const submissionReview = buildUnecaSubmissionReview({
+    finalValidation: {
+      supplierRfqs: [
+        { manufacturer: "ABB", product: "Electrical systems" },
+        { manufacturer: "ABB", product: "Lamps and lightbulbs" },
+        { manufacturer: "Signify", product: "Lighting fixtures" }
+      ]
+    }
+  }, { status: "registered", registrationNumber: "673735" }, {
+    id: "chart-document",
+    versionId: "chart-version",
+    sourceFilename: "LILOTOP-Organigramme-Brouillon.docx"
+  });
+  assert.equal(submissionReview.conditions.length, 4);
+  assert.equal(submissionReview.progressPercent, 25);
+  assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "UNGM Vendor ID Number")[1], "673735");
+  assert.equal(submissionReview.eligibility.length, 6);
+  assert.ok(submissionReview.eligibility.every((item) => item.status === "A CONFIRMER"));
+  assert.equal(submissionReview.commercialScope.families.length, 3);
+  assert.equal(submissionReview.commercialScope.rfqs.length, 3);
+  assert.equal(submissionReview.organizationChart.status, "BROUILLON CONSERVE DANS LE COFFRE - NON JOINT A UNECA");
+
+  const { organizationChartDraftDocx } = require("../lib/nexus/generated-documents");
+  const AdmZip = require("adm-zip");
+  const chartZip = new AdmZip(organizationChartDraftDocx());
+  const chartXml = chartZip.readAsText("word/document.xml");
+  assert.match(chartXml, /Organigramme LILOTOP SARL/);
+  assert.match(chartXml, /A COMPLETER/);
+  assert.doesNotMatch(chartXml, /CNSS|INPP|ISO|agrement/i);
 }
 
 function testOfficialTenderSourcePolicy() {
