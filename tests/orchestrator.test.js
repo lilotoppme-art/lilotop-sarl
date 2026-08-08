@@ -128,6 +128,7 @@ function testInterfaceAndRoutes() {
   const catalog = read("lib/nexus/catalog.js");
   const dashboard = read("admin/nexus.js");
   const orchestratorHandler = read("lib/nexus/orchestrator-handler.js");
+  const orchestratorStore = read("lib/nexus/orchestrator-store.js");
   const orchestratorCss = read("admin/orchestrator.css");
 
   assert.match(html, /Lancer Workflow Complet/);
@@ -135,6 +136,7 @@ function testInterfaceAndRoutes() {
   assert.match(client, /item\.name \|\| item\.title/);
   assert.match(html, /Journal récent/);
   assert.match(orchestratorHandler, /listActions\(null, 40\)/);
+  assert.match(orchestratorStore, /external_id = 'EOIUNECA24536'/);
   assert.match(html, /Workflows actifs/);
   assert.match(html, /Valeur potentielle/);
   assert.match(client, /Aucun envoi automatique n'est autorisé/);
