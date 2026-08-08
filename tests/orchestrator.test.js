@@ -318,8 +318,14 @@ function testDossierDocuments() {
   assert.equal(submissionReview.conditions.length, 4);
   assert.equal(submissionReview.progressPercent, 25);
   assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "UNGM Vendor ID Number")[1], "673735");
+  assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "Address")[1], "Boulevard du 30 Juin, no 144, Immeuble Didi, 3eme niveau, Kinshasa/Gombe");
+  assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "Fax Number")[1], "N/A");
+  assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "RCCM")[1], "CD/KIN/RCCM/16-B-8380");
+  assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "National Identification")[1], "01-9-N04151K");
   assert.equal(submissionReview.eligibility.length, 6);
   assert.ok(submissionReview.eligibility.every((item) => item.status === "A CONFIRMER"));
+  assert.ok(submissionReview.eligibility.every((item) => item.response === "OUI - PROPOSITION A VALIDER PAR LE DG"));
+  assert.equal(submissionReview.ungmComparison.automaticallyAccessible, false);
   assert.equal(submissionReview.commercialScope.families.length, 3);
   assert.equal(submissionReview.commercialScope.rfqs.length, 3);
   assert.equal(submissionReview.organizationChart.status, "BROUILLON CONSERVE DANS LE COFFRE - NON JOINT A UNECA");
@@ -331,6 +337,9 @@ function testDossierDocuments() {
   assert.equal(eoiSubmission.eligibilityPercent, 0);
   assert.equal(eoiSubmission.submissionPerformed, false);
   assert.equal(eoiSubmission.emailSent, false);
+  assert.equal(eoiSubmission.dgValidationItems.length, 3);
+  assert.equal(eoiSubmission.readyItems.length, 4);
+  assert.equal(eoiSubmission.expressInterestPayload.length, 5);
   assert.match(eoiSubmission.channel, /Express interest/);
   assert.match(eoiSubmission.letter, /UNGM Vendor Number 673735/);
   assert.doesNotMatch(eoiSubmission.letter, /ISO|CNSS|INPP|ARSP|price quote/i);

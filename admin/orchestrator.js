@@ -312,12 +312,13 @@ function renderValidationSheet(workflow) {
         <div class="eoi-dg-grid">
           <div><span>Echeance</span><strong>${escapeHtml(eoi.deadline)}</strong></div>
           <div><span>UNGM</span><strong>673735</strong></div>
-          <div><span>Eligibilite</span><strong>${escapeHtml(eoi.eligibilityPercent)}%</strong></div>
-          <div><span>Dossier EOI</span><strong>${escapeHtml(eoi.dossierPercent)}%</strong></div>
-          <div><span>Documents a fournir</span><strong>0</strong></div>
-          <div><span>Risque de rejet</span><strong>${escapeHtml(eoi.rejectionRisk)}</strong></div>
         </div>
-        <p><strong>Recommandation :</strong> ${escapeHtml(eoi.recommendation)}</p>
+        <div class="unece-review-columns">
+          <section><h4>PRET</h4>${listMarkup(eoi.readyItems, "Aucun element pret.")}</section>
+          <section><h4>A VALIDER PAR MOI</h4><ol>${eoi.dgValidationItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol></section>
+        </div>
+        <p><strong>BLOCAGE :</strong> ${escapeHtml(eoi.blockingItem)}</p>
+        <p><strong>RECOMMANDATION :</strong> ${escapeHtml(eoi.recommendation)}</p>
         <p><strong>Canal officiel :</strong> ${escapeHtml(eoi.channel)}</p>
         <div class="decision-actions eoi-package-actions">
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&disposition=inline&id=${encodeURIComponent(eoiPackage.pdf.id)}" target="_blank" rel="noopener">PREVISUALISER LE DOSSIER</a>` : ""}
@@ -326,7 +327,7 @@ function renderValidationSheet(workflow) {
         </div>
         <p><small>La validation DG enregistre une decision interne. Elle ne clique pas sur Express interest et n'envoie aucun e-mail.</small></p>
       </section>
-      <section><h4>Champs restant a completer par le DG</h4>${listMarkup(eoi.dgFields, "Aucun champ restant.")}</section>
+      <section><h4>Informations preparees pour Express interest</h4>${listMarkup(eoi.expressInterestPayload, "Aucune information preparee.")}</section>
       <section><h4>Controle final ligne par ligne</h4><div class="responsive-table"><table class="compact-table">
         <thead><tr><th>Controle</th><th>Statut</th><th>Action</th></tr></thead>
         <tbody>${eoi.control.map((item) => `<tr><td>${escapeHtml(item.label)}</td><td><span class="status ${item.status === "CONFORME" ? "status-completed" : item.status === "BLOQUANT" ? "status-failed" : "status-paused"}">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.action)}</td></tr>`).join("")}</tbody>
@@ -353,7 +354,8 @@ function renderValidationSheet(workflow) {
         <div class="responsive-table"><table class="compact-table"><thead><tr><th>Champ</th><th>Valeur preparee</th></tr></thead>
           <tbody>${unece.vendorResponseForm.fields.map(([label, value]) => `<tr><td><strong>${escapeHtml(label)}</strong></td><td>${escapeHtml(value)}</td></tr>`).join("")}</tbody>
         </table></div>
-        <p><strong>Adresses LILOTOP connues a departager par le DG :</strong> ${escapeHtml(unece.vendorResponseForm.knownAddresses.join(" | "))}</p>
+        <p><strong>Adresses internes recuperees :</strong> ${escapeHtml(unece.vendorResponseForm.knownAddresses.join(" | "))}</p>
+        <p><strong>Comparaison UNGM :</strong> ${escapeHtml(unece.ungmComparison.note)}</p>
       </section>
       <section><h4>Conditions d'eligibilite A-F</h4><div class="responsive-table"><table>
         <thead><tr><th>Condition</th><th>Exigence</th><th>Reponse LILOTOP</th><th>Preuve / controle</th><th>Statut</th><th>Declaration brouillon</th></tr></thead>
