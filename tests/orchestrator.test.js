@@ -150,12 +150,15 @@ function testInterfaceAndRoutes() {
   assert.match(html, /AUTORISER L'ENVOI DES RFQ/);
   assert.match(html, /Fiche finale de validation/);
   assert.match(client, /validation-required/);
+  assert.match(client, /ready-for-express-interest/);
   assert.match(client, /Cotations fournisseurs à autoriser/);
   assert.match(client, /exigences réelles UNECA/);
   assert.match(client, /organization-chart-preview/);
   assert.match(client, /UNECA - CONDITIONS AVANT SOUMISSION/);
   assert.match(client, /Vendor Response Form - Preview pre-remplie/);
-  assert.match(client, /Conditions d'eligibilite A-F/);
+  assert.match(client, /Declarations A-F - validation individuelle/);
+  assert.match(client, /data-eoi-confirmation/);
+  assert.match(client, /OUVRIR UNGM - EXPRESS INTEREST/);
   assert.match(client, /Perimetre commercial confirme/);
   assert.match(client, /PREVISUALISER LE DOSSIER/);
   assert.match(client, /Controle final ligne par ligne/);
@@ -327,6 +330,8 @@ function testDossierDocuments() {
   assert.equal(submissionReview.eligibility.length, 6);
   assert.ok(submissionReview.eligibility.every((item) => item.status === "A CONFIRMER"));
   assert.ok(submissionReview.eligibility.every((item) => item.response === "OUI - PROPOSITION A VALIDER PAR LE DG"));
+  assert.match(submissionReview.eligibility[0].requirement, /Security Council Consolidated Sanctions List/);
+  assert.match(submissionReview.eligibility[5].requirement, /undue risk to the United Nations/);
   assert.equal(submissionReview.ungmComparison.automaticallyAccessible, false);
   assert.equal(submissionReview.commercialScope.families.length, 3);
   assert.equal(submissionReview.commercialScope.rfqs.length, 3);
@@ -346,6 +351,20 @@ function testDossierDocuments() {
   assert.match(eoiSubmission.letter, /UNGM Vendor Number 673735/);
   assert.doesNotMatch(eoiSubmission.letter, /ISO|CNSS|INPP|ARSP|price quote/i);
   assert.ok(eoiSubmission.control.some((item) => item.label === "Required attachments at EOI stage" && item.status === "CONFORME"));
+
+  const { EOI_DG_CONFIRMATION_KEYS, eoiDgConfirmationSummary } = require("../lib/nexus/orchestrator-service");
+  assert.equal(EOI_DG_CONFIRMATION_KEYS.length, 9);
+  assert.deepEqual(eoiDgConfirmationSummary({}), {
+    required: 9,
+    validated: 0,
+    problems: 0,
+    complete: false,
+    status: "VALIDATION DG REQUISE"
+  });
+  const allConfirmed = Object.fromEntries(EOI_DG_CONFIRMATION_KEYS.map((key) => [key, { status: "validated" }]));
+  assert.equal(eoiDgConfirmationSummary(allConfirmed).status, "PRET POUR EXPRESS INTEREST");
+  allConfirmed["eligibility-f"] = { status: "problem" };
+  assert.equal(eoiDgConfirmationSummary(allConfirmed).status, "VALIDATION DG REQUISE");
 
   const AdmZip = require("adm-zip");
   const { buildUnecaEoiArtifacts } = require("../lib/nexus/generated-eoi-package");

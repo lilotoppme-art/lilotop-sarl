@@ -256,6 +256,17 @@ main {
 .eoi-dg-grid span { color: var(--steel); font-size: .75rem; font-weight: 800; text-transform: uppercase; }
 .eoi-dg-grid strong { color: var(--navy); line-height: 1.35; overflow-wrap: anywhere; }
 .eoi-package-actions { margin-top: .75rem; }
+.eoi-ungm-confirmations { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; border-top: 0 !important; padding-top: 0 !important; }
+.eoi-ungm-confirmations article, .eoi-declaration-card { padding: 1rem; border: 1px solid var(--line); background: #fff; }
+.eoi-ungm-confirmations h5, .eoi-declaration-card h5 { margin: 0 0 .5rem; color: var(--navy); font-size: .95rem; }
+.eoi-confirmation-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; margin-top: .8rem; }
+.eoi-confirmation-actions .button { min-height: 38px; padding: .55rem .75rem; font-size: .72rem; }
+.eoi-eligibility-review { display: grid; gap: .8rem; }
+.eoi-declaration-card { border-left: 3px solid var(--gold); }
+.eoi-declaration-card p { margin: .5rem 0; line-height: 1.55; }
+.eoi-express-interest-ready { display: grid; gap: .65rem; margin-top: 1rem; padding: 1rem; border: 1px solid #9dcbb0; border-left: 4px solid var(--success); background: #eef8f2; }
+.eoi-express-interest-ready .button { width: fit-content; }
+.eoi-express-interest-ready small { color: #405260; }
 .organization-chart-preview { grid-column: 1 / -1; }
 .organization-chart { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; align-items: start; }
 .organization-node { display: grid; gap: .35rem; min-height: 92px; padding: 1rem; border: 1px solid var(--line); border-top: 3px solid var(--gold); background: #f8fafb; text-align: center; }
@@ -322,7 +333,7 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid, .eoi-dg-grid { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid, .eoi-dg-grid, .eoi-ungm-confirmations { grid-template-columns: 1fr; }
   .unece-readiness-heading, .section-heading-inline { align-items: flex-start; flex-direction: column; }
   .unece-progress { width: 100%; text-align: left; }
   .validation-facts { grid-template-columns: 1fr; }

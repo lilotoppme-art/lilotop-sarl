@@ -52,6 +52,7 @@ const PIPELINE_LABELS = {
   "rfqs-sent": "RFQ envoyées",
   "offer-prepared": "Offre préparée",
   "validation-required": "Validation requise",
+  "ready-for-express-interest": "Pret pour Express Interest",
   "ready-to-send": "Envoi autorisé",
   submitted: "Soumis",
   pending: "En attente",
@@ -278,6 +279,22 @@ function renderValidationSheet(workflow) {
   const unece = sheet?.uneceSubmissionReview;
   const eoi = sheet?.uneceEoiSubmission;
   const eoiPackage = sheet?.uneceEoiPackage;
+  const validations = dossier.validations || {};
+  const dgConfirmations = validations.eoiDgConfirmations || {};
+  const confirmationKeys = [
+    "ungm-vendor-number", "ungm-basic", "ungm-profile",
+    "eligibility-a", "eligibility-b", "eligibility-c",
+    "eligibility-d", "eligibility-e", "eligibility-f"
+  ];
+  const allDgConfirmed = confirmationKeys.every((key) => dgConfirmations[key]?.status === "validated");
+  const confirmationControl = (key) => {
+    const status = dgConfirmations[key]?.status || "pending";
+    return `<div class="eoi-confirmation-actions" data-confirmation-state="${escapeHtml(status)}">
+      <button class="button button-primary" type="button" data-eoi-confirmation="${escapeHtml(key)}" data-outcome="validated" ${status === "validated" ? "disabled" : ""}>VALIDER OUI</button>
+      <button class="button button-secondary" type="button" data-eoi-confirmation="${escapeHtml(key)}" data-outcome="problem" ${status === "problem" ? "disabled" : ""}>SIGNALER UN PROBLEME</button>
+      <span class="status ${status === "validated" ? "status-completed" : status === "problem" ? "status-failed" : "status-paused"}">${status === "validated" ? "VALIDE OUI" : status === "problem" ? "PROBLEME SIGNALE" : "A CONFIRMER"}</span>
+    </div>`;
+  };
   section.hidden = !sheet;
   section.dataset.workflowId = workflow.id;
   if (!sheet) return;
@@ -308,11 +325,17 @@ function renderValidationSheet(workflow) {
         <div class="unece-progress" aria-label="Avancement operationnel ${escapeHtml(unece.progressPercent)} pour cent"><strong>${escapeHtml(unece.progressPercent)}%</strong><span>Avancement operationnel</span></div>
       </div>
       ${eoi ? `<section class="eoi-dg-card">
-        <div class="section-heading-inline"><div><p class="section-kicker">Fiche DG simplifiee</p><h4>UNECA EOIUNECA24536</h4></div><span class="status status-paused">NON SOUMIS</span></div>
+        <div class="section-heading-inline"><div><p class="section-kicker">Fiche de validation finale DG</p><h4>UNECA EOIUNECA24536</h4></div><span class="status ${allDgConfirmed ? "status-completed" : "status-paused"}">${allDgConfirmed ? "PRET POUR EXPRESS INTEREST" : "VALIDATION DG REQUISE"}</span></div>
         <div class="eoi-dg-grid">
           <div><span>Echeance</span><strong>${escapeHtml(eoi.deadline)}</strong></div>
           <div><span>UNGM</span><strong>673735</strong></div>
+          <div><span>Confirmations</span><strong>${confirmationKeys.filter((key) => dgConfirmations[key]?.status === "validated").length}/9 validees</strong></div>
         </div>
+        <section class="eoi-ungm-confirmations" aria-label="Confirmations UNGM">
+          <article><h5>UNGM Vendor Number</h5><p><strong>673735</strong></p>${confirmationControl("ungm-vendor-number")}</article>
+          <article><h5>Statut UNGM Basic</h5><p><strong>A CONFIRMER</strong></p>${confirmationControl("ungm-basic")}</article>
+          <article><h5>Profil UNGM a jour</h5><p><strong>A CONFIRMER</strong></p>${confirmationControl("ungm-profile")}</article>
+        </section>
         <div class="unece-review-columns">
           <section><h4>PRET</h4>${listMarkup(eoi.readyItems, "Aucun element pret.")}</section>
           <section><h4>A VALIDER PAR MOI</h4><ol>${eoi.dgValidationItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol></section>
@@ -320,6 +343,7 @@ function renderValidationSheet(workflow) {
         <p><strong>BLOCAGE :</strong> ${escapeHtml(eoi.blockingItem)}</p>
         <p><strong>RECOMMANDATION :</strong> ${escapeHtml(eoi.recommendation)}</p>
         <p><strong>Canal officiel :</strong> ${escapeHtml(eoi.channel)}</p>
+        ${allDgConfirmed ? `<div class="eoi-express-interest-ready"><strong>Action finale : EXPRESS INTEREST SUR UNGM</strong><a class="button button-primary" href="https://www.ungm.org/Public/Notice/306489" target="_blank" rel="noopener noreferrer">OUVRIR UNGM - EXPRESS INTEREST</a><small>Ce lien ouvre uniquement l'avis officiel. NEXUS ne soumet aucune reponse automatiquement.</small></div>` : ""}
         <div class="decision-actions eoi-package-actions">
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&disposition=inline&id=${encodeURIComponent(eoiPackage.pdf.id)}" target="_blank" rel="noopener">PREVISUALISER LE DOSSIER</a>` : ""}
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&id=${encodeURIComponent(eoiPackage.pdf.id)}" download>TELECHARGER PDF</a>` : ""}
@@ -357,10 +381,15 @@ function renderValidationSheet(workflow) {
         <p><strong>Adresses internes recuperees :</strong> ${escapeHtml(unece.vendorResponseForm.knownAddresses.join(" | "))}</p>
         <p><strong>Comparaison UNGM :</strong> ${escapeHtml(unece.ungmComparison.note)}</p>
       </section>
-      <section><h4>Conditions d'eligibilite A-F</h4><div class="responsive-table"><table>
-        <thead><tr><th>Condition</th><th>Exigence</th><th>Reponse LILOTOP</th><th>Preuve / controle</th><th>Statut</th><th>Declaration brouillon</th></tr></thead>
-        <tbody>${unece.eligibility.map((item) => `<tr><td><strong>${escapeHtml(item.key)}</strong></td><td>${escapeHtml(item.requirement)}</td><td>${escapeHtml(item.response)}</td><td>${escapeHtml(item.proof)}</td><td><span class="status status-paused">${escapeHtml(item.status)}</span></td><td>${escapeHtml(item.declarationDraft)}</td></tr>`).join("")}</tbody>
-      </table></div></section>
+      <section class="eoi-eligibility-review"><h4>Declarations A-F - validation individuelle</h4>
+        ${unece.eligibility.map((item) => `<article class="eoi-declaration-card">
+          <div class="section-heading-inline"><h5>Declaration ${escapeHtml(item.key)}</h5><span class="control-badge">Page 4 du DAO</span></div>
+          <p><strong>Texte exact :</strong> ${escapeHtml(item.requirement)}</p>
+          <p><strong>Reponse proposee :</strong> OUI</p>
+          <p><strong>Justification :</strong> ${escapeHtml(item.proof)}</p>
+          ${confirmationControl(`eligibility-${String(item.key).toLowerCase()}`)}
+        </article>`).join("")}
+      </section>
       ${eoi ? `<section><h4>Expression of Interest - brouillon professionnel</h4><pre>${escapeHtml(eoi.letter)}</pre></section>
       <section><h4>Documents reellement requis</h4><p><strong>Aucun document a joindre a cette etape.</strong> Le PDF et le ZIP sont des dossiers internes de validation DG, pas des pieces exigees par UNECA.</p></section>
       <section><h4>E-mail de secours pret</h4><pre>${escapeHtml(eoi.emailDraft)}</pre><p><small>A utiliser uniquement si la reponse electronique UNGM est techniquement impossible.</small></p></section>` : ""}
@@ -433,13 +462,12 @@ function renderValidationSheet(workflow) {
   document.getElementById("sale-price").value = sheet.proposedSalePrice ?? "";
   document.getElementById("price-currency").value = sheet.currency || "USD";
   document.querySelector(".price-validation").hidden = Boolean(eoi);
-  const validations = dossier.validations || {};
   const rfqAuthorizationBlocked = !(sheet.supplierRfqs || []).length
     || (sheet.supplierRfqs || []).some((rfq) => !rfq.coordinatesVerified || !rfq.readyToSend);
   document.querySelectorAll("[data-decision]").forEach((button) => {
     const key = button.dataset.decision;
     button.hidden = eoi
-      ? ["validate-participation", "validate-prices", "authorize-rfqs", "validate-final", "authorize-send"].includes(key)
+      ? ["validate-participation", "validate-prices", "authorize-rfqs", "validate-eoi", "validate-final", "authorize-send"].includes(key)
       : key === "validate-eoi";
     if (key === "reject") button.textContent = eoi ? "REFUSER" : "Rejeter";
     button.disabled = (key === "validate-participation" && validations.participation === "validated")
@@ -471,6 +499,32 @@ async function refreshVaultControl() {
   } catch (error) {
     statusRegion.textContent = error.message;
   } finally {
+    button.disabled = false;
+  }
+}
+
+async function submitEoiConfirmation(button) {
+  const section = document.getElementById("validation-sheet");
+  const id = section.dataset.workflowId;
+  if (!id) return;
+  button.disabled = true;
+  statusRegion.textContent = "Enregistrement de la confirmation DG...";
+  try {
+    await api("/api/nexus-orchestrator?action=decision", {
+      method: "POST",
+      body: JSON.stringify({
+        id,
+        decision: "review-eoi-confirmation",
+        confirmationKey: button.dataset.eoiConfirmation,
+        outcome: button.dataset.outcome,
+        comment: document.getElementById("decision-comment").value
+      })
+    });
+    await refresh();
+    await viewWorkflow(id);
+    statusRegion.textContent = "Confirmation DG enregistree et journalisee.";
+  } catch (error) {
+    statusRegion.textContent = error.message;
     button.disabled = false;
   }
 }
@@ -615,6 +669,10 @@ document.getElementById("detect-opportunity").addEventListener("click", () => {
 document.getElementById("decision-actions").addEventListener("click", (event) => {
   const button = event.target.closest("[data-decision]");
   if (button) submitDecision(button);
+});
+document.getElementById("validation-content").addEventListener("click", (event) => {
+  const button = event.target.closest("[data-eoi-confirmation]");
+  if (button) submitEoiConfirmation(button);
 });
 document.getElementById("refresh-vault-control").addEventListener("click", refreshVaultControl);
 document.getElementById("workflow-list").addEventListener("click", (event) => {
