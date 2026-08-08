@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <title>{{PAGE_TITLE}} | LILOTOP SARL</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/admin/orchestrator.css?v=eoi-review-v1">
+  <link rel="stylesheet" href="/admin/orchestrator.css?v=password-recovery-v1">
 </head>
 <body data-authenticated="{{AUTHENTICATED}}">
   <a class="skip-link" href="#orchestrator-main">Aller au contenu</a>
@@ -22,6 +22,7 @@
         <input id="orchestrator-email" name="email" type="email" autocomplete="username" required>
         <label for="orchestrator-password">Mot de passe</label>
         <input id="orchestrator-password" name="password" type="password" autocomplete="current-password" required>
+        <a class="forgot-password-link" href="/admin/nexus/reset-password?returnTo=%2Fadmin%2Fnexus%2Forchestrator">Mot de passe oubli&eacute; ?</a>
         <button class="button button-primary" type="submit">Se connecter</button>
         <p class="form-status" id="orchestrator-login-status" role="status" aria-live="polite"></p>
       </form>

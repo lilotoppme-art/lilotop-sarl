@@ -3,7 +3,15 @@
 const requestForm = document.getElementById("reset-request-form");
 const completeForm = document.getElementById("reset-complete-form");
 const statusRegion = document.getElementById("reset-status");
-const token = new URLSearchParams(window.location.search).get("token") || "";
+const loginLink = document.getElementById("reset-login-link");
+const query = new URLSearchParams(window.location.search);
+const token = query.get("token") || "";
+const requestedReturnTo = query.get("returnTo") || "";
+const returnTo = /^\/admin\/(?:nexus(?:\/.*)?|business-radar)$/.test(requestedReturnTo)
+  ? requestedReturnTo
+  : "/admin/nexus";
+
+loginLink.href = returnTo;
 
 requestForm.hidden = Boolean(token);
 completeForm.hidden = !token;
@@ -50,9 +58,10 @@ completeForm.addEventListener("submit", async (event) => {
   try {
     const data = await submit({ action: "complete", token, password });
     window.history.replaceState({}, document.title, "/admin/nexus/reset-password");
-    statusRegion.textContent = data.message;
+    statusRegion.textContent = `${data.message} Retour a la connexion...`;
     completeForm.reset();
     completeForm.hidden = true;
+    window.setTimeout(() => window.location.assign(returnTo), 1200);
   } catch (error) {
     statusRegion.textContent = error.message;
   } finally {

@@ -87,10 +87,16 @@ async function run() {
   const path = require("path");
   const migration = fs.readFileSync(path.join(__dirname, "../db/migrations/018_nexus_admin_password_reset.sql"), "utf8");
   const storeSource = fs.readFileSync(path.join(__dirname, "../lib/business-radar/admin-auth-store.js"), "utf8");
+  const resetShell = fs.readFileSync(path.join(__dirname, "../admin/password-reset-shell.html"), "utf8");
+  const orchestratorShell = fs.readFileSync(path.join(__dirname, "../admin/orchestrator-shell.html"), "utf8");
   assert.match(migration, /token_hash text NOT NULL UNIQUE/);
   assert.match(storeSource, /expires_at > now\(\)/);
   assert.match(storeSource, /used_at IS NULL/);
   assert.match(storeSource, /password_reset_completed/);
+  assert.match(resetShell, /value="admin@lilotopsarl\.com"/);
+  assert.match(resetShell, /id="reset-login-link"/);
+  assert.match(orchestratorShell, /Mot de passe oubli&eacute; \?/);
+  assert.match(orchestratorShell, /reset-password\?returnTo=%2Fadmin%2Fnexus%2Forchestrator/);
   console.log("admin password reset tests passed");
 }
 

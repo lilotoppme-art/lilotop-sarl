@@ -57,6 +57,17 @@ a { color: inherit; }
   border: 1px solid var(--line);
   padding: .7rem .8rem;
 }
+.forgot-password-link {
+  display: inline-flex;
+  width: fit-content;
+  margin: 2px 0 8px;
+  color: var(--gold-dark);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.forgot-password-link:hover,
+.forgot-password-link:focus-visible { color: var(--navy); }
 
 .app-header {
   min-height: 76px;
