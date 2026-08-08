@@ -3,6 +3,14 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/admin/nexus/reset-password",
+      "destination": "/api/nexus-page?handler=admin-password-reset-page"
+    },
+    {
+      "source": "/api/admin-password-reset",
+      "destination": "/api/nexus-page?handler=admin-password-reset-api"
+    },
+    {
       "source": "/admin/nexus/crm",
       "destination": "/api/nexus-page?handler=crm-page"
     },

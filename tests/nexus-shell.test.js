@@ -116,6 +116,13 @@ assert.ok(shell.includes('id="panel-ai-actions"'));
 assert.ok(shell.includes('id="panel-daily-summary"'));
 assert.ok(shell.includes('id="panel-deadlines"'));
 assert.ok(shell.includes("{{NEXUS_BOOTSTRAP}}"));
+assert.ok(shell.includes("Mot de passe oubli"));
+assert.ok(shell.includes('href="/admin/nexus/reset-password"'));
+
+const resetShell = read("admin/password-reset-shell.html");
+const resetClient = read("admin/password-reset.js");
+assert.ok(resetShell.includes("Recuperer l'acces NEXUS AI"));
+assert.ok(resetClient.includes("/api/admin-password-reset"));
 
 const stylesheet = read("admin/nexus.css");
 assert.ok(stylesheet.includes("[hidden]"), "Les vues masquées doivent respecter l'attribut HTML hidden.");
@@ -124,5 +131,7 @@ assert.ok(stylesheet.includes("display: none !important"));
 const pageRoute = read("api/nexus-page.js");
 assert.ok(pageRoute.includes('require("../lib/business-radar/auth")'));
 assert.ok(pageRoute.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
+assert.ok(pageRoute.includes('delegatedHandler === "admin-password-reset-api"'));
+assert.ok(vercelConfig.rewrites.some(({ source }) => source === "/admin/nexus/reset-password"));
 
 console.log("NEXUS AI Phase 3 shell tests passed.");

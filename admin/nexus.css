@@ -217,6 +217,14 @@ a {
   font-size: 14px;
 }
 
+.forgot-password-link {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: .8rem;
+  color: var(--gold);
+  font-weight: 750;
+}
+
 .nexus-shell {
   min-height: 100vh;
 }

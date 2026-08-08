@@ -1,6 +1,7 @@
 const { radarConfig } = require("../lib/business-radar/config");
 const { verifyPassword, createSession, verifySession, sessionCookie, clearSessionCookie } = require("../lib/business-radar/auth");
 const { json, parseJson } = require("../lib/business-radar/http");
+const adminAuthStore = require("../lib/business-radar/admin-auth-store");
 
 const attempts = new Map();
 
@@ -27,7 +28,15 @@ module.exports = async function handler(req, res) {
   const config = radarConfig();
   if (!config.adminEmail || !config.adminPasswordHash || !config.authSecret) return json(res, 503, { ok: false, error: "Administrator access is not configured", code: "AUTH_NOT_CONFIGURED" });
   const email = String(body.email || "").trim().toLowerCase();
-  if (email !== config.adminEmail || !verifyPassword(body.password || "", config.adminPasswordHash)) return json(res, 401, { ok: false, error: "Invalid credentials" });
+  let activePasswordHash = config.adminPasswordHash;
+  if (email === config.adminEmail && config.databaseUrl) {
+    try {
+      activePasswordHash = await adminAuthStore.activePasswordHash(config.adminEmail, config.adminPasswordHash);
+    } catch (error) {
+      console.error("[admin-auth] database password lookup failed", { code: error.code || "DATABASE_ERROR" });
+    }
+  }
+  if (email !== config.adminEmail || !verifyPassword(body.password || "", activePasswordHash)) return json(res, 401, { ok: false, error: "Invalid credentials" });
   res.setHeader("Set-Cookie", sessionCookie(createSession(email)));
   return json(res, 200, { ok: true });
 };

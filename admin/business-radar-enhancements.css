@@ -45,3 +45,4 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .toolbar input,.toolbar select{min-width:100%;width:100%}
   .check-filter{width:100%}
 }
+.forgot-password-link{display:inline-flex;width:fit-content;margin-top:12px;color:#b88a2a;font-weight:700}

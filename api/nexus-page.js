@@ -13,6 +13,7 @@ const documentVaultHandler = require("../lib/nexus/document-vault-handler");
 const emailDeliveryHandler = require("../lib/email/delivery-handler");
 const resendWebhookHandler = require("../lib/email/webhook-handler");
 const crmHandler = require("../lib/nexus/crm-handler");
+const passwordReset = require("../lib/business-radar/password-reset");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -83,6 +84,9 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "crm-api") {
     return crmHandler(req, res);
   }
+  if (delegatedHandler === "admin-password-reset-api") {
+    return passwordReset.handler(req, res);
+  }
   if (req.method !== "GET") {
     res.statusCode = 405;
     return res.end("Method not allowed");
@@ -116,6 +120,9 @@ module.exports = async function handler(req, res) {
   if (delegatedHandler === "crm-page") {
     const title = authenticated ? "CRM IA" : "Connexion CRM IA";
     return sendPrivateHtml(res, "crm-shell.html", authenticated, title);
+  }
+  if (delegatedHandler === "admin-password-reset-page") {
+    return sendPrivateHtml(res, "password-reset-shell.html", false, "Recuperation administrateur NEXUS AI");
   }
   const pageTitle = authenticated ? "NEXUS AI" : "Connexion NEXUS AI";
   return sendPrivateHtml(res, "nexus-shell.html", authenticated, pageTitle, nexusCatalog);
