@@ -86,6 +86,7 @@ function testArchitecture() {
   assert.match(service, /EN ATTENTE DE COTATION FOURNISSEUR/);
   assert.match(service, /applyDecision/);
   assert.match(service, /refreshVaultControl/);
+  assert.match(service, /document\\\(s\\\) restent manquants ou non utilisables/);
   assert.match(service, /supplierRfqs/);
   assert.match(service, /sendEnabled: false/);
   assert.match(service, /submissionEnabled: false/);
