@@ -248,7 +248,12 @@ async function loadOrchestratorDashboard() {
           <ol>${summary.recentWorkflows.map((workflow) => `<li><strong>${escapeHtml(workflow.title)}</strong> · ${escapeHtml(labels[workflow.pipelineStatus] || workflow.pipelineStatus)}</li>`).join("")}</ol>
           ${summary.latestValidation ? `<p><strong>Documents :</strong> ${escapeHtml(summary.latestValidation.documentSummary?.available || 0)}/${escapeHtml(summary.latestValidation.documentSummary?.total || 0)} disponibles · ${escapeHtml(summary.latestValidation.documentSummary?.toProcess || 0)} a traiter</p>
           <p><strong>RFQ :</strong> ${escapeHtml(summary.latestValidation.rfqSummary?.prepared || 0)} preparees · ${escapeHtml(summary.latestValidation.rfqSummary?.contactsVerified || 0)} coordonnee(s) verifiee(s) · ${escapeHtml(summary.latestValidation.rfqSummary?.sent || 0)} envoyee</p>
-          <p><strong>Prix :</strong> ${escapeHtml(summary.latestValidation.pricingSummary?.quotationsReceived || 0)} cotation recue · Cout rendu ${escapeHtml(summary.latestValidation.pricingSummary?.landedCost || "EN ATTENTE")} · Marge ${escapeHtml(summary.latestValidation.pricingSummary?.margin || "EN ATTENTE")}</p>` : ""}
+          <p><strong>Prix :</strong> ${escapeHtml(summary.latestValidation.pricingSummary?.quotationsReceived || 0)} cotation recue · Cout rendu ${escapeHtml(summary.latestValidation.pricingSummary?.landedCost || "EN ATTENTE")} · Marge ${escapeHtml(summary.latestValidation.pricingSummary?.margin || "EN ATTENTE")}</p>
+          ${summary.latestValidation.uneceSubmissionReview ? `<div class="dashboard-unece-readiness">
+            <p><strong>UNECA — CONDITIONS AVANT SOUMISSION</strong> · Avancement ${escapeHtml(summary.latestValidation.uneceSubmissionReview.progressPercent)}%</p>
+            <ol>${summary.latestValidation.uneceSubmissionReview.conditions.map((condition, index) => `<li><strong>Condition ${escapeHtml(index + 1)} :</strong> ${escapeHtml(condition.title)} · ${escapeHtml(condition.status)}</li>`).join("")}</ol>
+            <p><strong>Actions DG :</strong> ${escapeHtml(summary.latestValidation.uneceSubmissionReview.dgActions.join(" · "))}</p>
+          </div>` : ""}` : ""}
           <a class="button button-primary button-inline" href="/admin/nexus/orchestrator">Ouvrir l'orchestrateur</a>
         </div>
       `;

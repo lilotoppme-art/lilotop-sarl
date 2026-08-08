@@ -168,6 +168,8 @@ function testInterfaceAndRoutes() {
   assert.match(dashboard, /loadOrchestratorDashboard/);
   assert.match(dashboard, /loadOrchestratorDashboard[\s\S]*workflowPanel/);
   assert.match(dashboard, /État des dossiers/);
+  assert.match(dashboard, /UNECA — CONDITIONS AVANT SOUMISSION/);
+  assert.match(dashboard, /uneceSubmissionReview\.conditions/);
 }
 
 function testDossierDocuments() {
