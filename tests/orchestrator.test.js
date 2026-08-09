@@ -74,6 +74,10 @@ function testArchitecture() {
   assert.match(credentialMigration, /CREATE TABLE IF NOT EXISTS nexus_organization_credentials/);
   assert.match(credentialMigration, /registration_number text NOT NULL/);
   assert.doesNotMatch(credentialMigration, /\b(DROP|TRUNCATE)\b|DELETE\s+FROM/i);
+  const credentialHistoryMigration = read("db/migrations/020_nexus_ungm_profile_verification.sql");
+  assert.match(credentialHistoryMigration, /ADD COLUMN IF NOT EXISTS details jsonb/);
+  assert.match(credentialHistoryMigration, /CREATE TABLE IF NOT EXISTS nexus_organization_credential_history/);
+  assert.doesNotMatch(credentialHistoryMigration, /\b(DROP|TRUNCATE)\b|DELETE\s+FROM/i);
 
   const service = read("lib/nexus/orchestrator-service.js");
   assert.match(service, /analyzeWorkflowOpportunity/);
@@ -156,7 +160,7 @@ function testInterfaceAndRoutes() {
   assert.match(client, /organization-chart-preview/);
   assert.match(client, /UNECA - CONDITIONS AVANT SOUMISSION/);
   assert.match(client, /Vendor Response Form - Preview pre-remplie/);
-  assert.match(client, /Declarations A-F - validation individuelle/);
+  assert.match(client, /Sept declarations officielles UNGM A-G/);
   assert.match(client, /data-eoi-confirmation/);
   assert.match(client, /OUVRIR UNGM - EXPRESS INTEREST/);
   assert.match(client, /Perimetre commercial confirme/);
@@ -283,17 +287,23 @@ function testDossierDocuments() {
 
   assert.equal(isUnecaEoi24536({ opportunity: { reference: "EOIUNECA24536" } }), true);
   assert.equal(isUnecaEoi24536({ opportunity: { title: "Autre appel d'offres" } }), false);
-  const uneceCompliance = buildUnecaEoiCompliance({
-    status: "registered", registrationNumber: "673735", evidencePresent: false
-  });
+  const verifiedUngmCredential = {
+    status: "registered", registrationNumber: "673735", evidencePresent: false,
+    details: {
+      profileVerifiedByDg: true,
+      registeredOrganizations: 29,
+      eligibilityDeclaration: { status: "validated", conditionsCount: 7 }
+    }
+  };
+  const uneceCompliance = buildUnecaEoiCompliance(verifiedUngmCredential);
   assert.equal(uneceCompliance.rows.length, 4);
-  assert.equal(uneceCompliance.compliancePercent, 25);
+  assert.equal(uneceCompliance.compliancePercent, 100);
   assert.equal(uneceCompliance.documentaryReadinessPercent, 100);
   assert.equal(uneceCompliance.documentSubmissionRequired, false);
-  assert.equal(uneceCompliance.missingDocuments.length, 1);
-  assert.equal(uneceCompliance.generableDocuments.length, 2);
+  assert.equal(uneceCompliance.missingDocuments.length, 0);
+  assert.equal(uneceCompliance.generableDocuments.length, 0);
   const uneceMatrix = documentMatrixFor({ compliance: { documentControl: uneceCompliance.rows } });
-  assert.equal(uneceMatrix[2].statusLabel, "GÉNÉRABLE PAR NEXUS");
+  assert.equal(uneceMatrix[2].statusLabel, "INFORMATION CONFIRMÉE – PREUVE À AJOUTER");
   assert.match(uneceMatrix[2].sourcePage, /pages 2 et 3/);
   const chart = organizationChartDraft();
   assert.equal(chart.nodes[0].name, "Joël Kongolo");
@@ -315,25 +325,26 @@ function testDossierDocuments() {
         { manufacturer: "Signify", product: "Lighting fixtures" }
       ]
     }
-  }, { status: "registered", registrationNumber: "673735" }, {
+  }, verifiedUngmCredential, {
     id: "chart-document",
     versionId: "chart-version",
     sourceFilename: "LILOTOP-Organigramme-Brouillon.docx"
   });
   assert.equal(submissionReview.conditions.length, 4);
-  assert.equal(submissionReview.progressPercent, 25);
+  assert.equal(submissionReview.progressPercent, 100);
   assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "UNGM Vendor ID Number")[1], "673735");
   assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "Address")[1], "Boulevard du 30 Juin, no 144, Immeuble Didi, 3eme niveau, Kinshasa/Gombe");
   assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "Fax Number")[1], "N/A");
   assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "RCCM")[1], "CD/KIN/RCCM/16-B-8380");
   assert.equal(submissionReview.vendorResponseForm.fields.find(([label]) => label === "National Identification")[1], "01-9-N04151K");
-  assert.equal(submissionReview.eligibility.length, 6);
-  assert.ok(submissionReview.eligibility.every((item) => item.status === "A CONFIRMER"));
-  assert.ok(submissionReview.eligibility.every((item) => item.response === "OUI - PROPOSITION A VALIDER PAR LE DG"));
+  assert.equal(submissionReview.eligibility.length, 7);
+  assert.ok(submissionReview.eligibility.every((item) => item.status === "CONFORME"));
+  assert.ok(submissionReview.eligibility.every((item) => item.response === "OUI - VALIDE PAR LE DG DANS UNGM"));
   assert.match(submissionReview.eligibility[0].requirement, /Security Council Consolidated Sanctions List/);
   assert.match(submissionReview.eligibility[5].requirement, /undue risk to the United Nations/);
+  assert.match(submissionReview.eligibility[6].requirement, /litigation with a United Nations entity/);
   assert.equal(submissionReview.ungmComparison.automaticallyAccessible, false);
-  assert.equal(submissionReview.commercialScope.families.length, 3);
+  assert.equal(submissionReview.commercialScope.families.length, 4);
   assert.equal(submissionReview.commercialScope.rfqs.length, 3);
   assert.equal(submissionReview.organizationChart.status, "BROUILLON CONSERVE DANS LE COFFRE - NON JOINT A UNECA");
 
@@ -341,10 +352,10 @@ function testDossierDocuments() {
   assert.equal(eoiSubmission.reference, "EOIUNECA24536");
   assert.equal(eoiSubmission.deadline, "14 August 2026, 23:59 (GMT-4)");
   assert.equal(eoiSubmission.requiredDocuments.length, 0);
-  assert.equal(eoiSubmission.eligibilityPercent, 0);
+  assert.equal(eoiSubmission.eligibilityPercent, 100);
   assert.equal(eoiSubmission.submissionPerformed, false);
   assert.equal(eoiSubmission.emailSent, false);
-  assert.equal(eoiSubmission.dgValidationItems.length, 3);
+  assert.equal(eoiSubmission.dgValidationItems.length, 2);
   assert.equal(eoiSubmission.readyItems.length, 4);
   assert.equal(eoiSubmission.expressInterestPayload.length, 5);
   assert.match(eoiSubmission.channel, /Express interest/);
@@ -353,16 +364,16 @@ function testDossierDocuments() {
   assert.ok(eoiSubmission.control.some((item) => item.label === "Required attachments at EOI stage" && item.status === "CONFORME"));
 
   const { EOI_DG_CONFIRMATION_KEYS, eoiDgConfirmationSummary } = require("../lib/nexus/orchestrator-service");
-  assert.equal(EOI_DG_CONFIRMATION_KEYS.length, 9);
+  assert.equal(EOI_DG_CONFIRMATION_KEYS.length, 10);
   assert.deepEqual(eoiDgConfirmationSummary({}), {
-    required: 9,
+    required: 10,
     validated: 0,
     problems: 0,
     complete: false,
     status: "VALIDATION DG REQUISE"
   });
   const allConfirmed = Object.fromEntries(EOI_DG_CONFIRMATION_KEYS.map((key) => [key, { status: "validated" }]));
-  assert.equal(eoiDgConfirmationSummary(allConfirmed).status, "PRET POUR EXPRESS INTEREST");
+  assert.equal(eoiDgConfirmationSummary(allConfirmed).status, "PRET POUR VALIDATION FINALE DG / EXPRESS INTEREST");
   allConfirmed["eligibility-f"] = { status: "problem" };
   assert.equal(eoiDgConfirmationSummary(allConfirmed).status, "VALIDATION DG REQUISE");
 
@@ -373,7 +384,7 @@ function testDossierDocuments() {
   const packageZip = new AdmZip(eoiArtifacts.zip);
   assert.ok(packageZip.getEntry("UNECA-EOIUNECA24536-DG-Review.pdf"));
   assert.ok(packageZip.getEntry("01-Vendor-Response-Information.txt"));
-  assert.ok(packageZip.getEntry("03-Eligibility-Declarations-A-F.txt"));
+  assert.ok(packageZip.getEntry("03-Eligibility-Declarations-A-G.txt"));
   assert.ok(packageZip.getEntry("05-Email-Fallback-Draft.txt"));
 
   const { organizationChartDraftDocx } = require("../lib/nexus/generated-documents");

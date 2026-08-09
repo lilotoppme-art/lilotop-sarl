@@ -284,7 +284,7 @@ function renderValidationSheet(workflow) {
   const confirmationKeys = [
     "ungm-vendor-number", "ungm-basic", "ungm-profile",
     "eligibility-a", "eligibility-b", "eligibility-c",
-    "eligibility-d", "eligibility-e", "eligibility-f"
+    "eligibility-d", "eligibility-e", "eligibility-f", "eligibility-g"
   ];
   const allDgConfirmed = confirmationKeys.every((key) => dgConfirmations[key]?.status === "validated");
   const confirmationControl = (key) => {
@@ -325,16 +325,16 @@ function renderValidationSheet(workflow) {
         <div class="unece-progress" aria-label="Avancement operationnel ${escapeHtml(unece.progressPercent)} pour cent"><strong>${escapeHtml(unece.progressPercent)}%</strong><span>Avancement operationnel</span></div>
       </div>
       ${eoi ? `<section class="eoi-dg-card">
-        <div class="section-heading-inline"><div><p class="section-kicker">Fiche de validation finale DG</p><h4>UNECA EOIUNECA24536</h4></div><span class="status ${allDgConfirmed ? "status-completed" : "status-paused"}">${allDgConfirmed ? "PRET POUR EXPRESS INTEREST" : "VALIDATION DG REQUISE"}</span></div>
+        <div class="section-heading-inline"><div><p class="section-kicker">Fiche de validation finale DG</p><h4>UNECA EOIUNECA24536</h4></div><span class="status ${allDgConfirmed ? "status-completed" : "status-paused"}">${allDgConfirmed ? "PRET POUR VALIDATION FINALE DG / EXPRESS INTEREST" : "VALIDATION DG REQUISE"}</span></div>
         <div class="eoi-dg-grid">
           <div><span>Echeance</span><strong>${escapeHtml(eoi.deadline)}</strong></div>
           <div><span>UNGM</span><strong>673735</strong></div>
-          <div><span>Confirmations</span><strong>${confirmationKeys.filter((key) => dgConfirmations[key]?.status === "validated").length}/9 validees</strong></div>
+          <div><span>Confirmations</span><strong>${confirmationKeys.filter((key) => dgConfirmations[key]?.status === "validated").length}/${confirmationKeys.length} validees</strong></div>
         </div>
         <section class="eoi-ungm-confirmations" aria-label="Confirmations UNGM">
           <article><h5>UNGM Vendor Number</h5><p><strong>673735</strong></p>${confirmationControl("ungm-vendor-number")}</article>
-          <article><h5>Statut UNGM Basic</h5><p><strong>A CONFIRMER</strong></p>${confirmationControl("ungm-basic")}</article>
-          <article><h5>Profil UNGM a jour</h5><p><strong>A CONFIRMER</strong></p>${confirmationControl("ungm-profile")}</article>
+          <article><h5>Statut UNGM Basic</h5><p><strong>ENREGISTRE / CONFIRME</strong></p>${confirmationControl("ungm-basic")}</article>
+          <article><h5>Profil UNGM a jour</h5><p><strong>VERIFIE ET MIS A JOUR PAR LE DG</strong></p>${confirmationControl("ungm-profile")}</article>
         </section>
         <div class="unece-review-columns">
           <section><h4>PRET</h4>${listMarkup(eoi.readyItems, "Aucun element pret.")}</section>
@@ -381,7 +381,7 @@ function renderValidationSheet(workflow) {
         <p><strong>Adresses internes recuperees :</strong> ${escapeHtml(unece.vendorResponseForm.knownAddresses.join(" | "))}</p>
         <p><strong>Comparaison UNGM :</strong> ${escapeHtml(unece.ungmComparison.note)}</p>
       </section>
-      <section class="eoi-eligibility-review"><h4>Declarations A-F - validation individuelle</h4>
+      <section class="eoi-eligibility-review"><h4>Sept declarations officielles UNGM A-G</h4>
         ${unece.eligibility.map((item) => `<article class="eoi-declaration-card">
           <div class="section-heading-inline"><h5>Declaration ${escapeHtml(item.key)}</h5><span class="control-badge">Page 4 du DAO</span></div>
           <p><strong>Texte exact :</strong> ${escapeHtml(item.requirement)}</p>
