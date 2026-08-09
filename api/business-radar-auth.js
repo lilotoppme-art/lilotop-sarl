@@ -2,6 +2,7 @@ const { radarConfig } = require("../lib/business-radar/config");
 const { verifyPassword, createSession, verifySession, sessionCookie, clearSessionCookie } = require("../lib/business-radar/auth");
 const { json, parseJson } = require("../lib/business-radar/http");
 const adminAuthStore = require("../lib/business-radar/admin-auth-store");
+const passwordReset = require("../lib/business-radar/password-reset");
 
 const attempts = new Map();
 
@@ -28,15 +29,20 @@ module.exports = async function handler(req, res) {
   const config = radarConfig();
   if (!config.adminEmail || !config.adminPasswordHash || !config.authSecret) return json(res, 503, { ok: false, error: "Administrator access is not configured", code: "AUTH_NOT_CONFIGURED" });
   const email = String(body.email || "").trim().toLowerCase();
-  let activePasswordHash = config.adminPasswordHash;
+  let credentials = { passwordHash: config.adminPasswordHash, mustChangePassword: false };
   if (email === config.adminEmail && config.databaseUrl) {
     try {
-      activePasswordHash = await adminAuthStore.activePasswordHash(config.adminEmail, config.adminPasswordHash);
+      credentials = await adminAuthStore.activeCredentials(config.adminEmail, config.adminPasswordHash);
     } catch (error) {
       console.error("[admin-auth] database password lookup failed", { code: error.code || "DATABASE_ERROR" });
     }
   }
-  if (email !== config.adminEmail || !verifyPassword(body.password || "", activePasswordHash)) return json(res, 401, { ok: false, error: "Invalid credentials" });
+  if (email !== config.adminEmail || !verifyPassword(body.password || "", credentials.passwordHash)) return json(res, 401, { ok: false, error: "Invalid credentials" });
+  if (credentials.mustChangePassword) {
+    const resetToken = await passwordReset.createForcedChangeToken(req, config);
+    res.setHeader("Set-Cookie", clearSessionCookie());
+    return json(res, 200, { ok: true, passwordChangeRequired: true, resetToken });
+  }
   res.setHeader("Set-Cookie", sessionCookie(createSession(email)));
   return json(res, 200, { ok: true });
 };

@@ -629,13 +629,20 @@ async function authenticate(event) {
   loginStatus.textContent = "Connexion en cours…";
   const formData = new FormData(loginForm);
   try {
-    await api("/api/business-radar-auth", {
+    const response = await fetch("/api/business-radar-auth", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: formData.get("email"),
         password: formData.get("password")
       })
     });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) throw new Error(payload.error || "Action impossible.");
+    if (payload.passwordChangeRequired && payload.resetToken) {
+      window.location.assign(`/admin/nexus/reset-password?token=${encodeURIComponent(payload.resetToken)}&returnTo=%2Fadmin%2Fnexus%2Forchestrator`);
+      return;
+    }
     setAuthenticated(true);
     loginStatus.textContent = "";
     await refresh();

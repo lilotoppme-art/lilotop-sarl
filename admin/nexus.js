@@ -451,6 +451,10 @@ async function authenticate(event) {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Connexion impossible.");
+    if (result.passwordChangeRequired && result.resetToken) {
+      window.location.assign(`/admin/nexus/reset-password?token=${encodeURIComponent(result.resetToken)}&returnTo=%2Fadmin%2Fnexus`);
+      return;
+    }
     loginForm.reset();
     loginStatus.textContent = "";
     setAuthenticated(true);
