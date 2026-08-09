@@ -18,6 +18,16 @@ function request(method, body = {}, headers = {}) {
 }
 
 (async () => {
+  process.env.DATABASE_URL = "postgresql://production.invalid/database";
+  process.env.DATABASE_URL_PREVIEW = "postgresql://preview.invalid/database";
+  process.env.VERCEL_ENV = "preview";
+  assert.equal(require("../lib/business-radar/config").radarConfig().databaseUrl, process.env.DATABASE_URL_PREVIEW);
+  process.env.VERCEL_ENV = "production";
+  assert.equal(require("../lib/business-radar/config").radarConfig().databaseUrl, process.env.DATABASE_URL);
+  delete process.env.DATABASE_URL_PREVIEW;
+  delete process.env.DATABASE_URL;
+  delete process.env.VERCEL_ENV;
+
   assert.equal(neutralizeFormula("=HYPERLINK(\"bad\")"), "'=HYPERLINK(\"bad\")");
   assert.equal(neutralizeFormula(" +SUM(A1:A2)"), "' +SUM(A1:A2)");
   assert.equal(csvCell("Bonjour, Kinshasa"), '"Bonjour, Kinshasa"');
