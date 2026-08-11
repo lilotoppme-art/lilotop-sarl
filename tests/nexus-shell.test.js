@@ -132,6 +132,35 @@ const pageRoute = read("api/nexus-page.js");
 assert.ok(pageRoute.includes('require("../lib/business-radar/auth")'));
 assert.ok(pageRoute.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
 assert.ok(pageRoute.includes('delegatedHandler === "admin-password-reset-api"'));
+assert.ok(pageRoute.includes("VERCEL_BRANCH_URL"));
+assert.ok(pageRoute.includes('redirectToStablePreview(req, res, "/admin/nexus/orchestrator")'));
 assert.ok(vercelConfig.rewrites.some(({ source }) => source === "/admin/nexus/reset-password"));
+
+const pageHandler = require("../api/nexus-page");
+const previousVercelEnv = process.env.VERCEL_ENV;
+const previousBranchUrl = process.env.VERCEL_BRANCH_URL;
+process.env.VERCEL_ENV = "preview";
+process.env.VERCEL_BRANCH_URL = "lilotop-sarl-git-feature-preview.vercel.app";
+const redirectHeaders = {};
+const redirectResponse = {
+  setHeader(name, value) { redirectHeaders[name] = value; },
+  end() { this.ended = true; }
+};
+assert.equal(pageHandler.redirectToStablePreview(
+  { headers: { host: "lilotop-sarl-unique-preview.vercel.app" } },
+  redirectResponse,
+  "/admin/nexus/orchestrator"
+), true);
+assert.equal(redirectResponse.statusCode, 307);
+assert.equal(redirectHeaders.Location, "https://lilotop-sarl-git-feature-preview.vercel.app/admin/nexus/orchestrator");
+assert.equal(pageHandler.redirectToStablePreview(
+  { headers: { host: "lilotop-sarl-git-feature-preview.vercel.app" } },
+  { setHeader() {}, end() {} },
+  "/admin/nexus/orchestrator"
+), false);
+if (previousVercelEnv === undefined) delete process.env.VERCEL_ENV;
+else process.env.VERCEL_ENV = previousVercelEnv;
+if (previousBranchUrl === undefined) delete process.env.VERCEL_BRANCH_URL;
+else process.env.VERCEL_BRANCH_URL = previousBranchUrl;
 
 console.log("NEXUS AI Phase 3 shell tests passed.");

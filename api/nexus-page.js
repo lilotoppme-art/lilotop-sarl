@@ -32,6 +32,28 @@ function serializeForHtml(value) {
     .replace(/&/g, "\\u0026");
 }
 
+function previewBranchHost() {
+  const host = String(process.env.VERCEL_BRANCH_URL || "").trim().toLowerCase();
+  return /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?\.vercel\.app$/.test(host) ? host : "";
+}
+
+function redirectToStablePreview(req, res, targetPath) {
+  if (String(process.env.VERCEL_ENV || "").trim() !== "preview") return false;
+  const canonicalHost = previewBranchHost();
+  const requestHost = String(req.headers?.["x-forwarded-host"] || req.headers?.host || "")
+    .split(",")[0]
+    .trim()
+    .toLowerCase()
+    .replace(/:\d+$/, "");
+  if (!canonicalHost || requestHost === canonicalHost) return false;
+
+  res.statusCode = 307;
+  res.setHeader("Location", `https://${canonicalHost}${targetPath}`);
+  res.setHeader("Cache-Control", "no-store, private");
+  res.end();
+  return true;
+}
+
 function sendPrivateHtml(res, templateName, authenticated, title, bootstrap = null) {
   const template = fs.readFileSync(path.join(process.cwd(), "admin", templateName), "utf8");
   let html = template
@@ -92,6 +114,11 @@ module.exports = async function handler(req, res) {
     return res.end("Method not allowed");
   }
 
+  if (delegatedHandler === "orchestrator-page"
+      && redirectToStablePreview(req, res, "/admin/nexus/orchestrator")) {
+    return;
+  }
+
   const authenticated = Boolean(verifySession(req));
   if (delegatedHandler === "tender-page") {
     const title = authenticated ? "Appels d'Offres AI" : "Connexion Appels d'Offres AI";
@@ -131,3 +158,6 @@ module.exports = async function handler(req, res) {
 module.exports.config = {
   api: { bodyParser: false }
 };
+
+module.exports.previewBranchHost = previewBranchHost;
+module.exports.redirectToStablePreview = redirectToStablePreview;
