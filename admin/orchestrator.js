@@ -185,6 +185,66 @@ function listMarkup(items, emptyText) {
   )}</li>`).join("")}</ul>`;
 }
 
+function supplierCycleMarkup(cycle, workflow) {
+  const reference = workflow.dossier?.analysis?.tenderNumber
+    || workflow.dossier?.tenderResponse?.keyInformation?.tenderNumber
+    || workflow.dossier?.opportunity?.reference
+    || "";
+  if (!cycle) {
+    return /ITB\/2026\/62389/i.test(String(reference)) ? `<article id="supplier-rfq-cycle" class="validation-rfqs supplier-cycle">
+      <div class="section-heading-inline"><div><p class="section-kicker">Cycle fournisseurs</p><h3>RFQ FOURNISSEURS</h3></div><span class="status status-paused">A PREPARER</span></div>
+      <p>La preparation reste interne et ne declenche aucun envoi.</p>
+      <button class="button button-primary" type="button" data-prepare-unops-cycle>PREPARER LES RFQ PAR LOT</button>
+    </article>` : "";
+  }
+  const money = (value, currency) => value === null || value === undefined
+    ? "EN ATTENTE"
+    : `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(value)} ${currency || ""}`.trim();
+  return `<article id="supplier-rfq-cycle" class="validation-rfqs supplier-cycle">
+    <div class="section-heading-inline"><div><p class="section-kicker">Cycle fournisseurs UNOPS</p><h3>RFQ FOURNISSEURS</h3></div><span class="status status-paused">${escapeHtml(cycle.status)}</span></div>
+    <div class="supplier-cycle-stats">
+      <div><span>Lots retenus</span><strong>${escapeHtml(cycle.counts.lots)}</strong></div>
+      <div><span>Lignes DAO</span><strong>${escapeHtml(cycle.counts.products)}</strong></div>
+      <div><span>RFQ preparees</span><strong>${escapeHtml(cycle.counts.prepared)}</strong></div>
+      <div><span>RFQ envoyees</span><strong>${escapeHtml(cycle.counts.sent)}</strong></div>
+      <div><span>Reponses recues</span><strong>${escapeHtml(cycle.counts.received)}</strong></div>
+      <div><span>Cotations manquantes</span><strong>${escapeHtml(cycle.counts.missing)}</strong></div>
+    </div>
+    ${(cycle.rfqs || []).map((rfq) => `<section class="supplier-rfq-card">
+      <div class="section-heading-inline"><div><h4>${escapeHtml(rfq.supplier)} - Lot ${escapeHtml(rfq.lotNumber)}</h4><p>${escapeHtml(rfq.lotTitle)}</p></div><span class="status status-paused">${escapeHtml(rfq.status)}</span></div>
+      <div class="rfq-meta-grid">
+        <p><span>Destinataire</span><strong>${escapeHtml(rfq.contact.recipient)}</strong></p>
+        <p><span>E-mail verifie</span><strong>${escapeHtml(rfq.contact.email)}</strong></p>
+        <p><span>Date de preparation</span><strong>${escapeHtml(new Date(rfq.preparedAt).toLocaleString("fr-FR"))}</strong></p>
+        <p><span>Date limite de reponse</span><strong>${escapeHtml(rfq.responseDeadline || "A FIXER PAR LE DG")}</strong></p>
+      </div>
+      <p><a href="${escapeHtml(rfq.contact.source)}" target="_blank" rel="noopener noreferrer">Source officielle des coordonnees</a></p>
+      <div class="rfq-card-actions">
+        <button class="button button-secondary" type="button" data-toggle-rfq="${escapeHtml(rfq.id)}">VOIR RFQ</button>
+        <button class="button button-primary" type="button" disabled title="Autorisation explicite du DG requise">AUTORISER L'ENVOI</button>
+      </div>
+      <div id="${escapeHtml(rfq.id)}" class="rfq-detail" hidden>
+        <p><strong>Objet :</strong> ${escapeHtml(rfq.subject)}</p>
+        <p><strong>Livraison :</strong> ${escapeHtml(rfq.delivery)} - ${escapeHtml(rfq.incoterm)}</p>
+        <p><strong>Destination :</strong> ${escapeHtml(rfq.destination)}</p>
+        <p><strong>Pieces jointes prevues :</strong> ${escapeHtml((rfq.attachments || []).join(", "))}</p>
+        <div class="responsive-table"><table><thead><tr><th>Lot / ligne</th><th>Produit</th><th>Quantite</th><th>Unite</th><th>Specifications officielles</th><th>Normes relevees</th></tr></thead><tbody>
+          ${(rfq.products || []).map((item) => `<tr><td>${escapeHtml(item.reference)}</td><td>${escapeHtml(item.product)}</td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td><pre>${escapeHtml(item.specifications)}</pre></td><td>${escapeHtml((item.standards || []).join("; ") || "Non indiquee")}</td></tr>`).join("")}
+        </tbody></table></div>
+      </div>
+    </section>`).join("")}
+  </article>
+  <article class="validation-rfqs supplier-cycle"><h3>REPONSES FOURNISSEURS / COTATIONS RECUES</h3>
+    ${(cycle.responses || []).length ? `<div class="responsive-table"><table><thead><tr><th>Fournisseur</th><th>Lot</th><th>Prix total</th><th>Incoterm</th><th>Delai</th><th>Garantie</th><th>Validite</th><th>Preuve</th></tr></thead><tbody>${cycle.responses.map((quote) => `<tr><td>${escapeHtml(quote.supplier)}</td><td>${escapeHtml(quote.lotNumber)}</td><td>${escapeHtml(money(quote.totalPrice, quote.currency))}</td><td>${escapeHtml(quote.incoterm || "A verifier")}</td><td>${escapeHtml(quote.deliveryLeadTime || "A verifier")}</td><td>${escapeHtml(quote.warranty || "A verifier")}</td><td>${escapeHtml(quote.validity || "A verifier")}</td><td>${escapeHtml(quote.sourceMessageId || quote.evidenceDocumentId)}</td></tr>`).join("")}</tbody></table></div>` : "<p>Aucune cotation reelle recue. Les trois RFQ restent en attente d'autorisation DG.</p>"}
+  </article>
+  <article class="validation-rfqs supplier-cycle"><h3>COMPARAISON FOURNISSEURS</h3>
+    ${(cycle.comparison || []).length ? `<div class="responsive-table"><table><thead><tr><th>Fournisseur</th><th>Prix</th><th>Devise</th><th>Incoterm</th><th>Transport</th><th>Delai</th><th>Garantie</th><th>Paiement</th><th>Conformite</th><th>Cout rendu</th></tr></thead><tbody>${cycle.comparison.map((item) => `<tr><td>${escapeHtml(item.supplier)}</td><td>${escapeHtml(item.totalPrice)}</td><td>${escapeHtml(item.currency)}</td><td>${escapeHtml(item.incoterm || "A verifier")}</td><td>${escapeHtml(item.transport ?? "A documenter")}</td><td>${escapeHtml(item.deliveryLeadTime || "A verifier")}</td><td>${escapeHtml(item.warranty || "A verifier")}</td><td>${escapeHtml(item.paymentTerms || "A verifier")}</td><td>${escapeHtml(item.technicalCompliance)}</td><td>${escapeHtml(money(item.landedCost, item.currency))}</td></tr>`).join("")}</tbody></table></div>` : "<p>Comparaison indisponible tant qu'aucune cotation documentee n'est recue.</p>"}
+    <div class="supplier-pricing-state"><p><span>Cout d'achat</span><strong>${escapeHtml(money(cycle.pricing.purchaseCost))}</strong></p><p><span>Cout rendu LILOTOP</span><strong>${escapeHtml(money(cycle.pricing.landedCost))}</strong></p><p><span>Scenarios de marge</span><strong>${cycle.pricing.marginScenarios.length ? escapeHtml(cycle.pricing.marginScenarios.length) : "EN ATTENTE"}</strong></p><p><span>Offre financiere</span><strong>${escapeHtml(cycle.pricing.financialOfferStatus)}</strong></p></div>
+    <p><strong>Offre technique :</strong> ${escapeHtml(cycle.technicalOfferStatus)}</p>
+    <p><strong>Regle :</strong> aucun prix, cout rendu ou scenario de marge n'est produit sans cotation et couts documentes.</p>
+  </article>`;
+}
+
 function renderDossier(workflow, actions, sourceDocuments = []) {
   const panel = document.getElementById("dossier-panel");
   const dossier = workflow.dossier || {};
@@ -449,11 +509,12 @@ function renderValidationSheet(workflow) {
     <article><h3>Lettre de soumission</h3><pre>${escapeHtml(sheet.submissionLetter)}</pre></article>
     <article><h3>E-mail prêt à envoyer</h3><pre>${escapeHtml(sheet.emailDraft)}</pre></article>
     <article><h3>Actions restant à valider</h3>${listMarkup(sheet.remainingActions, "Aucune action restante.")}</article>
+    ${supplierCycleMarkup(sheet.supplierCycle || dossier.supplierCycle, workflow)}
     <article><h3>Lignes en attente de cotation</h3>${listMarkup(
       (sheet.quotationLines || []).map((item) => `${item.product} · ${item.supplier} · ${item.priceStatus}`),
       "Aucune ligne de cotation."
     )}</article>
-    <article class="validation-rfqs"><h3>Cotations fournisseurs à autoriser</h3>
+    ${sheet.supplierCycle || dossier.supplierCycle ? "" : `<article class="validation-rfqs"><h3>Cotations fournisseurs à autoriser</h3>
       ${(sheet.supplierRfqs || []).map((rfq) => `
         <div class="rfq-authorization-row">
           <p><strong>${escapeHtml(rfq.manufacturer || rfq.supplier)}</strong> · ${escapeHtml(rfq.product)}</p>
@@ -473,7 +534,7 @@ function renderValidationSheet(workflow) {
         </div>
       `).join("") || "<p>Aucune RFQ préparée.</p>"}
       <p><strong>Statut :</strong> ${sheet.rfqSendingAuthorized ? "Autorisation DG enregistrée - aucun envoi déclenché" : "En attente d'autorisation DG"}</p>
-    </article>
+    </article>`}
   `;
   document.getElementById("purchase-cost").value = sheet.purchaseCost ?? "";
   document.getElementById("sale-price").value = sheet.proposedSalePrice ?? "";
@@ -516,6 +577,26 @@ async function refreshVaultControl() {
   } catch (error) {
     statusRegion.textContent = error.message;
   } finally {
+    button.disabled = false;
+  }
+}
+
+async function prepareUnopsSupplierCycle(button) {
+  const id = document.getElementById("validation-sheet").dataset.workflowId;
+  if (!id) return;
+  button.disabled = true;
+  statusRegion.textContent = "Extraction des lots officiels et preparation des RFQ...";
+  try {
+    await api("/api/nexus-orchestrator?action=prepare-unops-supplier-cycle", {
+      method: "POST",
+      body: JSON.stringify({ id })
+    });
+    await refresh();
+    await viewWorkflow(id);
+    window.location.hash = "supplier-rfq-cycle";
+    statusRegion.textContent = "Trois RFQ preparees. Aucun envoi effectue.";
+  } catch (error) {
+    statusRegion.textContent = error.message;
     button.disabled = false;
   }
 }
@@ -745,6 +826,16 @@ document.getElementById("validation-content").addEventListener("click", (event) 
   if (button) submitEoiConfirmation(button);
   const submissionButton = event.target.closest("[data-record-eoi-submission]");
   if (submissionButton) recordEoiSubmission(submissionButton);
+  const prepareButton = event.target.closest("[data-prepare-unops-cycle]");
+  if (prepareButton) prepareUnopsSupplierCycle(prepareButton);
+  const toggleButton = event.target.closest("[data-toggle-rfq]");
+  if (toggleButton) {
+    const detail = document.getElementById(toggleButton.dataset.toggleRfq);
+    if (detail) {
+      detail.hidden = !detail.hidden;
+      toggleButton.textContent = detail.hidden ? "VOIR RFQ" : "MASQUER RFQ";
+    }
+  }
 });
 document.getElementById("refresh-vault-control").addEventListener("click", refreshVaultControl);
 document.getElementById("workflow-list").addEventListener("click", (event) => {

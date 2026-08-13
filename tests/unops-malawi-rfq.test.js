@@ -1,0 +1,74 @@
+"use strict";
+
+const assert = require("assert");
+const { buildSupplierCycle, recordSupplierQuotation } = require("../lib/nexus/unops-malawi-rfq");
+
+const schedule = `
+ITB/2026/62389 Lot 1: Power Tools
+1 Drill machine Each 10
+Voltage: 240 V, compliant with IEC 60745
+2 Cutting machine Set 4
+Blade diameter: 355 mm
+ITB/2026/62389 Lot 2: Electrical Installation Components and consumables
+1 Distribution board Each 15
+IP65 enclosure, IEC 61439
+2 Insulation tape Roll 50
+Flame retardant PVC
+ITB/2026/62389 Lot 10: General Hardware
+1 Shredding machine Each 1
+DIN compliant steel cutting mechanism
+2 Block board Each 5
+Exterior grade
+ITB/2026/62389 Lot 11: Plumbing
+1 Pipe Each 2
+`;
+
+function run() {
+  const cycle = buildSupplierCycle(schedule, {}, new Date("2026-08-13T12:00:00.000Z"));
+  assert.deepEqual(cycle.lots.map((lot) => lot.number), [1, 2, 10]);
+  assert.deepEqual(cycle.lots.map((lot) => lot.products.length), [2, 2, 2]);
+  assert.equal(cycle.lots[0].products[0].quantity, 10);
+  assert.equal(cycle.lots[1].products[0].unit, "Each");
+  assert.match(cycle.lots[1].products[0].specifications, /IEC 61439/);
+  assert.equal(cycle.rfqs.length, 3);
+  assert.ok(cycle.rfqs.every((rfq) => rfq.status === "EN ATTENTE D'AUTORISATION DG"));
+  assert.ok(cycle.rfqs.every((rfq) => rfq.emailSent === false));
+  assert.equal(cycle.counts.sent, 0);
+  assert.equal(cycle.counts.received, 0);
+  assert.equal(cycle.pricing.purchaseCost, null);
+  assert.equal(cycle.pricing.landedCost, null);
+  assert.deepEqual(cycle.pricing.marginScenarios, []);
+  assert.equal(cycle.pricing.financialOfferStatus, "EN ATTENTE DE COTATIONS FOURNISSEURS");
+
+  assert.throws(() => recordSupplierQuotation(cycle, {
+    rfqId: cycle.rfqs[0].id,
+    currency: "USD",
+    totalPrice: 1000
+  }), /message ou document source/);
+
+  const withQuotation = recordSupplierQuotation(cycle, {
+    rfqId: cycle.rfqs[0].id,
+    evidenceDocumentId: "quote-document-1",
+    currency: "USD",
+    totalPrice: 1000,
+    transport: 100,
+    insurance: 20,
+    dutiesAndTaxes: 50,
+    localLogistics: 30,
+    otherDocumentedCosts: 0,
+    incoterm: "FCA",
+    deliveryLeadTime: "30 days",
+    warranty: "12 months",
+    paymentTerms: "30 days",
+    validity: "30 days"
+  }, new Date("2026-08-13T13:00:00.000Z"));
+  assert.equal(withQuotation.counts.received, 1);
+  assert.equal(withQuotation.counts.missing, 2);
+  assert.equal(withQuotation.comparison[0].landedCost, 1200);
+  assert.equal(withQuotation.rfqs[0].status, "COTATION RECUE");
+  assert.deepEqual(withQuotation.pricing.marginScenarios, []);
+
+  console.log("UNOPS Malawi RFQ supplier-cycle tests passed.");
+}
+
+run();

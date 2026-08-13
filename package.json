@@ -10,7 +10,7 @@
     "check:links": "node audit-links.js",
     "lint": "node scripts/lint.js",
     "typecheck": "node scripts/typecheck.js",
-    "test": "node tests/email-deliverability.test.js && node tests/forms.test.js && node tests/business-radar.test.js && node tests/business-radar-extended.test.js && node tests/admin-password-reset.test.js && node tests/forced-password-change.test.js && node tests/nexus-shell.test.js && node tests/commercial-ai.test.js && node tests/commercial-assistant.test.js && node tests/procurement-ai.test.js && node tests/supplier-ai.test.js && node tests/orchestrator.test.js && node tests/tender-ai.test.js && node tests/tender-response-ai.test.js && node tests/tender-response-scoring.test.js && node tests/document-vault.test.js && node tests/mining-watch.test.js && node tests/crm.test.js",
+    "test": "node tests/email-deliverability.test.js && node tests/forms.test.js && node tests/business-radar.test.js && node tests/business-radar-extended.test.js && node tests/admin-password-reset.test.js && node tests/forced-password-change.test.js && node tests/nexus-shell.test.js && node tests/commercial-ai.test.js && node tests/commercial-assistant.test.js && node tests/procurement-ai.test.js && node tests/supplier-ai.test.js && node tests/orchestrator.test.js && node tests/unops-malawi-rfq.test.js && node tests/tender-ai.test.js && node tests/tender-response-ai.test.js && node tests/tender-response-scoring.test.js && node tests/document-vault.test.js && node tests/mining-watch.test.js && node tests/crm.test.js",
     "admin:hash-password": "node scripts/hash-admin-password.js",
     "db:migrate:radar": "node scripts/migrate-business-radar.js"
   },
