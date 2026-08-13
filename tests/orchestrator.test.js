@@ -318,6 +318,15 @@ function testDossierDocuments() {
   assert.equal(credentialCompliance.compliancePercent, 35);
   assert.equal(credentialCompliance.availableDocuments.length, 6);
   assert.equal(credentialCompliance.missingDocuments.length, 11);
+  const normalizedCredentialCompliance = applyOrganizationCredential({
+    ...initialCompliance,
+    rows: undefined,
+    documentControl: initialCompliance.rows
+  }, {
+    status: "registered", registrationNumber: "673735", evidencePresent: false
+  });
+  assert.equal(normalizedCredentialCompliance.documentControl.length, 17);
+  assert.equal(normalizedCredentialCompliance.compliancePercent, 35);
   const credentialRow = documentMatrixFor({ compliance: { documentControl: credentialCompliance.rows } })[14];
   assert.equal(credentialRow.statusLabel, "INFORMATION CONFIRMÉE – PREUVE À AJOUTER");
 
