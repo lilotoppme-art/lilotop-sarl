@@ -331,6 +331,16 @@ main {
 .rfq-card-actions { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .8rem; }
 .rfq-detail { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line); }
 .rfq-detail pre { min-width: 320px; margin: 0; white-space: pre-wrap; font: inherit; }
+.rfq-email-preview { max-height: 28rem; overflow: auto; padding: 1rem; background: #f6f8fa; border: 1px solid var(--line); }
+.supplier-warning { padding: .85rem 1rem; border-left: 3px solid #9d4b35; background: #fff6f2; }
+.supplier-lifecycle { display: grid; gap: .45rem; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-left: 1.5rem; }
+.rfq-authorization-dialog { width: min(46rem, calc(100% - 2rem)); border: 1px solid var(--line); padding: 1.25rem; }
+.rfq-authorization-dialog::backdrop { background: rgba(11, 25, 44, .58); }
+.rfq-authorization-dialog form { display: grid; gap: 1rem; }
+.rfq-authorization-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin: 0; }
+.rfq-authorization-summary div { padding: .75rem; border: 1px solid var(--line); }
+.rfq-authorization-summary dt { color: var(--steel); font-size: .8rem; text-transform: uppercase; }
+.rfq-authorization-summary dd { margin: .25rem 0 0; overflow-wrap: anywhere; font-weight: 700; }
 .validation-facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line); }
 .validation-facts div { display: grid; gap: .25rem; padding: .9rem; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .validation-facts span { color: var(--steel); font-size: .78rem; text-transform: uppercase; font-weight: 750; }
@@ -373,7 +383,7 @@ main {
   .app-header nav { width: 100%; overflow-x: auto; padding-bottom: .25rem; }
   .page-heading, .panel-heading { flex-direction: column; }
   .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid, .eoi-dg-grid, .eoi-ungm-confirmations, .supplier-cycle-stats, .rfq-meta-grid, .supplier-pricing-state { grid-template-columns: 1fr; }
+  .agent-grid, .dossier-grid, .validation-grid, .price-validation, .validation-summary-grid, .organization-chart, .unece-review-columns, .commercial-family-grid, .eoi-dg-grid, .eoi-ungm-confirmations, .supplier-cycle-stats, .rfq-meta-grid, .supplier-pricing-state, .supplier-lifecycle, .rfq-authorization-summary { grid-template-columns: 1fr; }
   .unece-readiness-heading, .section-heading-inline { align-items: flex-start; flex-direction: column; }
   .unece-progress { width: 100%; text-align: left; }
   .validation-facts { grid-template-columns: 1fr; }

@@ -150,6 +150,21 @@
     </main>
   </div>
 
-  <script src="/admin/orchestrator.js?v=eoi-dg-validation-v2" defer></script>
+  <dialog id="rfq-authorization-dialog" class="rfq-authorization-dialog">
+    <form method="dialog">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Validation DG</p><h2>Confirmer l'envoi de la RFQ</h2></div>
+        <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
+      </div>
+      <dl id="rfq-authorization-summary" class="rfq-authorization-summary"></dl>
+      <p class="selection-summary">Cette confirmation enregistre l'autorisation DG. Aucun envoi n'est declenche par l'ouverture de cette fenetre.</p>
+      <div class="rfq-card-actions">
+        <button class="button button-primary" id="confirm-rfq-authorization" value="confirm" type="submit">CONFIRMER L'ENVOI</button>
+        <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/admin/orchestrator.js?v=unops-rfq-final-review-v1" defer></script>
 </body>
 </html>

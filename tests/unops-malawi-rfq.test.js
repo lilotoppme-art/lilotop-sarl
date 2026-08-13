@@ -1,7 +1,7 @@
 "use strict";
 
 const assert = require("assert");
-const { buildSupplierCycle, recordSupplierQuotation } = require("../lib/nexus/unops-malawi-rfq");
+const { authorizeSupplierRfq, buildSupplierCycle, recordSupplierQuotation } = require("../lib/nexus/unops-malawi-rfq");
 
 const schedule = `
 ITB/2026/62389 Lot 1: Power Tools
@@ -60,9 +60,18 @@ function run() {
   assert.equal(cycle.lots[0].products[0].quantity, 10);
   assert.equal(cycle.lots[1].products[0].unit, "Each");
   assert.match(cycle.lots[1].products[0].specifications, /IEC 61439/);
-  assert.equal(cycle.rfqs.length, 3);
+  assert.equal(cycle.rfqs.length, 5);
+  assert.equal(cycle.coverageAudit.length, 6);
+  assert.equal(cycle.counts.readyForDgReview, 5);
+  assert.ok(cycle.coverageAudit.every((item) => item.supplierJustification));
+  assert.ok(cycle.coverageAudit.every((item) => [
+    "COUVERTURE CONFIRMÉE",
+    "COUVERTURE PROBABLE À CONFIRMER",
+    "FOURNISSEUR NON ADAPTÉ"
+  ].includes(item.verificationStatus)));
   assert.ok(cycle.rfqs.every((rfq) => rfq.status === "EN ATTENTE D'AUTORISATION DG"));
   assert.ok(cycle.rfqs.every((rfq) => rfq.emailSent === false));
+  assert.ok(cycle.rfqs.every((rfq) => rfq.emailBody.includes("does not constitute an order")));
   assert.equal(cycle.counts.sent, 0);
   assert.equal(cycle.counts.received, 0);
   assert.equal(cycle.pricing.purchaseCost, null);
@@ -104,10 +113,16 @@ function run() {
     validity: "30 days"
   }, new Date("2026-08-13T13:00:00.000Z"));
   assert.equal(withQuotation.counts.received, 1);
-  assert.equal(withQuotation.counts.missing, 2);
+  assert.equal(withQuotation.counts.missing, cycle.rfqs.length - 1);
   assert.equal(withQuotation.comparison[0].landedCost, 1200);
   assert.equal(withQuotation.rfqs[0].status, "COTATION RECUE");
   assert.deepEqual(withQuotation.pricing.marginScenarios, []);
+
+  const authorized = authorizeSupplierRfq(cycle, cycle.rfqs[0].id, "admin@lilotopsarl.com");
+  assert.equal(authorized.rfqs[0].status, "AUTORISEE PAR LE DG - ENVOI NON DECLENCHE");
+  assert.equal(authorized.rfqs[0].emailSent, false);
+  assert.equal(authorized.rfqs[0].sentAt, null);
+  assert.equal(authorized.counts.sent, 0);
 
   console.log("UNOPS Malawi RFQ supplier-cycle tests passed.");
 }

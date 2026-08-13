@@ -94,6 +94,7 @@ function testArchitecture() {
   assert.match(service, /refreshVaultControl/);
   assert.match(service, /prepareUnopsSupplierCycle/);
   assert.match(service, /recordUnopsSupplierQuotation/);
+  assert.match(service, /authorizeUnopsSupplierRfq/);
   assert.match(service, /document\\\(s\\\) restent manquants ou non utilisables/);
   assert.match(service, /supplierRfqs/);
   assert.match(service, /sendEnabled: false/);
@@ -121,6 +122,7 @@ function testArchitecture() {
   assert.match(handler, /action === "decision"/);
   assert.match(handler, /action === "refresh-vault"/);
   assert.match(handler, /action === "prepare-unops-supplier-cycle"/);
+  assert.match(handler, /action === "authorize-unops-supplier-rfq"/);
   assert.match(handler, /action === "record-unops-supplier-quotation"/);
   assert.match(handler, /action === "document"/);
   assert.match(handler, /disposition"\) === "inline"/);
@@ -183,6 +185,9 @@ function testInterfaceAndRoutes() {
   assert.match(client, /COMPARAISON FOURNISSEURS/);
   assert.match(client, /data-prepare-unops-cycle/);
   assert.match(client, /AUTORISER L'ENVOI/);
+  assert.match(client, /Texte exact de l'e-mail RFQ/);
+  assert.match(client, /data-request-rfq-authorization/);
+  assert.match(client, /confirmRfqAuthorization/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
   assert.match(routes, /\/api\/nexus-orchestrator/);
   assert.match(page, /orchestrator-page/);

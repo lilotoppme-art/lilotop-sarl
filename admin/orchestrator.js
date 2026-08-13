@@ -18,6 +18,7 @@ let state = {
   dashboard: {}
 };
 let runningWorkflowId = null;
+let pendingRfqAuthorization = null;
 
 function reportClientFailure(message) {
   const safeMessage = String(message || "Erreur d'affichage inconnue").slice(0, 500);
@@ -206,31 +207,47 @@ function supplierCycleMarkup(cycle, workflow) {
       <div><span>Lots retenus</span><strong>${escapeHtml(cycle.counts.lots)}</strong></div>
       <div><span>Lignes DAO</span><strong>${escapeHtml(cycle.counts.products)}</strong></div>
       <div><span>RFQ preparees</span><strong>${escapeHtml(cycle.counts.prepared)}</strong></div>
+      <div><span>Pretes pour controle DG</span><strong>${escapeHtml(cycle.counts.readyForDgReview || 0)}</strong></div>
       <div><span>RFQ envoyees</span><strong>${escapeHtml(cycle.counts.sent)}</strong></div>
       <div><span>Reponses recues</span><strong>${escapeHtml(cycle.counts.received)}</strong></div>
       <div><span>Cotations manquantes</span><strong>${escapeHtml(cycle.counts.missing)}</strong></div>
     </div>
-    ${(cycle.rfqs || []).map((rfq) => `<section class="supplier-rfq-card">
+    ${(cycle.supplierCorrections || []).map((item) => `<p class="supplier-warning"><strong>${escapeHtml(item.supplier)} : ${escapeHtml(item.status)}</strong> - ${escapeHtml(item.reason)}</p>`).join("")}
+    ${(cycle.rfqs || []).map((rfq) => `<section class="supplier-rfq-card" data-rfq-card="${escapeHtml(rfq.id)}">
       <div class="section-heading-inline"><div><h4>${escapeHtml(rfq.supplier)} - Lot ${escapeHtml(rfq.lotNumber)}</h4><p>${escapeHtml(rfq.lotTitle)}</p></div><span class="status status-paused">${escapeHtml(rfq.status)}</span></div>
       <div class="rfq-meta-grid">
         <p><span>Destinataire</span><strong>${escapeHtml(rfq.contact.recipient)}</strong></p>
-        <p><span>E-mail verifie</span><strong>${escapeHtml(rfq.contact.email)}</strong></p>
+        <p><span>Coordonnees verifiees</span><strong>${escapeHtml(rfq.contact.email || rfq.contact.contactForm || "A VERIFIER")}</strong></p>
+        <p><span>Telephone</span><strong>${escapeHtml(rfq.contact.phone || "Non publie")}</strong></p>
+        <p><span>Nombre de lignes</span><strong>${escapeHtml((rfq.products || []).length)}</strong></p>
+        <p><span>Couverture</span><strong>${escapeHtml(rfq.coverageStatus)}</strong></p>
         <p><span>Date de preparation</span><strong>${escapeHtml(new Date(rfq.preparedAt).toLocaleString("fr-FR"))}</strong></p>
         <p><span>Date limite de reponse</span><strong>${escapeHtml(rfq.responseDeadline || "A FIXER PAR LE DG")}</strong></p>
       </div>
       <p><a href="${escapeHtml(rfq.contact.source)}" target="_blank" rel="noopener noreferrer">Source officielle des coordonnees</a></p>
+      <p><a href="${escapeHtml(rfq.contact.catalogSource || rfq.contact.website)}" target="_blank" rel="noopener noreferrer">Source officielle de couverture produit</a></p>
       <div class="rfq-card-actions">
         <button class="button button-secondary" type="button" data-toggle-rfq="${escapeHtml(rfq.id)}">VOIR RFQ</button>
-        <button class="button button-primary" type="button" disabled title="Autorisation explicite du DG requise">AUTORISER L'ENVOI</button>
+        <button class="button button-primary" type="button"
+          data-request-rfq-authorization="${escapeHtml(rfq.id)}"
+          data-rfq-supplier="${escapeHtml(rfq.supplier)}"
+          data-rfq-recipient="${escapeHtml(rfq.contact.email || rfq.contact.contactForm)}"
+          data-rfq-lot="${escapeHtml(rfq.lotNumber)}"
+          data-rfq-lines="${escapeHtml((rfq.products || []).length)}"
+          data-rfq-attachments="${escapeHtml((rfq.attachments || []).join(", "))}"
+          data-rfq-deadline="${escapeHtml(rfq.responseDeadline)}"
+          ${rfq.readyForDgReview ? "" : "disabled"}>AUTORISER L'ENVOI</button>
       </div>
       <div id="${escapeHtml(rfq.id)}" class="rfq-detail" hidden>
         <p><strong>Objet :</strong> ${escapeHtml(rfq.subject)}</p>
         <p><strong>Livraison :</strong> ${escapeHtml(rfq.delivery)} - ${escapeHtml(rfq.incoterm)}</p>
         <p><strong>Destination :</strong> ${escapeHtml(rfq.destination)}</p>
         <p><strong>Pieces jointes prevues :</strong> ${escapeHtml((rfq.attachments || []).join(", "))}</p>
-        <div class="responsive-table"><table><thead><tr><th>Lot / ligne</th><th>Produit</th><th>Quantite</th><th>Unite</th><th>Specifications officielles</th><th>Normes relevees</th></tr></thead><tbody>
-          ${(rfq.products || []).map((item) => `<tr><td>${escapeHtml(item.reference)}</td><td>${escapeHtml(item.product)}</td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td><pre>${escapeHtml(item.specifications)}</pre></td><td>${escapeHtml((item.standards || []).join("; ") || "Non indiquee")}</td></tr>`).join("")}
+        <div class="responsive-table"><table><thead><tr><th>Lot / ligne</th><th>Designation exacte</th><th>Specification</th><th>Quantite</th><th>Unite</th><th>Fournisseur propose</th><th>Justification</th><th>Statut de verification</th></tr></thead><tbody>
+          ${(rfq.products || []).map((item) => `<tr><td>${escapeHtml(item.reference)}</td><td>${escapeHtml(item.product)}</td><td><pre>${escapeHtml(item.specifications)}</pre></td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td>${escapeHtml(item.proposedSupplier)}</td><td>${escapeHtml(item.supplierJustification)}</td><td><strong>${escapeHtml(item.verificationStatus)}</strong></td></tr>`).join("")}
         </tbody></table></div>
+        <h5>Texte exact de l'e-mail RFQ</h5>
+        <pre class="rfq-email-preview">${escapeHtml(rfq.emailBody)}</pre>
       </div>
     </section>`).join("")}
   </article>
@@ -242,6 +259,7 @@ function supplierCycleMarkup(cycle, workflow) {
     <div class="supplier-pricing-state"><p><span>Cout d'achat</span><strong>${escapeHtml(money(cycle.pricing.purchaseCost))}</strong></p><p><span>Cout rendu LILOTOP</span><strong>${escapeHtml(money(cycle.pricing.landedCost))}</strong></p><p><span>Scenarios de marge</span><strong>${cycle.pricing.marginScenarios.length ? escapeHtml(cycle.pricing.marginScenarios.length) : "EN ATTENTE"}</strong></p><p><span>Offre financiere</span><strong>${escapeHtml(cycle.pricing.financialOfferStatus)}</strong></p></div>
     <p><strong>Offre technique :</strong> ${escapeHtml(cycle.technicalOfferStatus)}</p>
     <p><strong>Regle :</strong> aucun prix, cout rendu ou scenario de marge n'est produit sans cotation et couts documentes.</p>
+    <ol class="supplier-lifecycle">${(cycle.supplierResponseLifecycle || []).map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol>
   </article>`;
 }
 
@@ -594,11 +612,48 @@ async function prepareUnopsSupplierCycle(button) {
     await refresh();
     await viewWorkflow(id);
     window.location.hash = "supplier-rfq-cycle";
-    statusRegion.textContent = "Trois RFQ preparees. Aucun envoi effectue.";
+    statusRegion.textContent = "RFQ specialisees preparees pour controle DG. Aucun envoi effectue.";
   } catch (error) {
     statusRegion.textContent = error.message;
     button.disabled = false;
   }
+}
+
+function openRfqAuthorization(button) {
+  const dialog = document.getElementById("rfq-authorization-dialog");
+  const summary = document.getElementById("rfq-authorization-summary");
+  pendingRfqAuthorization = {
+    rfqId: button.dataset.requestRfqAuthorization,
+    supplier: button.dataset.rfqSupplier,
+    recipient: button.dataset.rfqRecipient,
+    lot: button.dataset.rfqLot,
+    lines: button.dataset.rfqLines,
+    attachments: button.dataset.rfqAttachments,
+    deadline: button.dataset.rfqDeadline
+  };
+  summary.innerHTML = [
+    ["Destinataire", pendingRfqAuthorization.recipient],
+    ["Fournisseur", pendingRfqAuthorization.supplier],
+    ["Lot", pendingRfqAuthorization.lot],
+    ["Nombre de lignes", pendingRfqAuthorization.lines],
+    ["Pieces jointes", pendingRfqAuthorization.attachments],
+    ["Date limite demandee", pendingRfqAuthorization.deadline]
+  ].map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
+  dialog.showModal();
+}
+
+async function confirmRfqAuthorization() {
+  const id = document.getElementById("validation-sheet").dataset.workflowId;
+  if (!id || !pendingRfqAuthorization) return;
+  statusRegion.textContent = "Enregistrement de l'autorisation DG, sans envoi...";
+  await api("/api/nexus-orchestrator?action=authorize-unops-supplier-rfq", {
+    method: "POST",
+    body: JSON.stringify({ id, rfqId: pendingRfqAuthorization.rfqId })
+  });
+  pendingRfqAuthorization = null;
+  await refresh();
+  await viewWorkflow(id);
+  statusRegion.textContent = "Autorisation DG enregistree. Aucun e-mail n'a ete envoye.";
 }
 
 async function submitEoiConfirmation(button) {
@@ -835,6 +890,15 @@ document.getElementById("validation-content").addEventListener("click", (event) 
       detail.hidden = !detail.hidden;
       toggleButton.textContent = detail.hidden ? "VOIR RFQ" : "MASQUER RFQ";
     }
+  }
+  const authorizeButton = event.target.closest("[data-request-rfq-authorization]");
+  if (authorizeButton) openRfqAuthorization(authorizeButton);
+});
+document.getElementById("rfq-authorization-dialog").addEventListener("close", (event) => {
+  if (event.target.returnValue === "confirm") {
+    confirmRfqAuthorization().catch((error) => { statusRegion.textContent = error.message; });
+  } else {
+    pendingRfqAuthorization = null;
   }
 });
 document.getElementById("refresh-vault-control").addEventListener("click", refreshVaultControl);
