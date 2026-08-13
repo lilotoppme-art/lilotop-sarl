@@ -329,7 +329,7 @@ function renderValidationSheet(workflow) {
   document.getElementById("validation-content").innerHTML = `
     <div class="validation-facts">${fields.map(([label, value]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}</div>
     <article class="validation-summary validation-summary-wide">
-      <h3>Dashboard DG - situation UNECA</h3>
+      <h3>Dashboard DG - ${unece ? "situation UNECA" : "situation du marche"}</h3>
       <div class="validation-summary-grid">
         <div><span>DOCUMENTS</span><strong>${sheet.documentSubmissionRequired === false ? "Aucun document à joindre à cette EOI" : `${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} exigences satisfaites`}</strong><small>${escapeHtml(sheet.documentSummary?.available || 0)}/${escapeHtml(sheet.documentSummary?.total || 0)} condition(s) confirmée(s) · Préparation documentaire ${escapeHtml(sheet.documentaryReadinessPercent || 0)}%</small></div>
         <div><span>RFQ</span><strong>${escapeHtml(sheet.rfqSummary?.prepared || 0)} preparees</strong><small>${escapeHtml(sheet.rfqSummary?.contactsVerified || 0)} coordonnee(s) verifiee(s) · ${escapeHtml(sheet.rfqSummary?.sent || 0)} envoyee</small></div>
@@ -419,9 +419,9 @@ function renderValidationSheet(workflow) {
         </table></div>
       </section>
     </article>` : ""}
-    <article class="validation-documents"><h3>${escapeHtml(sheet.documentSummary?.total || 0)} exigences réelles UNECA</h3>
+    <article class="validation-documents"><h3>${escapeHtml(sheet.documentSummary?.total || 0)} exigences réelles ${unece ? "UNECA" : "du marché"}</h3>
       <div class="responsive-table"><table>
-        <thead><tr><th>N°</th><th>Document / exigence UNECA</th><th>Statut LILOTOP</th><th>Fichier trouvé dans le Coffre</th><th>Justification DAO</th><th>Action nécessaire</th></tr></thead>
+        <thead><tr><th>N°</th><th>Document / exigence ${unece ? "UNECA" : "du marché"}</th><th>Statut LILOTOP</th><th>Fichier trouvé dans le Coffre</th><th>Justification DAO</th><th>Action nécessaire</th></tr></thead>
         <tbody>${(sheet.documentMatrix || []).map((item, index) => `<tr>
           <td>${escapeHtml(index + 1)}</td>
           <td>${escapeHtml(item.requirement)}</td>

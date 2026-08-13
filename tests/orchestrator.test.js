@@ -159,7 +159,8 @@ function testInterfaceAndRoutes() {
   assert.match(client, /data-record-eoi-submission/);
   assert.match(client, /record-eoi-submission/);
   assert.match(client, /Cotations fournisseurs à autoriser/);
-  assert.match(client, /exigences réelles UNECA/);
+  assert.match(client, /exigences réelles/);
+  assert.match(client, /situation du marche/);
   assert.match(client, /organization-chart-preview/);
   assert.match(client, /UNECA - CONDITIONS AVANT SOUMISSION/);
   assert.match(client, /Vendor Response Form - Preview pre-remplie/);
@@ -220,6 +221,7 @@ function testDossierDocuments() {
     documentsFor,
     isUnecaEoi24536,
     organizationChartDraft,
+    scopeComplianceToRequirements,
     supplierComparisonFor
   } = require("../lib/nexus/orchestrator-service");
   const documents = documentsFor({
@@ -327,6 +329,12 @@ function testDossierDocuments() {
   });
   assert.equal(normalizedCredentialCompliance.documentControl.length, 17);
   assert.equal(normalizedCredentialCompliance.compliancePercent, 35);
+  const scopedCompliance = scopeComplianceToRequirements(normalizedCredentialCompliance, [
+    "Document 1",
+    "Form A: Bid Submission Form"
+  ]);
+  assert.deepStrictEqual(scopedCompliance.rows.map((row) => row.document), ["Document 1"]);
+  assert.equal(scopedCompliance.compliancePercent, 100);
   const credentialRow = documentMatrixFor({ compliance: { documentControl: credentialCompliance.rows } })[14];
   assert.equal(credentialRow.statusLabel, "INFORMATION CONFIRMÉE – PREUVE À AJOUTER");
 
