@@ -23,6 +23,36 @@ ITB/2026/62389 Lot 11: Plumbing
 1 Pipe Each 2
 `;
 
+const collapsedSchedule = `
+ITB/2026/62389 - Section II -Schedule of Requirements - Lot 1: Power Tools
+1Drill machine
+Portable Drill Machine
+Minimum Technical Specifications Required: IEC 60745
+Each10
+ITB/2026/62389 - Section II -Schedule of Requirements - Lot 2: Electrical Installation Components and consumables
+1Distribution board (heavy duty)
+Heavy duty Distribution board IP65 IEC 61439
+Each15
+ITB/2026/62389 - Section II -Schedule of Requirements - Lot 10: General Hardware
+1Shredding machine
+Cross-cut, 20 litres
+Each1
+ITB/2026/62389 - Section II -Schedule of Requirements - Lot 11: Plumbing
+1Pipe
+Each2
+`;
+
+const priceSchedule = `
+ITB/2026/62389 - Section III -Returnable Bidding Form B - Lot 1: Power Tools
+1 | Drill machine | Each | 10 | [object Object]
+ITB/2026/62389 - Section III -Returnable Bidding Form B - Lot 2: Electrical Installation Components and consumables
+1 | Distribution board (heavy duty) | Each | 15 | [object Object]
+ITB/2026/62389 - Section III -Returnable Bidding Form B - Lot 10: General Hardware
+1 | Shredding machine | Each | 1 | [object Object]
+ITB/2026/62389 - Section III -Returnable Bidding Form B - Lot 11: Plumbing
+1 | Pipe | Each | 2 | [object Object]
+`;
+
 function run() {
   const cycle = buildSupplierCycle(schedule, {}, new Date("2026-08-13T12:00:00.000Z"));
   assert.deepEqual(cycle.lots.map((lot) => lot.number), [1, 2, 10]);
@@ -39,6 +69,17 @@ function run() {
   assert.equal(cycle.pricing.landedCost, null);
   assert.deepEqual(cycle.pricing.marginScenarios, []);
   assert.equal(cycle.pricing.financialOfferStatus, "EN ATTENTE DE COTATIONS FOURNISSEURS");
+
+  const collapsedCycle = buildSupplierCycle(
+    collapsedSchedule,
+    {},
+    new Date("2026-08-13T12:00:00.000Z"),
+    priceSchedule
+  );
+  assert.deepEqual(collapsedCycle.lots.map((lot) => lot.products.length), [1, 1, 1]);
+  assert.equal(collapsedCycle.lots[0].products[0].product, "Drill machine");
+  assert.equal(collapsedCycle.lots[1].products[0].quantity, 15);
+  assert.match(collapsedCycle.lots[1].products[0].specifications, /IP65 IEC 61439/);
 
   assert.throws(() => recordSupplierQuotation(cycle, {
     rfqId: cycle.rfqs[0].id,
