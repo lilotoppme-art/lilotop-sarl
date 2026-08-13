@@ -241,6 +241,20 @@ function testDossierDocuments() {
   assert.ok(documents.some((item) => item.key === "supplier-report"));
   assert.ok(documents.some((item) => item.key === "rfq-register"));
 
+  const partialSourcingDocuments = documentsFor({
+    analysis: { executiveSummary: "Resume", products: [] },
+    sourcing: [{ product: { name: "Outillage" } }],
+    rfqs: [{ subject: "RFQ Outillage" }]
+  });
+  assert.match(
+    partialSourcingDocuments.find((item) => item.key === "supplier-report").content,
+    /Aucun fournisseur exploitable identifie/
+  );
+  assert.match(
+    partialSourcingDocuments.find((item) => item.key === "rfq-register").content,
+    /Fournisseur a confirmer/
+  );
+
   const dossier = {
     opportunity: { title: "AO Pompes", organization: "Client", score: 70, currency: "USD" },
     analysis: { opportunityScore: 82, priority: "prioritaire", risks: ["Délai court"] },
