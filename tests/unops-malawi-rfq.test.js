@@ -90,6 +90,15 @@ function run() {
   assert.equal(collapsedCycle.lots[1].products[0].quantity, 15);
   assert.match(collapsedCycle.lots[1].products[0].specifications, /IP65 IEC 61439/);
 
+  const partialPriceCycle = buildSupplierCycle(
+    schedule,
+    {},
+    new Date("2026-08-13T12:00:00.000Z"),
+    priceSchedule
+  );
+  assert.deepEqual(partialPriceCycle.lots.map((lot) => lot.products.length), [2, 2, 2]);
+  assert.equal(partialPriceCycle.counts.products, 6);
+
   assert.throws(() => recordSupplierQuotation(cycle, {
     rfqId: cycle.rfqs[0].id,
     currency: "USD",
