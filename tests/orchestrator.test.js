@@ -189,6 +189,11 @@ function testInterfaceAndRoutes() {
   assert.match(client, /data-request-rfq-authorization/);
   assert.match(client, /REVALIDER LES RFQ/);
   assert.match(client, /confirmRfqAuthorization/);
+  assert.match(client, /RFQ PILOTE : HILTI/);
+  assert.match(client, /AUTORISER L'ENVOI PILOTE/);
+  assert.match(client, /rfq-pilot-final-confirmation-dialog/);
+  assert.match(html, /Deuxieme confirmation obligatoire/);
+  assert.match(html, /CONFIRMER L'AUTORISATION PILOTE/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
   assert.match(routes, /\/api\/nexus-orchestrator/);
   assert.match(page, /orchestrator-page/);

@@ -3,7 +3,7 @@
 const assert = require("assert");
 const fs = require("fs");
 const path = require("path");
-const { authorizeSupplierRfq, buildSupplierCycle, recordSupplierQuotation } = require("../lib/nexus/unops-malawi-rfq");
+const { authorizeSupplierRfq, buildHiltiPilot, buildSupplierCycle, recordSupplierQuotation } = require("../lib/nexus/unops-malawi-rfq");
 const { extractTenderTableDocument } = require("../lib/nexus/tender-response-documents");
 
 const schedule = `
@@ -81,6 +81,24 @@ async function run() {
   assert.equal(cycle.pricing.landedCost, null);
   assert.deepEqual(cycle.pricing.marginScenarios, []);
   assert.equal(cycle.pricing.financialOfferStatus, "EN ATTENTE DE COTATIONS FOURNISSEURS");
+  assert.equal(cycle.pilot.supplier, "Hilti");
+  assert.equal(cycle.pilot.dryRun.realSendPerformed, false);
+  assert.equal(cycle.pilot.authorization.doubleConfirmationRequired, true);
+  assert.equal(cycle.pilot.contact.email, "customercare.za@hilti.com");
+  assert.equal(cycle.pilot.responseTracking.operational, false);
+  assert.match(cycle.pilot.emailBody, /product datasheets and product photos/);
+  assert.deepEqual(cycle.pilot.attachments.map((item) => item.name), ["RFQ_LILOTOP_HILTI_ITB-2026-62389_Lot1.pdf"]);
+
+  const configuredPilot = buildHiltiPilot(cycle.rfqs, {
+    RESEND_API_KEY: "hidden",
+    EMAIL_FROM: "LILOTOP Website <notifications@updates.lilotopsarl.com>",
+    GMAIL_OAUTH_CLIENT_ID: "hidden",
+    GMAIL_OAUTH_CLIENT_SECRET: "hidden",
+    GMAIL_OAUTH_REFRESH_TOKEN: "hidden"
+  });
+  assert.equal(configuredPilot.dryRun.senderConfigured, true);
+  assert.equal(configuredPilot.responseTracking.operational, true);
+  assert.doesNotMatch(configuredPilot.dryRun.sender, /notifications@/);
 
   const collapsedCycle = buildSupplierCycle(
     collapsedSchedule,
@@ -115,6 +133,10 @@ async function run() {
     assert.equal(officialCycle.counts.readyForDgReview, 17);
     assert.equal(officialCycle.counts.sent, 0);
     assert.equal(officialCycle.counts.received, 0);
+    assert.equal(officialCycle.pilot.lineCount, 6);
+    assert.deepEqual(officialCycle.pilot.lines.map((item) => item.itemNumber), [1, 12, 13, 14, 15, 16]);
+    assert.ok(officialCycle.pilot.lines.every((item) => item.extractionCompliance === "CONFORME AU DAO OFFICIEL"));
+    assert.ok(officialCycle.pilot.lines.every((item) => item.datasheetRequired));
     assert.equal(officialCycle.coverageAudit.length, 83);
     assert.ok(officialCycle.coverageAudit.every((item) => item.verificationStatus !== "FOURNISSEUR NON ADAPTÃ‰"));
     assert.ok(officialCycle.rfqs.every((rfq) => rfq.coverageCounts.rejected === 0));

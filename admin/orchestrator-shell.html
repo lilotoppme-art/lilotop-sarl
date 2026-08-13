@@ -157,7 +157,7 @@
         <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
       </div>
       <dl id="rfq-authorization-summary" class="rfq-authorization-summary"></dl>
-      <p class="selection-summary">Cette confirmation enregistre l'autorisation DG. Aucun envoi n'est declenche par l'ouverture de cette fenetre.</p>
+      <p class="selection-summary" id="rfq-authorization-warning">Cette confirmation enregistre l'autorisation DG. Aucun envoi n'est declenche par l'ouverture de cette fenetre.</p>
       <div class="rfq-card-actions">
         <button class="button button-primary" id="confirm-rfq-authorization" value="confirm" type="submit">CONFIRMER L'ENVOI</button>
         <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
@@ -165,6 +165,21 @@
     </form>
   </dialog>
 
-  <script src="/admin/orchestrator.js?v=unops-rfq-final-review-v1" defer></script>
+  <dialog id="rfq-pilot-final-confirmation-dialog" class="rfq-authorization-dialog">
+    <form method="dialog">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Deuxieme confirmation obligatoire</p><h2>Autoriser uniquement la RFQ pilote Hilti</h2></div>
+        <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
+      </div>
+      <p class="supplier-warning"><strong>Confirmation finale :</strong> cette decision concerne uniquement Hilti, le Lot 1 et les 6 lignes affichees. Elle n'autorise aucune autre RFQ.</p>
+      <p class="selection-summary">NEXUS enregistrera l'autorisation DG. Aucune autorisation globale des 16 autres RFQ ne sera creee.</p>
+      <div class="rfq-card-actions">
+        <button class="button button-primary" value="confirm" type="submit">CONFIRMER L'AUTORISATION PILOTE</button>
+        <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/admin/orchestrator.js?v=unops-hilti-pilot-v1" defer></script>
 </body>
 </html>

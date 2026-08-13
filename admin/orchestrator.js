@@ -186,6 +186,36 @@ function listMarkup(items, emptyText) {
   )}</li>`).join("")}</ul>`;
 }
 
+function hiltiPilotMarkup(pilot) {
+  if (!pilot) return "";
+  return `<section id="hilti-pilot-rfq" class="hilti-pilot-card">
+    <div class="section-heading-inline"><div><p class="section-kicker">Premier envoi reel - controle prealable</p><h3>RFQ PILOTE : HILTI</h3></div><span class="status status-paused">AUCUN ENVOI EFFECTUE</span></div>
+    <div class="rfq-meta-grid">
+      <p><span>Lignes</span><strong>${escapeHtml(pilot.lineCount)}</strong></p>
+      <p><span>E-mail verifie</span><strong>${pilot.contact?.verified ? "OUI" : "NON"}</strong></p>
+      <p><span>Canal</span><strong>${escapeHtml(pilot.contact?.channel)}</strong></p>
+      <p><span>Date verification</span><strong>${escapeHtml(new Date(pilot.contact?.verifiedAt).toLocaleDateString("fr-FR"))}</strong></p>
+      <p><span>Date fournisseur</span><strong>${escapeHtml(pilot.supplierDeadlineLabel)}</strong></p>
+      <p><span>Date UNOPS enregistree</span><strong>${escapeHtml(pilot.officialBidDeadlineLabel)}</strong></p>
+      <p><span>Envoi technique</span><strong>${pilot.dryRun?.senderConfigured ? "CONFIGURE" : "A CONFIGURER"}</strong></p>
+      <p><span>Suivi automatique reponses</span><strong>${pilot.responseTracking?.operational ? "OPERATIONNEL" : "NON OPERATIONNEL"}</strong></p>
+    </div>
+    <p><strong>E-mail :</strong> ${escapeHtml(pilot.contact?.email)}</p>
+    <p><a href="${escapeHtml(pilot.contact?.source)}" target="_blank" rel="noopener noreferrer">Source officielle Hilti utilisee pour la verification</a></p>
+    <p class="supplier-warning"><strong>Controle de date :</strong> ${escapeHtml(pilot.deadlineAssessment)}</p>
+    <div class="responsive-table"><table class="hilti-audit-table"><thead><tr><th>Ligne</th><th>Produit</th><th>Quantite</th><th>Unite</th><th>Conformite extraction DAO</th><th>Couverture Hilti</th><th>Statut</th></tr></thead><tbody>
+      ${(pilot.lines || []).map((item) => `<tr><td>${escapeHtml(item.itemNumber)}</td><td>${escapeHtml(item.product)}</td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td>${escapeHtml(item.extractionCompliance)}</td><td>${escapeHtml(item.coverage)}</td><td>${escapeHtml(item.status)}</td></tr>`).join("")}
+    </tbody></table></div>
+    <div class="pilot-control-grid">
+      <article><h4>Piece jointe limitee aux 6 lignes</h4>${(pilot.attachments || []).map((item) => `<p><a class="button button-secondary button-inline" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">OUVRIR ${escapeHtml(item.name)}</a></p>`).join("")}</article>
+      <article><h4>Test technique sans envoi</h4><p>Expediteur : ${escapeHtml(pilot.dryRun?.sender)}</p><p>Journalisation : ${pilot.dryRun?.deliveryLoggingReady ? "OK" : "NON"}</p><p>Message-ID : ${pilot.dryRun?.messageIdCaptureReady ? "CAPTURE PREVUE" : "NON"}</p><p>Erreurs API : ${pilot.dryRun?.apiErrorHandlingReady ? "GEREES" : "NON"}</p></article>
+      <article><h4>Reponses fournisseurs</h4><p>${pilot.responseTracking?.operational ? "Detection automatique configuree." : escapeHtml(pilot.responseTracking?.blocker)}</p><p>Saisie avec message/document source : ${pilot.responseTracking?.manualEvidenceIntakeReady ? "DISPONIBLE" : "NON"}</p></article>
+    </div>
+    <h4>Objet</h4><p>${escapeHtml(pilot.subject)}</p>
+    <h4>Corps exact prepare</h4><pre class="rfq-email-preview">${escapeHtml(pilot.emailBody)}</pre>
+  </section>`;
+}
+
 function supplierCycleMarkup(cycle, workflow) {
   const reference = workflow.dossier?.analysis?.tenderNumber
     || workflow.dossier?.tenderResponse?.keyInformation?.tenderNumber
@@ -212,9 +242,10 @@ function supplierCycleMarkup(cycle, workflow) {
       <div><span>Reponses recues</span><strong>${escapeHtml(cycle.counts.received)}</strong></div>
       <div><span>Cotations manquantes</span><strong>${escapeHtml(cycle.counts.missing)}</strong></div>
     </div>
+    ${hiltiPilotMarkup(cycle.pilot)}
     ${(cycle.supplierCorrections || []).map((item) => `<p class="supplier-warning"><strong>${escapeHtml(item.supplier)} : ${escapeHtml(item.status)}</strong> - ${escapeHtml(item.reason)}</p>`).join("")}
     <div class="responsive-table"><table class="rfq-review-table"><thead><tr><th>Fournisseur</th><th>Lot</th><th>Lignes</th><th>Confirmee</th><th>Probable</th><th>Rejetee</th><th>Contact verifie</th><th>RFQ prete</th><th>Date reponse</th><th>Statut envoi</th><th>Action</th></tr></thead><tbody>
-      ${(cycle.rfqs || []).map((rfq) => `<tr><td>${escapeHtml(rfq.supplier)}</td><td>${escapeHtml(rfq.lotNumber)}</td><td>${escapeHtml((rfq.products || []).length)}</td><td>${escapeHtml(rfq.coverageCounts?.confirmed || 0)}</td><td>${escapeHtml(rfq.coverageCounts?.probable || 0)}</td><td>${escapeHtml(rfq.coverageCounts?.rejected || 0)}</td><td>${rfq.contact?.verified ? "OUI" : "NON"}</td><td>${rfq.readyForDgReview ? "OUI" : "NON"}</td><td>${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline || "A FIXER")}</td><td>${escapeHtml(rfq.sentAt ? "ENVOYEE" : "NON AUTORISE")}</td><td><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-toggle-rfq="${escapeHtml(rfq.id)}">VOIR RFQ</button><button class="button button-secondary" type="button" data-edit-rfq="${escapeHtml(rfq.id)}">MODIFIER</button>${rfq.readyForDgReview ? `<button class="button button-primary" type="button" data-request-rfq-authorization="${escapeHtml(rfq.id)}" data-rfq-supplier="${escapeHtml(rfq.supplier)}" data-rfq-recipient="${escapeHtml(rfq.contact.email || rfq.contact.contactForm)}" data-rfq-lot="${escapeHtml(rfq.lotNumber)}" data-rfq-lines="${escapeHtml((rfq.products || []).length)}" data-rfq-attachments="${escapeHtml((rfq.attachments || []).join(", "))}" data-rfq-deadline="${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline)}">AUTORISER</button>` : ""}</div></td></tr>`).join("")}
+      ${(cycle.rfqs || []).map((rfq) => `<tr><td>${escapeHtml(rfq.supplier)}</td><td>${escapeHtml(rfq.lotNumber)}</td><td>${escapeHtml((rfq.products || []).length)}</td><td>${escapeHtml(rfq.coverageCounts?.confirmed || 0)}</td><td>${escapeHtml(rfq.coverageCounts?.probable || 0)}</td><td>${escapeHtml(rfq.coverageCounts?.rejected || 0)}</td><td>${rfq.contact?.verified ? "OUI" : "NON"}</td><td>${rfq.readyForDgReview ? "OUI" : "NON"}</td><td>${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline || "A FIXER")}</td><td>${escapeHtml(rfq.sentAt ? "ENVOYEE" : "NON AUTORISE")}</td><td><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-toggle-rfq="${escapeHtml(rfq.id)}">VOIR RFQ</button><button class="button button-secondary" type="button" data-edit-rfq="${escapeHtml(rfq.id)}">MODIFIER</button>${rfq.readyForDgReview ? `<button class="button button-primary" type="button" data-request-rfq-authorization="${escapeHtml(rfq.id)}" data-rfq-pilot="${rfq.id === "UNOPS-62389-L1-HILTI" ? "true" : "false"}" data-rfq-supplier="${escapeHtml(rfq.supplier)}" data-rfq-recipient="${escapeHtml(rfq.contact.email || rfq.contact.contactForm)}" data-rfq-lot="${escapeHtml(rfq.lotNumber)}" data-rfq-lines="${escapeHtml((rfq.products || []).length)}" data-rfq-attachments="${escapeHtml((rfq.attachments || []).join(", "))}" data-rfq-deadline="${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline)}">${rfq.id === "UNOPS-62389-L1-HILTI" ? "AUTORISER L'ENVOI PILOTE" : "AUTORISER"}</button>` : ""}</div></td></tr>`).join("")}
     </tbody></table></div>
     ${(cycle.rfqs || []).map((rfq) => `<section class="supplier-rfq-card" data-rfq-card="${escapeHtml(rfq.id)}">
       <div class="section-heading-inline"><div><h4>${escapeHtml(rfq.supplier)} - Lot ${escapeHtml(rfq.lotNumber)}</h4><p>${escapeHtml(rfq.lotTitle)}</p></div><span class="status status-paused">${escapeHtml(rfq.status)}</span></div>
@@ -239,7 +270,8 @@ function supplierCycleMarkup(cycle, workflow) {
           data-rfq-lines="${escapeHtml((rfq.products || []).length)}"
           data-rfq-attachments="${escapeHtml((rfq.attachments || []).join(", "))}"
           data-rfq-deadline="${escapeHtml(rfq.responseDeadline)}"
-          ${rfq.readyForDgReview ? "" : "disabled"}>AUTORISER L'ENVOI</button>
+          data-rfq-pilot="${rfq.id === "UNOPS-62389-L1-HILTI" ? "true" : "false"}"
+          ${rfq.readyForDgReview ? "" : "disabled"}>${rfq.id === "UNOPS-62389-L1-HILTI" ? "AUTORISER L'ENVOI PILOTE" : "AUTORISER L'ENVOI"}</button>
       </div>
       <div id="${escapeHtml(rfq.id)}" class="rfq-detail" hidden>
         <p><strong>Objet :</strong> ${escapeHtml(rfq.subject)}</p>
@@ -627,6 +659,7 @@ function openRfqAuthorization(button) {
   const summary = document.getElementById("rfq-authorization-summary");
   pendingRfqAuthorization = {
     rfqId: button.dataset.requestRfqAuthorization,
+    pilot: button.dataset.rfqPilot === "true",
     supplier: button.dataset.rfqSupplier,
     recipient: button.dataset.rfqRecipient,
     lot: button.dataset.rfqLot,
@@ -642,6 +675,10 @@ function openRfqAuthorization(button) {
     ["Pieces jointes", pendingRfqAuthorization.attachments],
     ["Date limite demandee", pendingRfqAuthorization.deadline]
   ].map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
+  const warning = document.getElementById("rfq-authorization-warning");
+  warning.textContent = pendingRfqAuthorization.pilot
+    ? "Vous etes sur le point d'autoriser l'envoi reel d'une RFQ a Hilti pour 6 lignes du Lot 1 de ITB/2026/62389."
+    : "Cette confirmation enregistre l'autorisation DG pour cette RFQ uniquement.";
   dialog.showModal();
 }
 
@@ -907,6 +944,17 @@ document.getElementById("validation-content").addEventListener("click", (event) 
   }
 });
 document.getElementById("rfq-authorization-dialog").addEventListener("close", (event) => {
+  if (event.target.returnValue === "confirm") {
+    if (pendingRfqAuthorization?.pilot) {
+      document.getElementById("rfq-pilot-final-confirmation-dialog").showModal();
+    } else {
+      confirmRfqAuthorization().catch((error) => { statusRegion.textContent = error.message; });
+    }
+  } else {
+    pendingRfqAuthorization = null;
+  }
+});
+document.getElementById("rfq-pilot-final-confirmation-dialog").addEventListener("close", (event) => {
   if (event.target.returnValue === "confirm") {
     confirmRfqAuthorization().catch((error) => { statusRegion.textContent = error.message; });
   } else {
