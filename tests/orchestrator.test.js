@@ -335,6 +335,11 @@ function testDossierDocuments() {
   ]);
   assert.deepStrictEqual(scopedCompliance.rows.map((row) => row.document), ["Document 1"]);
   assert.equal(scopedCompliance.compliancePercent, 100);
+  const generableCompliance = scopeComplianceToRequirements({
+    rows: [{ document: "Form A: Bid Submission Form", status: "missing" }]
+  }, ["Form A: Bid Submission Form"]);
+  assert.equal(generableCompliance.rows[0].status, "generable");
+  assert.deepStrictEqual(generableCompliance.generableDocuments, ["Form A: Bid Submission Form"]);
   const credentialRow = documentMatrixFor({ compliance: { documentControl: credentialCompliance.rows } })[14];
   assert.equal(credentialRow.statusLabel, "INFORMATION CONFIRMÉE – PREUVE À AJOUTER");
 
