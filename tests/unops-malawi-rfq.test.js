@@ -1,7 +1,10 @@
 "use strict";
 
 const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
 const { authorizeSupplierRfq, buildSupplierCycle, recordSupplierQuotation } = require("../lib/nexus/unops-malawi-rfq");
+const { extractTenderTableDocument } = require("../lib/nexus/tender-response-documents");
 
 const schedule = `
 ITB/2026/62389 Lot 1: Power Tools
@@ -53,7 +56,7 @@ ITB/2026/62389 - Section III -Returnable Bidding Form B - Lot 11: Plumbing
 1 | Pipe | Each | 2 | [object Object]
 `;
 
-function run() {
+async function run() {
   const cycle = buildSupplierCycle(schedule, {}, new Date("2026-08-13T12:00:00.000Z"));
   assert.deepEqual(cycle.lots.map((lot) => lot.number), [1, 2, 10]);
   assert.deepEqual(cycle.lots.map((lot) => lot.products.length), [2, 2, 2]);
@@ -99,6 +102,19 @@ function run() {
   assert.deepEqual(partialPriceCycle.lots.map((lot) => lot.products.length), [2, 2, 2]);
   assert.equal(partialPriceCycle.counts.products, 6);
 
+  const officialSchedulePath = path.join(__dirname, "..", "tmp", "itb-2026-62389", "Section-II-Schedule.pdf");
+  if (fs.existsSync(officialSchedulePath)) {
+    const official = await extractTenderTableDocument({
+      filename: "Section-II-Schedule.pdf",
+      buffer: fs.readFileSync(officialSchedulePath)
+    });
+    const officialCycle = buildSupplierCycle(official.text, {}, new Date("2026-08-13T12:00:00.000Z"));
+    assert.deepEqual(officialCycle.lots.map((lot) => lot.products.length), [20, 54, 9]);
+    assert.equal(officialCycle.counts.products, 83);
+    assert.equal(officialCycle.counts.prepared, 16);
+    assert.equal(officialCycle.counts.readyForDgReview, 15);
+  }
+
   assert.throws(() => recordSupplierQuotation(cycle, {
     rfqId: cycle.rfqs[0].id,
     currency: "USD",
@@ -136,4 +152,7 @@ function run() {
   console.log("UNOPS Malawi RFQ supplier-cycle tests passed.");
 }
 
-run();
+run().catch((cause) => {
+  console.error(cause);
+  process.exitCode = 1;
+});
