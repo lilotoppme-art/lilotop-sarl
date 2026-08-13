@@ -1,6 +1,7 @@
 "use strict";
 
 const assert = require("assert");
+const { matchesMonitor, parseUngmNotices } = require("../lib/nexus/itb-monitor");
 const fs = require("fs");
 const path = require("path");
 
@@ -187,6 +188,24 @@ function testInterfaceAndRoutes() {
   assert.match(dashboard, /État des dossiers/);
   assert.match(dashboard, /UNECA — CONDITIONS AVANT SOUMISSION/);
   assert.match(dashboard, /uneceSubmissionReview\.conditions/);
+}
+
+function testUnecaItbMonitoring() {
+  const notices = parseUngmNotices(`
+    <div role="row" data-noticeid="309999" class="tableRow dataRow notice-table">
+      <div class="tableCell resultTitle"><span class="ungm-title ungm-title--small">Invitation to Bid for Africa Hall electrical spare parts</span></div>
+      <div class="tableCell deadline" data-description="Deadline"><span>31-Aug-2026 12:00 (GMT 0.00)</span></div>
+      <div class="tableCell resultAgency"><span>UNECA</span></div>
+      <div class="tableCell"><span><label>Invitation to bid</label></span></div>
+      <div class="tableCell resultInfo1" data-description="Reference"><span>ITB-UNECA-AFRICA-HALL</span></div>
+    </div>`);
+  assert.equal(notices.length, 1);
+  assert.equal(notices[0].noticeId, "309999");
+  assert.equal(notices[0].reference, "ITB-UNECA-AFRICA-HALL");
+  const monitor = { active: true, parentNotice: "306489", matchKeys: ["EOIUNECA24536", "306489", "Africa Hall Building", "Electrical Systems", "LTA"] };
+  assert.equal(matchesMonitor(notices[0], monitor), true);
+  assert.equal(matchesMonitor({ ...notices[0], noticeId: "306489" }, monitor), false);
+  assert.equal(matchesMonitor({ ...notices[0], title: "Office furniture", organization: "UNDP" }, monitor), false);
 }
 
 function testDossierDocuments() {
@@ -456,6 +475,7 @@ function testCommercialAnalysisBridge() {
   testArchitecture();
   testCommercialAnalysisBridge();
   testInterfaceAndRoutes();
+  testUnecaItbMonitoring();
   testDossierDocuments();
   testOfficialTenderSourcePolicy();
   await testOpenAiContract();
