@@ -487,6 +487,7 @@ function testOfficialAttachmentFlow() {
   const documentReader = read("lib/nexus/tender-response-documents.js");
   assert.match(documentReader, /ExcelJS/);
   assert.match(documentReader, /ext === "\.xlsx"/);
+  assert.match(documentReader, /extractSpreadsheetXml/);
 }
 
 (async () => {
