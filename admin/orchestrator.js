@@ -204,6 +204,14 @@ function renderDossier(workflow, actions, sourceDocuments = []) {
           Télécharger ${escapeHtml(document.filename)} (${escapeHtml(Math.round(document.sizeBytes / 1024))} Ko)
         </a></p>
       `).join("") : "<p>Aucun document téléchargé.</p>"}
+      ${workflow.status !== "completed" ? `
+        <form data-official-sources-form data-workflow-id="${escapeHtml(workflow.id)}" class="source-attachment-form">
+          <label>Référence officielle<input name="reference" value="${escapeHtml(dossier.tenderSource?.reference || "")}" required></label>
+          <label>Date de publication<input name="publicationDate" type="date" value="${escapeHtml(dossier.tenderSource?.publicationDate || "")}"></label>
+          <label>Documents officiels (une URL par ligne)<textarea name="documentUrls" rows="5" required>${escapeHtml((dossier.opportunity?.rawData?.documentUrls || []).join("\n"))}</textarea></label>
+          <button class="button button-secondary" type="submit">Rattacher les documents et relancer l'analyse</button>
+        </form>
+      ` : ""}
     </article>
     <article class="dossier-card">
       <h3>Analyse</h3>
@@ -549,6 +557,19 @@ async function viewWorkflow(id) {
   renderActions(data.actions);
 }
 
+async function attachOfficialSourcesFromForm(event) {
+  event.preventDefault();
+  const form = event.target;
+  const values = Object.fromEntries(new FormData(form));
+  statusRegion.textContent = "Rattachement et contrôle des documents officiels…";
+  const workflow = await api("/api/nexus-orchestrator?action=attach-official-sources", {
+    method: "POST",
+    body: JSON.stringify({ ...values, id: form.dataset.workflowId })
+  });
+  await refresh();
+  await runUntilComplete(workflow.id);
+}
+
 async function runUntilComplete(id) {
   runningWorkflowId = id;
   renderWorkflows();
@@ -712,6 +733,10 @@ document.getElementById("workflow-list").addEventListener("click", (event) => {
   const resume = event.target.closest("[data-resume-workflow]");
   if (view) viewWorkflow(view.dataset.viewWorkflow).catch((error) => { statusRegion.textContent = error.message; });
   if (resume) runUntilComplete(resume.dataset.resumeWorkflow);
+});
+document.getElementById("dossier-content").addEventListener("submit", (event) => {
+  if (!event.target.matches("[data-official-sources-form]")) return;
+  attachOfficialSourcesFromForm(event).catch((error) => { statusRegion.textContent = error.message; });
 });
 loginForm.addEventListener("submit", authenticate);
 document.getElementById("orchestrator-logout").addEventListener("click", logout);

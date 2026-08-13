@@ -471,9 +471,25 @@ function testCommercialAnalysisBridge() {
   assert.equal(result.model, "gpt-test");
 }
 
+function testOfficialAttachmentFlow() {
+  const service = read("lib/nexus/orchestrator-service.js");
+  const handler = read("lib/nexus/orchestrator-handler.js");
+  const client = read("admin/orchestrator.js");
+  assert.match(service, /async function attachOfficialSources/);
+  assert.match(service, /externalAction: false/);
+  assert.match(service, /combinedSourceDocument/);
+  assert.match(handler, /action === "attach-official-sources"/);
+  assert.match(client, /data-official-sources-form/);
+  assert.match(client, /Rattacher les documents et relancer l'analyse/);
+  const documentReader = read("lib/nexus/tender-response-documents.js");
+  assert.match(documentReader, /ExcelJS/);
+  assert.match(documentReader, /ext === "\.xlsx"/);
+}
+
 (async () => {
   testArchitecture();
   testCommercialAnalysisBridge();
+  testOfficialAttachmentFlow();
   testInterfaceAndRoutes();
   testUnecaItbMonitoring();
   testDossierDocuments();
