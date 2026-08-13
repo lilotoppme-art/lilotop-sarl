@@ -211,6 +211,11 @@ function renderDossier(workflow, actions, sourceDocuments = []) {
           <label>Documents officiels (une URL par ligne)<textarea name="documentUrls" rows="5" required>${escapeHtml((dossier.opportunity?.rawData?.documentUrls || []).join("\n"))}</textarea></label>
           <button class="button button-secondary" type="submit">Rattacher les documents et relancer l'analyse</button>
         </form>
+        <form data-official-upload-form data-workflow-id="${escapeHtml(workflow.id)}" class="source-attachment-form">
+          <label>URL officielle du fichier<input name="sourceUrl" type="url" required></label>
+          <label>Copie officielle<input name="document" type="file" accept=".pdf,.docx,.xlsx,.zip" required></label>
+          <button class="button button-secondary" type="submit">Ajouter cette copie officielle</button>
+        </form>
       ` : ""}
     </article>
     <article class="dossier-card">
@@ -570,6 +575,20 @@ async function attachOfficialSourcesFromForm(event) {
   await runUntilComplete(workflow.id);
 }
 
+async function uploadOfficialSourceFromForm(event) {
+  event.preventDefault();
+  const form = event.target;
+  const body = new FormData(form);
+  body.set("id", form.dataset.workflowId);
+  statusRegion.textContent = "Import de la copie officielle…";
+  const response = await fetch("/api/nexus-orchestrator?action=upload-official-source", { method: "POST", body });
+  const payload = await response.json();
+  if (!response.ok || !payload.ok) throw new Error(payload.error || "Import impossible.");
+  form.reset();
+  await viewWorkflow(form.dataset.workflowId);
+  statusRegion.textContent = `${payload.data.filename} rattaché au dossier.`;
+}
+
 async function runUntilComplete(id) {
   runningWorkflowId = id;
   renderWorkflows();
@@ -735,8 +754,12 @@ document.getElementById("workflow-list").addEventListener("click", (event) => {
   if (resume) runUntilComplete(resume.dataset.resumeWorkflow);
 });
 document.getElementById("dossier-content").addEventListener("submit", (event) => {
-  if (!event.target.matches("[data-official-sources-form]")) return;
-  attachOfficialSourcesFromForm(event).catch((error) => { statusRegion.textContent = error.message; });
+  if (event.target.matches("[data-official-sources-form]")) {
+    attachOfficialSourcesFromForm(event).catch((error) => { statusRegion.textContent = error.message; });
+  }
+  if (event.target.matches("[data-official-upload-form]")) {
+    uploadOfficialSourceFromForm(event).catch((error) => { statusRegion.textContent = error.message; });
+  }
 });
 loginForm.addEventListener("submit", authenticate);
 document.getElementById("orchestrator-logout").addEventListener("click", logout);

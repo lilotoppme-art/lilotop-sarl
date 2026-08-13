@@ -481,6 +481,9 @@ function testOfficialAttachmentFlow() {
   assert.match(handler, /action === "attach-official-sources"/);
   assert.match(client, /data-official-sources-form/);
   assert.match(client, /Rattacher les documents et relancer l'analyse/);
+  assert.match(service, /async function uploadOfficialSource/);
+  assert.match(handler, /action === "upload-official-source"/);
+  assert.match(client, /data-official-upload-form/);
   const documentReader = read("lib/nexus/tender-response-documents.js");
   assert.match(documentReader, /ExcelJS/);
   assert.match(documentReader, /ext === "\.xlsx"/);
