@@ -111,8 +111,18 @@ async function run() {
     const officialCycle = buildSupplierCycle(official.text, {}, new Date("2026-08-13T12:00:00.000Z"));
     assert.deepEqual(officialCycle.lots.map((lot) => lot.products.length), [20, 54, 9]);
     assert.equal(officialCycle.counts.products, 83);
-    assert.equal(officialCycle.counts.prepared, 16);
-    assert.equal(officialCycle.counts.readyForDgReview, 15);
+    assert.equal(officialCycle.counts.prepared, 17);
+    assert.equal(officialCycle.counts.readyForDgReview, 17);
+    assert.equal(officialCycle.counts.sent, 0);
+    assert.equal(officialCycle.counts.received, 0);
+    assert.equal(officialCycle.coverageAudit.length, 83);
+    assert.ok(officialCycle.coverageAudit.every((item) => item.verificationStatus !== "FOURNISSEUR NON ADAPTÃ‰"));
+    assert.ok(officialCycle.rfqs.every((rfq) => rfq.coverageCounts.rejected === 0));
+    assert.ok(officialCycle.rfqs.every((rfq) => rfq.emailBody.includes("COMPLY: YES / NO / ALTERNATIVE")));
+    assert.ok(officialCycle.rfqs.every((rfq) => rfq.emailBody.includes("MANUFACTURER / MODEL / PART NUMBER")));
+    assert.ok(officialCycle.rfqs.every((rfq) => rfq.responseDeadlineLabel.includes("Malawi time")));
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Marley / Aliaxis").contact.verified, true);
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "RS South Africa").products.length, 3);
   }
 
   assert.throws(() => recordSupplierQuotation(cycle, {

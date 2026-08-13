@@ -213,6 +213,9 @@ function supplierCycleMarkup(cycle, workflow) {
       <div><span>Cotations manquantes</span><strong>${escapeHtml(cycle.counts.missing)}</strong></div>
     </div>
     ${(cycle.supplierCorrections || []).map((item) => `<p class="supplier-warning"><strong>${escapeHtml(item.supplier)} : ${escapeHtml(item.status)}</strong> - ${escapeHtml(item.reason)}</p>`).join("")}
+    <div class="responsive-table"><table class="rfq-review-table"><thead><tr><th>Fournisseur</th><th>Lot</th><th>Lignes</th><th>Confirmee</th><th>Probable</th><th>Rejetee</th><th>Contact verifie</th><th>RFQ prete</th><th>Date reponse</th><th>Statut envoi</th><th>Action</th></tr></thead><tbody>
+      ${(cycle.rfqs || []).map((rfq) => `<tr><td>${escapeHtml(rfq.supplier)}</td><td>${escapeHtml(rfq.lotNumber)}</td><td>${escapeHtml((rfq.products || []).length)}</td><td>${escapeHtml(rfq.coverageCounts?.confirmed || 0)}</td><td>${escapeHtml(rfq.coverageCounts?.probable || 0)}</td><td>${escapeHtml(rfq.coverageCounts?.rejected || 0)}</td><td>${rfq.contact?.verified ? "OUI" : "NON"}</td><td>${rfq.readyForDgReview ? "OUI" : "NON"}</td><td>${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline || "A FIXER")}</td><td>${escapeHtml(rfq.sentAt ? "ENVOYEE" : "NON AUTORISE")}</td><td><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-toggle-rfq="${escapeHtml(rfq.id)}">VOIR RFQ</button><button class="button button-secondary" type="button" data-edit-rfq="${escapeHtml(rfq.id)}">MODIFIER</button>${rfq.readyForDgReview ? `<button class="button button-primary" type="button" data-request-rfq-authorization="${escapeHtml(rfq.id)}" data-rfq-supplier="${escapeHtml(rfq.supplier)}" data-rfq-recipient="${escapeHtml(rfq.contact.email || rfq.contact.contactForm)}" data-rfq-lot="${escapeHtml(rfq.lotNumber)}" data-rfq-lines="${escapeHtml((rfq.products || []).length)}" data-rfq-attachments="${escapeHtml((rfq.attachments || []).join(", "))}" data-rfq-deadline="${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline)}">AUTORISER</button>` : ""}</div></td></tr>`).join("")}
+    </tbody></table></div>
     ${(cycle.rfqs || []).map((rfq) => `<section class="supplier-rfq-card" data-rfq-card="${escapeHtml(rfq.id)}">
       <div class="section-heading-inline"><div><h4>${escapeHtml(rfq.supplier)} - Lot ${escapeHtml(rfq.lotNumber)}</h4><p>${escapeHtml(rfq.lotTitle)}</p></div><span class="status status-paused">${escapeHtml(rfq.status)}</span></div>
       <div class="rfq-meta-grid">
@@ -222,7 +225,7 @@ function supplierCycleMarkup(cycle, workflow) {
         <p><span>Nombre de lignes</span><strong>${escapeHtml((rfq.products || []).length)}</strong></p>
         <p><span>Couverture</span><strong>${escapeHtml(rfq.coverageStatus)}</strong></p>
         <p><span>Date de preparation</span><strong>${escapeHtml(new Date(rfq.preparedAt).toLocaleString("fr-FR"))}</strong></p>
-        <p><span>Date limite de reponse</span><strong>${escapeHtml(rfq.responseDeadline || "A FIXER PAR LE DG")}</strong></p>
+        <p><span>Date limite de reponse</span><strong>${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline || "A FIXER PAR LE DG")}</strong></p>
       </div>
       <p><a href="${escapeHtml(rfq.contact.source)}" target="_blank" rel="noopener noreferrer">Source officielle des coordonnees</a></p>
       <p><a href="${escapeHtml(rfq.contact.catalogSource || rfq.contact.website)}" target="_blank" rel="noopener noreferrer">Source officielle de couverture produit</a></p>
@@ -243,8 +246,8 @@ function supplierCycleMarkup(cycle, workflow) {
         <p><strong>Livraison :</strong> ${escapeHtml(rfq.delivery)} - ${escapeHtml(rfq.incoterm)}</p>
         <p><strong>Destination :</strong> ${escapeHtml(rfq.destination)}</p>
         <p><strong>Pieces jointes prevues :</strong> ${escapeHtml((rfq.attachments || []).join(", "))}</p>
-        <div class="responsive-table"><table><thead><tr><th>Lot / ligne</th><th>Designation exacte</th><th>Specification</th><th>Quantite</th><th>Unite</th><th>Fournisseur propose</th><th>Justification</th><th>Statut de verification</th></tr></thead><tbody>
-          ${(rfq.products || []).map((item) => `<tr><td>${escapeHtml(item.reference)}</td><td>${escapeHtml(item.product)}</td><td><pre>${escapeHtml(item.specifications)}</pre></td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td>${escapeHtml(item.proposedSupplier)}</td><td>${escapeHtml(item.supplierJustification)}</td><td><strong>${escapeHtml(item.verificationStatus)}</strong></td></tr>`).join("")}
+        <div class="responsive-table"><table><thead><tr><th>Lot / ligne</th><th>Designation exacte</th><th>Specification</th><th>Quantite</th><th>Unite</th><th>Fournisseur propose</th><th>Justification</th><th>Statut de verification</th><th>COMPLY: YES / NO / ALTERNATIVE</th><th>MANUFACTURER / MODEL / PART NUMBER</th></tr></thead><tbody>
+          ${(rfq.products || []).map((item) => `<tr><td>${escapeHtml(item.reference)}</td><td>${escapeHtml(item.product)}</td><td><pre>${escapeHtml(item.specifications)}</pre></td><td>${escapeHtml(item.quantity)}</td><td>${escapeHtml(item.unit)}</td><td>${escapeHtml(item.proposedSupplier)}</td><td>${escapeHtml(item.supplierJustification)}</td><td><strong>${escapeHtml(item.verificationStatus)}</strong></td><td>A COMPLETER PAR LE FOURNISSEUR</td><td>A COMPLETER PAR LE FOURNISSEUR</td></tr>`).join("")}
         </tbody></table></div>
         <h5>Texte exact de l'e-mail RFQ</h5>
         <pre class="rfq-email-preview">${escapeHtml(rfq.emailBody)}</pre>
@@ -252,7 +255,7 @@ function supplierCycleMarkup(cycle, workflow) {
     </section>`).join("")}
   </article>
   <article class="validation-rfqs supplier-cycle"><h3>REPONSES FOURNISSEURS / COTATIONS RECUES</h3>
-    ${(cycle.responses || []).length ? `<div class="responsive-table"><table><thead><tr><th>Fournisseur</th><th>Lot</th><th>Prix total</th><th>Incoterm</th><th>Delai</th><th>Garantie</th><th>Validite</th><th>Preuve</th></tr></thead><tbody>${cycle.responses.map((quote) => `<tr><td>${escapeHtml(quote.supplier)}</td><td>${escapeHtml(quote.lotNumber)}</td><td>${escapeHtml(money(quote.totalPrice, quote.currency))}</td><td>${escapeHtml(quote.incoterm || "A verifier")}</td><td>${escapeHtml(quote.deliveryLeadTime || "A verifier")}</td><td>${escapeHtml(quote.warranty || "A verifier")}</td><td>${escapeHtml(quote.validity || "A verifier")}</td><td>${escapeHtml(quote.sourceMessageId || quote.evidenceDocumentId)}</td></tr>`).join("")}</tbody></table></div>` : "<p>Aucune cotation reelle recue. Les trois RFQ restent en attente d'autorisation DG.</p>"}
+    ${(cycle.responses || []).length ? `<div class="responsive-table"><table><thead><tr><th>Fournisseur</th><th>Lot</th><th>Prix total</th><th>Incoterm</th><th>Delai</th><th>Garantie</th><th>Validite</th><th>Preuve</th></tr></thead><tbody>${cycle.responses.map((quote) => `<tr><td>${escapeHtml(quote.supplier)}</td><td>${escapeHtml(quote.lotNumber)}</td><td>${escapeHtml(money(quote.totalPrice, quote.currency))}</td><td>${escapeHtml(quote.incoterm || "A verifier")}</td><td>${escapeHtml(quote.deliveryLeadTime || "A verifier")}</td><td>${escapeHtml(quote.warranty || "A verifier")}</td><td>${escapeHtml(quote.validity || "A verifier")}</td><td>${escapeHtml(quote.sourceMessageId || quote.evidenceDocumentId)}</td></tr>`).join("")}</tbody></table></div>` : "<p>Aucune cotation reelle recue. Toutes les RFQ restent en attente d'autorisation DG.</p>"}
   </article>
   <article class="validation-rfqs supplier-cycle"><h3>COMPARAISON FOURNISSEURS</h3>
     ${(cycle.comparison || []).length ? `<div class="responsive-table"><table><thead><tr><th>Fournisseur</th><th>Prix</th><th>Devise</th><th>Incoterm</th><th>Transport</th><th>Delai</th><th>Garantie</th><th>Paiement</th><th>Conformite</th><th>Cout rendu</th></tr></thead><tbody>${cycle.comparison.map((item) => `<tr><td>${escapeHtml(item.supplier)}</td><td>${escapeHtml(item.totalPrice)}</td><td>${escapeHtml(item.currency)}</td><td>${escapeHtml(item.incoterm || "A verifier")}</td><td>${escapeHtml(item.transport ?? "A documenter")}</td><td>${escapeHtml(item.deliveryLeadTime || "A verifier")}</td><td>${escapeHtml(item.warranty || "A verifier")}</td><td>${escapeHtml(item.paymentTerms || "A verifier")}</td><td>${escapeHtml(item.technicalCompliance)}</td><td>${escapeHtml(money(item.landedCost, item.currency))}</td></tr>`).join("")}</tbody></table></div>` : "<p>Comparaison indisponible tant qu'aucune cotation documentee n'est recue.</p>"}
@@ -893,6 +896,15 @@ document.getElementById("validation-content").addEventListener("click", (event) 
   }
   const authorizeButton = event.target.closest("[data-request-rfq-authorization]");
   if (authorizeButton) openRfqAuthorization(authorizeButton);
+  const editButton = event.target.closest("[data-edit-rfq]");
+  if (editButton) {
+    const detail = document.getElementById(editButton.dataset.editRfq);
+    if (detail) {
+      detail.hidden = false;
+      detail.scrollIntoView({ behavior: "smooth", block: "start" });
+      statusRegion.textContent = "RFQ ouverte en mode controle. Aucune modification ni aucun envoi n'a ete effectue.";
+    }
+  }
 });
 document.getElementById("rfq-authorization-dialog").addEventListener("close", (event) => {
   if (event.target.returnValue === "confirm") {
