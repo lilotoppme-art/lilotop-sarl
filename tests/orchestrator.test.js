@@ -187,6 +187,7 @@ function testInterfaceAndRoutes() {
   assert.match(client, /AUTORISER L'ENVOI/);
   assert.match(client, /Texte exact de l'e-mail RFQ/);
   assert.match(client, /data-request-rfq-authorization/);
+  assert.match(client, /REVALIDER LES RFQ/);
   assert.match(client, /confirmRfqAuthorization/);
   assert.match(routes, /\/admin\/nexus\/orchestrator/);
   assert.match(routes, /\/api\/nexus-orchestrator/);
