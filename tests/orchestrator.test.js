@@ -155,6 +155,8 @@ function testInterfaceAndRoutes() {
   assert.match(html, /Fiche finale de validation/);
   assert.match(client, /validation-required/);
   assert.match(client, /ready-for-express-interest/);
+  assert.match(client, /data-record-eoi-submission/);
+  assert.match(client, /record-eoi-submission/);
   assert.match(client, /Cotations fournisseurs à autoriser/);
   assert.match(client, /exigences réelles UNECA/);
   assert.match(client, /organization-chart-preview/);
@@ -162,7 +164,7 @@ function testInterfaceAndRoutes() {
   assert.match(client, /Vendor Response Form - Preview pre-remplie/);
   assert.match(client, /Sept declarations officielles UNGM A-G/);
   assert.match(client, /data-eoi-confirmation/);
-  assert.match(client, /OUVRIR UNGM - EXPRESS INTEREST/);
+  assert.doesNotMatch(client, /OUVRIR UNGM - EXPRESS INTEREST/);
   assert.match(client, /Perimetre commercial confirme/);
   assert.match(client, /PREVISUALISER LE DOSSIER/);
   assert.match(client, /Controle final ligne par ligne/);

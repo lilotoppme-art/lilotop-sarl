@@ -347,7 +347,7 @@ function renderValidationSheet(workflow) {
         <p><strong>PHASE :</strong> ${escapeHtml(eoiSubmitted ? eoiLifecycle.phase : eoi.blockingItem)}</p>
         <p><strong>RECOMMANDATION :</strong> ${escapeHtml(eoiSubmitted ? "Attendre et surveiller la publication de l'ITB / des documents de sollicitation." : eoi.recommendation)}</p>
         <p><strong>Canal officiel :</strong> ${escapeHtml(eoi.channel)}</p>
-        ${eoiSubmitted ? `<div class="eoi-express-interest-ready"><strong>EOI UNGM : SOUMISE</strong><p>${escapeHtml(eoiLifecycle.confirmation)}</p><small>Soumise manuellement par le DG le ${escapeHtml(new Date(eoiLifecycle.submittedAt).toLocaleString("fr-FR"))}. Aucun e-mail et aucune RFQ n'ont ete envoyes.</small></div><div class="validation-summary validation-summary-wide"><h4>Surveillance ITB</h4><p><strong>${itbMonitoring.active ? "ACTIVE" : "INACTIVE"}</strong> · ${escapeHtml(itbMonitoring.status || "WAITING FOR ITB")}</p><p>Le futur avis sera rattache au dossier existant via les references EOIUNECA24536 et UNGM 306489. Toute transmission externe restera soumise a validation humaine.</p></div>` : allDgConfirmed ? `<div class="eoi-express-interest-ready"><strong>Action finale : EXPRESS INTEREST SUR UNGM</strong><a class="button button-primary" href="https://www.ungm.org/Public/Notice/306489" target="_blank" rel="noopener noreferrer">OUVRIR UNGM - EXPRESS INTEREST</a><small>Ce lien ouvre uniquement l'avis officiel. NEXUS ne soumet aucune reponse automatiquement.</small></div>` : ""}
+        ${eoiSubmitted ? `<div class="eoi-express-interest-ready"><strong>EOI UNGM : SOUMISE</strong><p>${escapeHtml(eoiLifecycle.confirmation)}</p><small>Soumise manuellement par le DG le ${escapeHtml(new Date(eoiLifecycle.submittedAt).toLocaleString("fr-FR"))}. Aucun e-mail et aucune RFQ n'ont ete envoyes.</small></div><div class="validation-summary validation-summary-wide"><h4>Surveillance ITB</h4><p><strong>${itbMonitoring.active ? "ACTIVE" : "INACTIVE"}</strong> · ${escapeHtml(itbMonitoring.status || "WAITING FOR ITB")}</p><p>Le futur avis sera rattache au dossier existant via les references EOIUNECA24536 et UNGM 306489. Toute transmission externe restera soumise a validation humaine.</p></div>` : allDgConfirmed ? `<div class="eoi-express-interest-ready"><strong>Confirmation de l'action manuelle</strong><button class="button button-primary" type="button" data-record-eoi-submission>ENREGISTRER L'EOI SOUMISE SUR UNGM</button><small>Ce bouton enregistre uniquement dans NEXUS la confirmation deja fournie par le DG. Il ne contacte pas UNGM.</small></div>` : ""}
         <div class="decision-actions eoi-package-actions">
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&disposition=inline&id=${encodeURIComponent(eoiPackage.pdf.id)}" target="_blank" rel="noopener">PREVISUALISER LE DOSSIER</a>` : ""}
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&id=${encodeURIComponent(eoiPackage.pdf.id)}" download>TELECHARGER PDF</a>` : ""}
@@ -628,6 +628,25 @@ async function submitDecision(button) {
   }
 }
 
+async function recordEoiSubmission(button) {
+  const id = document.getElementById("validation-sheet").dataset.workflowId;
+  if (!id) return;
+  button.disabled = true;
+  statusRegion.textContent = "Enregistrement de la confirmation UNGM dans NEXUS...";
+  try {
+    await api("/api/nexus-orchestrator?action=record-eoi-submission", {
+      method: "POST",
+      body: JSON.stringify({ id })
+    });
+    await refresh();
+    await viewWorkflow(id);
+    statusRegion.textContent = "EOI soumise enregistree. Surveillance ITB active.";
+  } catch (error) {
+    statusRegion.textContent = error.message;
+    button.disabled = false;
+  }
+}
+
 async function authenticate(event) {
   event.preventDefault();
   loginStatus.textContent = "Connexion en cours…";
@@ -684,6 +703,8 @@ document.getElementById("decision-actions").addEventListener("click", (event) =>
 document.getElementById("validation-content").addEventListener("click", (event) => {
   const button = event.target.closest("[data-eoi-confirmation]");
   if (button) submitEoiConfirmation(button);
+  const submissionButton = event.target.closest("[data-record-eoi-submission]");
+  if (submissionButton) recordEoiSubmission(submissionButton);
 });
 document.getElementById("refresh-vault-control").addEventListener("click", refreshVaultControl);
 document.getElementById("workflow-list").addEventListener("click", (event) => {
