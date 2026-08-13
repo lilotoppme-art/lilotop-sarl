@@ -192,6 +192,7 @@ function testDossierDocuments() {
     applyOrganizationCredential,
     buildFinalValidation,
     buildUnecaEoiSubmission,
+    markUnecaEoiSubmitted,
     buildUnecaSubmissionReview,
     buildUnecaEoiCompliance,
     documentMatrixFor,
@@ -355,6 +356,23 @@ function testDossierDocuments() {
   assert.equal(eoiSubmission.eligibilityPercent, 100);
   assert.equal(eoiSubmission.submissionPerformed, false);
   assert.equal(eoiSubmission.emailSent, false);
+
+  const submittedDossier = markUnecaEoiSubmitted({
+    opportunity: { reference: "EOIUNECA24536" },
+    pipelineStatus: "ready-for-express-interest",
+    validations: { eoiDgConfirmations: { "ungm-vendor-number": { status: "validated" } } },
+    uneceSubmissionReview: submissionReview,
+    uneceEoiSubmission: eoiSubmission,
+    finalValidation: { uneceSubmissionReview: submissionReview, uneceEoiSubmission: eoiSubmission }
+  }, "2026-08-13T12:00:00.000Z", "admin@lilotopsarl.com");
+  assert.equal(submittedDossier.pipelineStatus, "eoi-submitted-waiting-itb");
+  assert.equal(submittedDossier.eoiLifecycle.status, "EOI SUBMITTED");
+  assert.equal(submittedDossier.eoiLifecycle.submissionPerformed, true);
+  assert.equal(submittedDossier.eoiLifecycle.emailSent, false);
+  assert.equal(submittedDossier.eoiLifecycle.rfqSent, false);
+  assert.equal(submittedDossier.itbMonitoring.active, true);
+  assert.equal(submittedDossier.itbMonitoring.parentNotice, "306489");
+  assert.equal(submittedDossier.validations.eoiDgConfirmations["ungm-vendor-number"].status, "validated");
   assert.equal(eoiSubmission.dgValidationItems.length, 2);
   assert.equal(eoiSubmission.readyItems.length, 4);
   assert.equal(eoiSubmission.expressInterestPayload.length, 5);

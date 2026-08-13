@@ -53,6 +53,7 @@ const PIPELINE_LABELS = {
   "offer-prepared": "Offre préparée",
   "validation-required": "Validation requise",
   "ready-for-express-interest": "Pret pour Express Interest",
+  "eoi-submitted-waiting-itb": "EOI soumise - En attente ITB",
   "ready-to-send": "Envoi autorisé",
   submitted: "Soumis",
   pending: "En attente",
@@ -279,6 +280,9 @@ function renderValidationSheet(workflow) {
   const unece = sheet?.uneceSubmissionReview;
   const eoi = sheet?.uneceEoiSubmission;
   const eoiPackage = sheet?.uneceEoiPackage;
+  const eoiLifecycle = dossier.eoiLifecycle || {};
+  const itbMonitoring = dossier.itbMonitoring || {};
+  const eoiSubmitted = eoiLifecycle.status === "EOI SUBMITTED";
   const validations = dossier.validations || {};
   const dgConfirmations = validations.eoiDgConfirmations || {};
   const confirmationKeys = [
@@ -290,8 +294,8 @@ function renderValidationSheet(workflow) {
   const confirmationControl = (key) => {
     const status = dgConfirmations[key]?.status || "pending";
     return `<div class="eoi-confirmation-actions" data-confirmation-state="${escapeHtml(status)}">
-      <button class="button button-primary" type="button" data-eoi-confirmation="${escapeHtml(key)}" data-outcome="validated" ${status === "validated" ? "disabled" : ""}>VALIDER OUI</button>
-      <button class="button button-secondary" type="button" data-eoi-confirmation="${escapeHtml(key)}" data-outcome="problem" ${status === "problem" ? "disabled" : ""}>SIGNALER UN PROBLEME</button>
+      <button class="button button-primary" type="button" data-eoi-confirmation="${escapeHtml(key)}" data-outcome="validated" ${eoiSubmitted || status === "validated" ? "disabled" : ""}>VALIDER OUI</button>
+      <button class="button button-secondary" type="button" data-eoi-confirmation="${escapeHtml(key)}" data-outcome="problem" ${eoiSubmitted || status === "problem" ? "disabled" : ""}>SIGNALER UN PROBLEME</button>
       <span class="status ${status === "validated" ? "status-completed" : status === "problem" ? "status-failed" : "status-paused"}">${status === "validated" ? "VALIDE OUI" : status === "problem" ? "PROBLEME SIGNALE" : "A CONFIRMER"}</span>
     </div>`;
   };
@@ -325,7 +329,7 @@ function renderValidationSheet(workflow) {
         <div class="unece-progress" aria-label="Avancement operationnel ${escapeHtml(unece.progressPercent)} pour cent"><strong>${escapeHtml(unece.progressPercent)}%</strong><span>Avancement operationnel</span></div>
       </div>
       ${eoi ? `<section class="eoi-dg-card">
-        <div class="section-heading-inline"><div><p class="section-kicker">Fiche de validation finale DG</p><h4>UNECA EOIUNECA24536</h4></div><span class="status ${allDgConfirmed ? "status-completed" : "status-paused"}">${allDgConfirmed ? "PRET POUR VALIDATION FINALE DG / EXPRESS INTEREST" : "VALIDATION DG REQUISE"}</span></div>
+        <div class="section-heading-inline"><div><p class="section-kicker">Fiche de suivi DG</p><h4>UNECA EOIUNECA24536</h4></div><span class="status ${eoiSubmitted || allDgConfirmed ? "status-completed" : "status-paused"}">${eoiSubmitted ? "EXPRESSION D'INTERET SOUMISE / EOI SUBMITTED" : allDgConfirmed ? "PRET POUR VALIDATION FINALE DG / EXPRESS INTEREST" : "VALIDATION DG REQUISE"}</span></div>
         <div class="eoi-dg-grid">
           <div><span>Echeance</span><strong>${escapeHtml(eoi.deadline)}</strong></div>
           <div><span>UNGM</span><strong>673735</strong></div>
@@ -340,10 +344,10 @@ function renderValidationSheet(workflow) {
           <section><h4>PRET</h4>${listMarkup(eoi.readyItems, "Aucun element pret.")}</section>
           <section><h4>A VALIDER PAR MOI</h4><ol>${eoi.dgValidationItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ol></section>
         </div>
-        <p><strong>BLOCAGE :</strong> ${escapeHtml(eoi.blockingItem)}</p>
-        <p><strong>RECOMMANDATION :</strong> ${escapeHtml(eoi.recommendation)}</p>
+        <p><strong>PHASE :</strong> ${escapeHtml(eoiSubmitted ? eoiLifecycle.phase : eoi.blockingItem)}</p>
+        <p><strong>RECOMMANDATION :</strong> ${escapeHtml(eoiSubmitted ? "Attendre et surveiller la publication de l'ITB / des documents de sollicitation." : eoi.recommendation)}</p>
         <p><strong>Canal officiel :</strong> ${escapeHtml(eoi.channel)}</p>
-        ${allDgConfirmed ? `<div class="eoi-express-interest-ready"><strong>Action finale : EXPRESS INTEREST SUR UNGM</strong><a class="button button-primary" href="https://www.ungm.org/Public/Notice/306489" target="_blank" rel="noopener noreferrer">OUVRIR UNGM - EXPRESS INTEREST</a><small>Ce lien ouvre uniquement l'avis officiel. NEXUS ne soumet aucune reponse automatiquement.</small></div>` : ""}
+        ${eoiSubmitted ? `<div class="eoi-express-interest-ready"><strong>EOI UNGM : SOUMISE</strong><p>${escapeHtml(eoiLifecycle.confirmation)}</p><small>Soumise manuellement par le DG le ${escapeHtml(new Date(eoiLifecycle.submittedAt).toLocaleString("fr-FR"))}. Aucun e-mail et aucune RFQ n'ont ete envoyes.</small></div><div class="validation-summary validation-summary-wide"><h4>Surveillance ITB</h4><p><strong>${itbMonitoring.active ? "ACTIVE" : "INACTIVE"}</strong> · ${escapeHtml(itbMonitoring.status || "WAITING FOR ITB")}</p><p>Le futur avis sera rattache au dossier existant via les references EOIUNECA24536 et UNGM 306489. Toute transmission externe restera soumise a validation humaine.</p></div>` : allDgConfirmed ? `<div class="eoi-express-interest-ready"><strong>Action finale : EXPRESS INTEREST SUR UNGM</strong><a class="button button-primary" href="https://www.ungm.org/Public/Notice/306489" target="_blank" rel="noopener noreferrer">OUVRIR UNGM - EXPRESS INTEREST</a><small>Ce lien ouvre uniquement l'avis officiel. NEXUS ne soumet aucune reponse automatiquement.</small></div>` : ""}
         <div class="decision-actions eoi-package-actions">
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&disposition=inline&id=${encodeURIComponent(eoiPackage.pdf.id)}" target="_blank" rel="noopener">PREVISUALISER LE DOSSIER</a>` : ""}
           ${eoiPackage?.pdf?.id ? `<a class="button button-secondary" href="/api/nexus-orchestrator?action=document&id=${encodeURIComponent(eoiPackage.pdf.id)}" download>TELECHARGER PDF</a>` : ""}
