@@ -744,12 +744,13 @@ async function showInternalGmailTestStatus(button) {
     const result = await api("/api/nexus-gmail?action=internal-send-test-status");
     const inbound = result.inbound || {};
     const authorization = result.authorization || {};
+    const sent = result.sent || {};
     statusRegion.textContent = [
       `Envoi: ${authorization.status || "ABSENT"}`,
       `Message-ID: ${authorization.provider_message_id ? "OBTENU" : "ABSENT"}`,
       `Reception: ${inbound.gmail_message_id ? "OK" : "ABSENTE"}`,
-      `From: ${inbound.sender || "ABSENT"}`,
-      `Reply-To: ${inbound.reply_to || "ABSENT"}`,
+      `From: ${sent.from || inbound.sender || "ABSENT"}`,
+      `Reply-To: ${sent.replyTo || inbound.reply_to || "ABSENT"}`,
       `Rattachement: ${inbound.matching_status || "ABSENT"}`,
       `Pieces jointes: ${(inbound.attachments || []).length}`,
       `Devise: ${inbound.extraction?.currency || "ABSENTE"}`,
