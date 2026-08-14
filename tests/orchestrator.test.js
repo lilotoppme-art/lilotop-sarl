@@ -185,6 +185,9 @@ function testInterfaceAndRoutes() {
   assert.match(client, /COMPARAISON FOURNISSEURS/);
   assert.match(client, /data-prepare-unops-cycle/);
   assert.match(client, /AUTORISER L'ENVOI/);
+  assert.match(client, /Priorite A/);
+  assert.match(client, /Recommandation/);
+  assert.match(client, /SUIVI UNIQUEMENT/);
   assert.match(client, /Texte exact de l'e-mail RFQ/);
   assert.match(client, /data-request-rfq-authorization/);
   assert.match(client, /REVALIDER LES RFQ/);

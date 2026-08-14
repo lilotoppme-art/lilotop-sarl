@@ -155,6 +155,16 @@ async function run() {
     assert.ok(officialCycle.rfqs.every((rfq) => rfq.responseDeadlineLabel.includes("Malawi time")));
     assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Marley / Aliaxis").contact.verified, true);
     assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "RS South Africa").products.length, 3);
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Makita South Africa").contact.email, "info@rutherford.co.za");
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Schneider Electric").contact.email, "za-ccc@se.com");
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Makita South Africa").priority, "A");
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Werner Ladders").priority, "C");
+    assert.equal(officialCycle.rfqs.find((rfq) => rfq.supplier === "Ingersoll Rand / Rhino Lifting").sendRecommendation, "NON");
+    assert.equal(officialCycle.counts.priorityA, 9);
+    assert.equal(officialCycle.counts.priorityB, 6);
+    assert.equal(officialCycle.counts.priorityC, 1);
+    assert.equal(officialCycle.counts.recommended, 13);
+    assert.ok(officialCycle.rfqs.filter((rfq) => rfq.sendRecommendation === "OUI").every((rfq) => rfq.rfqPdfReady));
   }
 
   assert.throws(() => recordSupplierQuotation(cycle, {
