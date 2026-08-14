@@ -19,6 +19,7 @@ let state = {
 };
 let runningWorkflowId = null;
 let pendingRfqAuthorization = null;
+let pendingAuthorizedRfqSend = null;
 let gmailSyncTimer = null;
 
 function reportClientFailure(message) {
@@ -738,8 +739,20 @@ async function sendAuthorizedRfq(button) {
   const card = button.closest("[data-rfq-card]");
   const supplier = card?.querySelector("h4")?.textContent?.trim() || rfqId;
   const recipient = card?.querySelector(".rfq-meta-grid strong")?.textContent?.trim() || "destinataire verifie";
-  const confirmed = window.confirm(`Confirmation finale : envoyer uniquement ${supplier} a ${recipient} ?`);
-  if (!confirmed) return;
+  const summary = document.getElementById("rfq-send-summary");
+  pendingAuthorizedRfqSend = { button, id, rfqId, supplier, recipient };
+  summary.innerHTML = [
+    ["Destinataire", recipient],
+    ["Fournisseur", supplier],
+    ["Portee", "Cette RFQ uniquement"]
+  ].map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
+  document.getElementById("rfq-send-dialog").showModal();
+}
+
+async function confirmAuthorizedRfqSend() {
+  if (!pendingAuthorizedRfqSend) return;
+  const { button, id, rfqId, supplier } = pendingAuthorizedRfqSend;
+  pendingAuthorizedRfqSend = null;
   button.disabled = true;
   statusRegion.textContent = `Envoi de la RFQ autorisee ${supplier} via Gmail API...`;
   try {
@@ -1025,6 +1038,13 @@ document.getElementById("rfq-pilot-final-confirmation-dialog").addEventListener(
     confirmRfqAuthorization().catch((error) => { statusRegion.textContent = error.message; });
   } else {
     pendingRfqAuthorization = null;
+  }
+});
+document.getElementById("rfq-send-dialog").addEventListener("close", (event) => {
+  if (event.target.returnValue === "confirm") {
+    confirmAuthorizedRfqSend().catch((error) => { statusRegion.textContent = error.message; });
+  } else {
+    pendingAuthorizedRfqSend = null;
   }
 });
 document.getElementById("refresh-vault-control").addEventListener("click", refreshVaultControl);

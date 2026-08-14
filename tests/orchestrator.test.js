@@ -197,7 +197,9 @@ function testInterfaceAndRoutes() {
   assert.match(client, /RFQ PILOTE : HILTI/);
   assert.match(client, /ENVOYER LA RFQ AUTORISEE/);
   assert.match(client, /send-authorized-rfq/);
-  assert.match(client, /Confirmation finale : envoyer uniquement/);
+  assert.match(client, /rfq-send-dialog/);
+  assert.match(html, /CONFIRMER L'ENVOI REEL/);
+  assert.match(html, /Confirmation finale de cette RFQ/);
   assert.doesNotMatch(client, /envoyer uniquement la RFQ Hilti/);
   assert.match(client, /Gmail Message-ID/);
   assert.match(client, /rfq-pilot-final-confirmation-dialog/);

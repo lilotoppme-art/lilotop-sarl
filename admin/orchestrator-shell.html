@@ -181,6 +181,21 @@
     </form>
   </dialog>
 
-  <script src="/admin/orchestrator.js?v=unops-rfq-priority-send-v1" defer></script>
+  <dialog id="rfq-send-dialog" class="rfq-authorization-dialog">
+    <form method="dialog">
+      <div class="panel-heading">
+        <div><p class="eyebrow">Envoi Gmail autorise</p><h2>Confirmation finale de cette RFQ</h2></div>
+        <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
+      </div>
+      <dl id="rfq-send-summary" class="rfq-authorization-summary"></dl>
+      <p class="selection-summary">L'envoi concerne uniquement la RFQ affichee. Aucune autre RFQ ne sera autorisee ou envoyee.</p>
+      <div class="rfq-card-actions">
+        <button class="button button-primary" value="confirm" type="submit">CONFIRMER L'ENVOI REEL</button>
+        <button class="button button-secondary" value="cancel" type="submit">ANNULER</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/admin/orchestrator.js?v=unops-rfq-priority-send-v2" defer></script>
 </body>
 </html>
