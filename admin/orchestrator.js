@@ -257,7 +257,7 @@ function supplierCycleMarkup(cycle, workflow) {
     ? "EN ATTENTE"
     : `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(value)} ${currency || ""}`.trim();
   return `<article id="supplier-rfq-cycle" class="validation-rfqs supplier-cycle">
-    <div class="section-heading-inline"><div><p class="section-kicker">Cycle fournisseurs UNOPS</p><h3>RFQ FOURNISSEURS</h3></div><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-prepare-unops-cycle>REVALIDER LES RFQ</button><span class="status status-paused">${escapeHtml(cycle.status)}</span></div></div>
+    <div class="section-heading-inline"><div><p class="section-kicker">Cycle fournisseurs UNOPS</p><h3>RFQ FOURNISSEURS</h3></div><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-internal-gmail-send-test>TEST INTERNE GMAIL</button><button class="button button-secondary" type="button" data-prepare-unops-cycle>REVALIDER LES RFQ</button><span class="status status-paused">${escapeHtml(cycle.status)}</span></div></div>
     <div class="supplier-cycle-stats">
       <div><span>Lots retenus</span><strong>${escapeHtml(cycle.counts.lots)}</strong></div>
       <div><span>Lignes DAO</span><strong>${escapeHtml(cycle.counts.products)}</strong></div>
