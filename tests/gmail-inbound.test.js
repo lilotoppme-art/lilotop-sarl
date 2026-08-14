@@ -94,6 +94,7 @@ function run() {
   assert.match(decoded, /From: LILOTOP SARL <contact@lilotopsarl\.com>/);
   assert.match(decoded, /Reply-To: contact@lilotopsarl\.com/);
   assert.match(decoded, /filename="quote\.csv"/);
+  assert.equal(typeof outbound.messageMetadata, "function");
 
   assert.equal(outbound.assertIdentityArchitecture({
     ADMIN_EMAIL: "admin@lilotopsarl.com",

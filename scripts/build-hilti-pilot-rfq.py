@@ -57,7 +57,7 @@ def build():
     ]
     meta = [
         [para("Buyer preparing the bid", body), para("LILOTOP SARL", body), para("Requested destination", body), para("Lilongwe, Malawi", body)],
-        [para("Tender", body), para("Supply and Delivery of Workshop Tools, General Hardware and Electricals to Mzuzu Technical College, Malawi", body), para("Delivery basis", body), para("DAP Lilongwe, Malawi - Incoterms 2020", body)],
+        [para("Tender", body), para("Supply and Delivery of Workshop Tools, General Hardware and Electricals to Mzuzu Technical College, Malawi", body), para("Delivery basis", body), para("DAP Lilongwe (Schedule of Requirements); FCA plus freight and insurance to DPU Lilongwe (Price Schedule) - Incoterms 2020", body)],
         [para("Reference", body), para("ITB/2026/62389 - Lot 1", body), para("Requested quotation deadline", body), para("17 August 2026, 14:00 CAT (Malawi time)", body)],
         [para("Requested delivery", body), para("60 to 90 calendar days after contract signature", body), para("Contact", body), para("contact@lilotopsarl.com", body)],
     ]
@@ -94,7 +94,7 @@ def build():
     story += [line_table(table_data[1:5]), PageBreak(), Paragraph("Official Lot 1 lines requested - continued", heading), line_table(table_data[5:]), Spacer(1, 5 * mm), Paragraph("Commercial response required for every line", heading)]
     requirements = [
         "COMPLY status: YES, NO or ALTERNATIVE", "Manufacturer, brand, exact model and part number",
-        "Unit price, total price and currency", "Incoterm and transport identified separately where available",
+        "Unit price, total price and currency", "DAP Lilongwe price; FCA price and named FCA location; freight and insurance separately to DPU Lilongwe",
         "Availability and delivery lead time", "Manufacturer warranty", "Country of origin",
         "Product datasheet and product photo", "Payment terms", "Quotation validity",
     ]

@@ -89,6 +89,9 @@ async function run() {
   assert.equal(cycle.pilot.responseTracking.authorizationStatus, "NON CONFIGURE");
   assert.match(cycle.pilot.subject, /NEXUS-RFQ-ITB2026-62389-HILTI-L1/);
   assert.match(cycle.pilot.emailBody, /product datasheets and product photos/);
+  assert.match(cycle.pilot.emailBody, /DAP Lilongwe/);
+  assert.match(cycle.pilot.emailBody, /FCA price and named FCA location/);
+  assert.match(cycle.pilot.emailBody, /DPU Lilongwe/);
   assert.deepEqual(cycle.pilot.attachments.map((item) => item.name), ["RFQ_LILOTOP_HILTI_ITB-2026-62389_Lot1.pdf"]);
 
   const configuredPilot = buildHiltiPilot(cycle.rfqs, {
