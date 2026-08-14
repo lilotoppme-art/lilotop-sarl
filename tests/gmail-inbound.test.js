@@ -56,6 +56,27 @@ function run() {
   assert.equal(uncertain.matchingStatus, "REPONSE A CLASSER MANUELLEMENT");
   assert.equal(uncertain.rfqId, null);
 
+  const normalized = gmail.normalizeGmailMessage({
+    id: "gmail-3",
+    threadId: "thread-3",
+    internalDate: String(Date.parse("2026-08-14T11:00:00.000Z")),
+    payload: {
+      mimeType: "multipart/mixed",
+      headers: [
+        { name: "From", value: "customercare.za@hilti.com" },
+        { name: "To", value: "admin@lilotopsarl.com" },
+        { name: "Subject", value: "Re: NEXUS-RFQ-ITB2026-62389-HILTI-L1" }
+      ],
+      parts: [
+        { mimeType: "text/plain", body: { data: Buffer.from("Currency: USD").toString("base64url") } },
+        { filename: "quote.pdf", mimeType: "application/pdf", body: { attachmentId: "att-3", size: 2048 } }
+      ]
+    }
+  });
+  assert.equal(normalized.gmailMessageId, "gmail-3");
+  assert.equal(normalized.bodyText, "Currency: USD");
+  assert.equal(normalized.attachments[0].filename, "quote.pdf");
+
   console.log("Gmail inbound tests passed");
 }
 

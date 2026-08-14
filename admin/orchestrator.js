@@ -19,6 +19,7 @@ let state = {
 };
 let runningWorkflowId = null;
 let pendingRfqAuthorization = null;
+let gmailSyncTimer = null;
 
 function reportClientFailure(message) {
   const safeMessage = String(message || "Erreur d'affichage inconnue").slice(0, 500);
@@ -92,6 +93,29 @@ async function api(path, options = {}) {
     throw new Error(payload.error || "Action impossible.");
   }
   return payload.data;
+}
+
+async function syncGmailInbound({ silent = false } = {}) {
+  if (document.hidden || body.dataset.authenticated !== "true") return null;
+  try {
+    const result = await api("/api/nexus-gmail?action=sync", { method: "POST" });
+    const status = document.getElementById("gmail-response-status");
+    const detail = document.getElementById("gmail-response-detail");
+    if (status) status.textContent = "GMAIL CONNECTE - SUIVI ACTIF";
+    if (detail) detail.textContent = `${result.checked} message(s) controle(s), ${result.matched} reponse(s) rattachee(s). Derniere synchronisation : ${new Date(result.lastSyncAt).toLocaleString("fr-FR")}.`;
+    if (!silent) statusRegion.textContent = "Suivi Gmail synchronise. Aucun e-mail envoye.";
+    return result;
+  } catch (error) {
+    const detail = document.getElementById("gmail-response-detail");
+    if (detail) detail.textContent = `Synchronisation Gmail indisponible : ${error.message}`;
+    if (!silent) statusRegion.textContent = error.message;
+    return null;
+  }
+}
+
+function startGmailPolling() {
+  if (gmailSyncTimer) clearInterval(gmailSyncTimer);
+  gmailSyncTimer = setInterval(() => syncGmailInbound({ silent: true }), 30000);
 }
 
 function formatDuration(seconds) {
@@ -209,7 +233,7 @@ function hiltiPilotMarkup(pilot) {
     <div class="pilot-control-grid">
       <article><h4>Piece jointe limitee aux 6 lignes</h4>${(pilot.attachments || []).map((item) => `<p><a class="button button-secondary button-inline" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">OUVRIR ${escapeHtml(item.name)}</a></p>`).join("")}</article>
       <article><h4>Test technique sans envoi</h4><p>Expediteur : ${escapeHtml(pilot.dryRun?.sender)}</p><p>Journalisation : ${pilot.dryRun?.deliveryLoggingReady ? "OK" : "NON"}</p><p>Message-ID : ${pilot.dryRun?.messageIdCaptureReady ? "CAPTURE PREVUE" : "NON"}</p><p>Erreurs API : ${pilot.dryRun?.apiErrorHandlingReady ? "GEREES" : "NON"}</p></article>
-      <article><h4>Reponses fournisseurs</h4><p><strong>${escapeHtml(pilot.responseTracking?.authorizationStatus || "NON CONFIGURE")}</strong></p><p>${pilot.responseTracking?.operational ? "Detection automatique configuree." : escapeHtml(pilot.responseTracking?.blocker)}</p>${pilot.responseTracking?.oauthConfigured ? '<p><a class="button button-secondary button-inline" href="/api/nexus-gmail?action=authorize">AUTORISER GMAIL (DG)</a></p>' : ""}<p>Saisie avec message/document source : ${pilot.responseTracking?.manualEvidenceIntakeReady ? "DISPONIBLE" : "NON"}</p></article>
+      <article><h4>Reponses fournisseurs</h4><p><strong id="gmail-response-status">${escapeHtml(pilot.responseTracking?.authorizationStatus || "NON CONFIGURE")}</strong></p><p id="gmail-response-detail">${pilot.responseTracking?.operational ? "Detection automatique configuree." : escapeHtml(pilot.responseTracking?.blocker)}</p>${pilot.responseTracking?.oauthConfigured ? '<p><a class="button button-secondary button-inline" href="/api/nexus-gmail?action=authorize">AUTORISER GMAIL (DG)</a></p>' : ""}<p>Saisie avec message/document source : ${pilot.responseTracking?.manualEvidenceIntakeReady ? "DISPONIBLE" : "NON"}</p></article>
     </div>
     <h4>Objet</h4><p>${escapeHtml(pilot.subject)}</p>
     <h4>Corps exact prepare</h4><pre class="rfq-email-preview">${escapeHtml(pilot.emailBody)}</pre>
@@ -885,6 +909,8 @@ async function authenticate(event) {
     setAuthenticated(true);
     loginStatus.textContent = "";
     await refresh();
+    startGmailPolling();
+    await syncGmailInbound({ silent: true });
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -892,6 +918,8 @@ async function authenticate(event) {
 
 async function logout() {
   await fetch("/api/business-radar-auth", { method: "DELETE" });
+  if (gmailSyncTimer) clearInterval(gmailSyncTimer);
+  gmailSyncTimer = null;
   setAuthenticated(false);
 }
 
@@ -978,11 +1006,17 @@ document.getElementById("dossier-content").addEventListener("submit", (event) =>
 });
 loginForm.addEventListener("submit", authenticate);
 document.getElementById("orchestrator-logout").addEventListener("click", logout);
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) syncGmailInbound({ silent: true });
+});
 
 setAuthenticated(body.dataset.authenticated === "true");
 if (body.dataset.authenticated === "true") {
   refresh().then(() => {
     const workflowId = new URLSearchParams(window.location.search).get("workflow");
     return workflowId ? viewWorkflow(workflowId) : null;
+  }).then(() => {
+    startGmailPolling();
+    return syncGmailInbound({ silent: true });
   }).catch((error) => { reportClientFailure(error.message); });
 }
