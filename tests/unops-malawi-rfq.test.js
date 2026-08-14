@@ -93,7 +93,8 @@ async function run() {
 
   const configuredPilot = buildHiltiPilot(cycle.rfqs, {
     RESEND_API_KEY: "hidden",
-    EMAIL_FROM: "LILOTOP Website <notifications@updates.lilotopsarl.com>",
+    RFQ_FROM: "LILOTOP SARL <contact@lilotopsarl.com>",
+    RFQ_REPLY_TO: "contact@lilotopsarl.com",
     GOOGLE_OAUTH_CLIENT_ID: "hidden",
     GOOGLE_OAUTH_CLIENT_SECRET: "hidden",
     GOOGLE_OAUTH_REDIRECT_URI: "https://preview.example.vercel.app/api/nexus-gmail/callback",

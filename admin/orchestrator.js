@@ -136,6 +136,7 @@ function renderDashboard() {
   document.getElementById("stat-average").textContent = formatDuration(dashboard.averageSeconds);
   document.getElementById("stat-value").textContent = formatValue(dashboard.potentialValue);
   document.getElementById("stat-alerts").textContent = dashboard.criticalAlerts || 0;
+  document.getElementById("stat-supplier-replies").textContent = dashboard.emailTracking?.matched || 0;
 }
 
 function renderOpportunities() {

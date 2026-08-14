@@ -2,6 +2,7 @@
 
 const assert = require("assert");
 const gmail = require("../lib/nexus/gmail-inbound");
+const identities = require("../lib/nexus/email-identities");
 
 function run() {
   const missing = gmail.readiness({ EMAIL_REPLY_TO: "contact@lilotopsarl.com" });
@@ -76,6 +77,18 @@ function run() {
   assert.equal(normalized.gmailMessageId, "gmail-3");
   assert.equal(normalized.bodyText, "Currency: USD");
   assert.equal(normalized.attachments[0].filename, "quote.pdf");
+
+  const identityStatus = identities.readiness({
+    ADMIN_EMAIL: "admin@lilotopsarl.com",
+    RFQ_FROM: "LILOTOP SARL <contact@lilotopsarl.com>",
+    RFQ_REPLY_TO: "contact@lilotopsarl.com",
+    GMAIL_INBOUND_MAILBOX: "admin@lilotopsarl.com"
+  });
+  assert.equal(identityStatus.configured, true);
+  assert.equal(identityStatus.nexusAdmin, "admin@lilotopsarl.com");
+  assert.equal(identityStatus.rfqFromMailbox, "contact@lilotopsarl.com");
+  assert.equal(identityStatus.rfqReplyTo, "contact@lilotopsarl.com");
+  assert.equal(identityStatus.inboundMailbox, "admin@lilotopsarl.com");
 
   console.log("Gmail inbound tests passed");
 }
