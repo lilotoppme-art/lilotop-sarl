@@ -2,6 +2,7 @@
 
 const assert = require("assert");
 const gmail = require("../lib/nexus/gmail-inbound");
+const outbound = require("../lib/nexus/gmail-outbound");
 const identities = require("../lib/nexus/email-identities");
 
 function run() {
@@ -18,7 +19,10 @@ function run() {
   };
   const configured = gmail.readiness(configuredEnv);
   assert.equal(configured.configured, true);
-  assert.equal(configured.scope, "https://www.googleapis.com/auth/gmail.readonly");
+  assert.deepEqual(configured.scopes, [
+    "https://www.googleapis.com/auth/gmail.readonly",
+    "https://www.googleapis.com/auth/gmail.send"
+  ]);
 
   process.env.AUTH_SECRET = "test-auth-secret-that-is-at-least-32-characters";
   const state = gmail.stateToken(1_000);
@@ -77,6 +81,32 @@ function run() {
   assert.equal(normalized.gmailMessageId, "gmail-3");
   assert.equal(normalized.bodyText, "Currency: USD");
   assert.equal(normalized.attachments[0].filename, "quote.pdf");
+
+  const raw = outbound.buildRawMessage({
+    from: "LILOTOP SARL <contact@lilotopsarl.com>",
+    to: "contact@lilotopsarl.com",
+    replyTo: "contact@lilotopsarl.com",
+    subject: "NEXUS internal send test",
+    text: "Currency: USD\nTotal price: 376.50",
+    attachments: [{ filename: "quote.csv", contentType: "text/csv", content: Buffer.from("total,currency\n376.50,USD\n") }]
+  });
+  const decoded = Buffer.from(raw, "base64url").toString("utf8");
+  assert.match(decoded, /From: LILOTOP SARL <contact@lilotopsarl\.com>/);
+  assert.match(decoded, /Reply-To: contact@lilotopsarl\.com/);
+  assert.match(decoded, /filename="quote\.csv"/);
+
+  assert.equal(outbound.assertIdentityArchitecture({
+    ADMIN_EMAIL: "admin@lilotopsarl.com",
+    RFQ_FROM: "LILOTOP SARL <contact@lilotopsarl.com>",
+    RFQ_REPLY_TO: "contact@lilotopsarl.com",
+    GMAIL_INBOUND_MAILBOX: "admin@lilotopsarl.com"
+  }).configured, true);
+  assert.throws(() => outbound.assertIdentityArchitecture({
+    ADMIN_EMAIL: "admin@lilotopsarl.com",
+    RFQ_FROM: "admin@lilotopsarl.com",
+    RFQ_REPLY_TO: "contact@lilotopsarl.com",
+    GMAIL_INBOUND_MAILBOX: "admin@lilotopsarl.com"
+  }), /identity architecture mismatch/);
 
   const identityStatus = identities.readiness({
     ADMIN_EMAIL: "admin@lilotopsarl.com",
