@@ -188,12 +188,13 @@ function testInterfaceAndRoutes() {
   assert.match(client, /Priorite A/);
   assert.match(client, /Recommandation/);
   assert.match(client, /SUIVI UNIQUEMENT/);
+  assert.match(client, /ENVOI NON RECOMMANDE/);
+  assert.match(client, /rfq\.sendRecommendation === "OUI"/);
   assert.match(client, /Texte exact de l'e-mail RFQ/);
   assert.match(client, /data-request-rfq-authorization/);
   assert.match(client, /REVALIDER LES RFQ/);
   assert.match(client, /confirmRfqAuthorization/);
   assert.match(client, /RFQ PILOTE : HILTI/);
-  assert.match(client, /AUTORISER L'ENVOI PILOTE/);
   assert.match(client, /ENVOYER LA RFQ AUTORISEE/);
   assert.match(client, /send-authorized-rfq/);
   assert.match(client, /Gmail Message-ID/);
