@@ -4,6 +4,8 @@ const assert = require("assert");
 const gmail = require("../lib/nexus/gmail-inbound");
 const outbound = require("../lib/nexus/gmail-outbound");
 const identities = require("../lib/nexus/email-identities");
+const fs = require("fs");
+const path = require("path");
 
 function run() {
   const missing = gmail.readiness({ EMAIL_REPLY_TO: "contact@lilotopsarl.com" });
@@ -81,6 +83,11 @@ function run() {
   assert.equal(normalized.gmailMessageId, "gmail-3");
   assert.equal(normalized.bodyText, "Currency: USD");
   assert.equal(normalized.attachments[0].filename, "quote.pdf");
+
+  const handlerSource = fs.readFileSync(path.join(__dirname, "..", "lib", "nexus", "gmail-inbound-handler.js"), "utf8");
+  assert.match(handlerSource, /in:inbox -in:sent newer_than:30d/);
+  assert.match(handlerSource, /excludeOutboundMessages/);
+  assert.match(handlerSource, /includes\("SENT"\)/);
 
   const raw = outbound.buildRawMessage({
     from: "LILOTOP SARL <contact@lilotopsarl.com>",
