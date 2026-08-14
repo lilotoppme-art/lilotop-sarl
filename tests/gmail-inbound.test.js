@@ -85,8 +85,10 @@ function run() {
   assert.equal(normalized.attachments[0].filename, "quote.pdf");
 
   const handlerSource = fs.readFileSync(path.join(__dirname, "..", "lib", "nexus", "gmail-inbound-handler.js"), "utf8");
+  const orchestratorStoreSource = fs.readFileSync(path.join(__dirname, "..", "lib", "nexus", "orchestrator-store.js"), "utf8");
   assert.match(handlerSource, /in:inbox -in:sent newer_than:30d/);
   assert.match(handlerSource, /excludeOutboundMessages/);
+  assert.match(orchestratorStoreSource, /rfq_id <> 'NEXUS-INTERNAL-EMAIL-ROUTING-TEST'/);
   assert.match(handlerSource, /includes\("SENT"\)/);
 
   const raw = outbound.buildRawMessage({
