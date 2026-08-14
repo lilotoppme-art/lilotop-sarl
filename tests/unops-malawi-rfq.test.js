@@ -86,18 +86,24 @@ async function run() {
   assert.equal(cycle.pilot.authorization.doubleConfirmationRequired, true);
   assert.equal(cycle.pilot.contact.email, "customercare.za@hilti.com");
   assert.equal(cycle.pilot.responseTracking.operational, false);
+  assert.equal(cycle.pilot.responseTracking.authorizationStatus, "NON CONFIGURE");
+  assert.match(cycle.pilot.subject, /NEXUS-RFQ-ITB2026-62389-HILTI-L1/);
   assert.match(cycle.pilot.emailBody, /product datasheets and product photos/);
   assert.deepEqual(cycle.pilot.attachments.map((item) => item.name), ["RFQ_LILOTOP_HILTI_ITB-2026-62389_Lot1.pdf"]);
 
   const configuredPilot = buildHiltiPilot(cycle.rfqs, {
     RESEND_API_KEY: "hidden",
     EMAIL_FROM: "LILOTOP Website <notifications@updates.lilotopsarl.com>",
-    GMAIL_OAUTH_CLIENT_ID: "hidden",
-    GMAIL_OAUTH_CLIENT_SECRET: "hidden",
-    GMAIL_OAUTH_REFRESH_TOKEN: "hidden"
+    GOOGLE_OAUTH_CLIENT_ID: "hidden",
+    GOOGLE_OAUTH_CLIENT_SECRET: "hidden",
+    GOOGLE_OAUTH_REDIRECT_URI: "https://preview.example.vercel.app/api/nexus-gmail/callback",
+    GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY: "x".repeat(32),
+    GMAIL_INBOUND_MAILBOX: "contact@lilotopsarl.com"
   });
   assert.equal(configuredPilot.dryRun.senderConfigured, true);
-  assert.equal(configuredPilot.responseTracking.operational, true);
+  assert.equal(configuredPilot.responseTracking.operational, false);
+  assert.equal(configuredPilot.responseTracking.oauthConfigured, true);
+  assert.equal(configuredPilot.responseTracking.authorizationStatus, "AUTORISATION GOOGLE REQUISE PAR LE DG");
   assert.doesNotMatch(configuredPilot.dryRun.sender, /notifications@/);
 
   const collapsedCycle = buildSupplierCycle(

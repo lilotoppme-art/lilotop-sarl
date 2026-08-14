@@ -27,6 +27,14 @@
       "destination": "/api/nexus-page?handler=email-delivery-api"
     },
     {
+      "source": "/api/nexus-gmail",
+      "destination": "/api/nexus-page?handler=gmail-inbound-api"
+    },
+    {
+      "source": "/api/nexus-gmail/callback",
+      "destination": "/api/nexus-page?handler=gmail-inbound-api&action=callback"
+    },
+    {
       "source": "/admin/nexus/document-vault",
       "destination": "/api/nexus-page?handler=document-vault-page"
     },

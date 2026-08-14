@@ -1,0 +1,62 @@
+"use strict";
+
+const assert = require("assert");
+const gmail = require("../lib/nexus/gmail-inbound");
+
+function run() {
+  const missing = gmail.readiness({ EMAIL_REPLY_TO: "contact@lilotopsarl.com" });
+  assert.equal(missing.configured, false);
+  assert.ok(missing.missing.includes("GOOGLE_OAUTH_CLIENT_ID"));
+
+  const configuredEnv = {
+    GOOGLE_OAUTH_CLIENT_ID: "client-id",
+    GOOGLE_OAUTH_CLIENT_SECRET: "client-secret",
+    GOOGLE_OAUTH_REDIRECT_URI: "https://preview.example.vercel.app/api/nexus-gmail/callback",
+    GOOGLE_OAUTH_TOKEN_ENCRYPTION_KEY: "x".repeat(32),
+    GMAIL_INBOUND_MAILBOX: "contact@lilotopsarl.com"
+  };
+  const configured = gmail.readiness(configuredEnv);
+  assert.equal(configured.configured, true);
+  assert.equal(configured.scope, "https://www.googleapis.com/auth/gmail.readonly");
+
+  process.env.AUTH_SECRET = "test-auth-secret-that-is-at-least-32-characters";
+  const state = gmail.stateToken(1_000);
+  assert.equal(gmail.verifyState(state, 1_001), true);
+  assert.equal(gmail.verifyState(state, 1_000 + (11 * 60 * 1000)), false);
+
+  const rfqs = [{
+    id: "UNOPS-62389-L1-HILTI",
+    trackingId: "NEXUS-RFQ-ITB2026-62389-HILTI-L1",
+    supplier: "Hilti",
+    lotNumber: 1,
+    contactEmail: "customercare.za@hilti.com"
+  }];
+  const result = gmail.processSupplierReply({
+    gmailMessageId: "gmail-test-1",
+    gmailThreadId: "thread-test-1",
+    messageId: "<reply@example.test>",
+    from: "customercare.za@hilti.com",
+    to: "contact@lilotopsarl.com",
+    subject: "Re: NEXUS-RFQ-ITB2026-62389-HILTI-L1",
+    receivedAt: "2026-08-14T10:00:00.000Z",
+    bodyText: "Currency: USD\nUnit price: 125.50\nTotal price: 753.00\nIncoterm: DAP Lilongwe\nLead time: 30 days\nWarranty: 12 months\nValidity: 45 days\nCountry of origin: Germany",
+    attachments: [{ filename: "quotation.pdf", mimeType: "application/pdf", size: 1200, gmailAttachmentId: "att-1" }]
+  }, rfqs);
+  assert.equal(result.matchingStatus, "REPONSE RATTACHEE");
+  assert.equal(result.rfqId, "UNOPS-62389-L1-HILTI");
+  assert.equal(result.attachments[0].filename, "quotation.pdf");
+  assert.equal(result.extraction.currency, "USD");
+  assert.equal(result.extraction.unitPrice, 125.5);
+  assert.equal(result.extraction.totalPrice, 753);
+  assert.equal(result.extraction.incoterm, "DAP Lilongwe");
+
+  const uncertain = gmail.processSupplierReply({
+    gmailMessageId: "gmail-test-2", from: "unknown@example.test", subject: "Quotation", bodyText: "Thank you"
+  }, rfqs);
+  assert.equal(uncertain.matchingStatus, "REPONSE A CLASSER MANUELLEMENT");
+  assert.equal(uncertain.rfqId, null);
+
+  console.log("Gmail inbound tests passed");
+}
+
+run();

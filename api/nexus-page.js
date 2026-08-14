@@ -14,6 +14,7 @@ const emailDeliveryHandler = require("../lib/email/delivery-handler");
 const resendWebhookHandler = require("../lib/email/webhook-handler");
 const crmHandler = require("../lib/nexus/crm-handler");
 const passwordReset = require("../lib/business-radar/password-reset");
+const gmailInboundHandler = require("../lib/nexus/gmail-inbound-handler");
 
 function escapeHtml(value) {
   return String(value || "").replace(/[&<>"']/g, (character) => ({
@@ -108,6 +109,9 @@ module.exports = async function handler(req, res) {
   }
   if (delegatedHandler === "admin-password-reset-api") {
     return passwordReset.handler(req, res);
+  }
+  if (delegatedHandler === "gmail-inbound-api") {
+    return gmailInboundHandler(req, res);
   }
   if (req.method !== "GET") {
     res.statusCode = 405;
