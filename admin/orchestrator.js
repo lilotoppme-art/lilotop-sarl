@@ -735,10 +735,13 @@ async function sendAuthorizedRfq(button) {
   const id = document.getElementById("validation-sheet").dataset.workflowId;
   const rfqId = button.dataset.sendAuthorizedRfq;
   if (!id || !rfqId) return;
-  const confirmed = window.confirm("Confirmation finale : envoyer uniquement la RFQ Hilti Lot 1 autorisee a Customercare.za@hilti.com ?");
+  const card = button.closest("[data-rfq-card]");
+  const supplier = card?.querySelector("h4")?.textContent?.trim() || rfqId;
+  const recipient = card?.querySelector(".rfq-meta-grid strong")?.textContent?.trim() || "destinataire verifie";
+  const confirmed = window.confirm(`Confirmation finale : envoyer uniquement ${supplier} a ${recipient} ?`);
   if (!confirmed) return;
   button.disabled = true;
-  statusRegion.textContent = "Envoi de l'unique RFQ autorisee via Gmail API...";
+  statusRegion.textContent = `Envoi de la RFQ autorisee ${supplier} via Gmail API...`;
   try {
     const result = await api("/api/nexus-gmail?action=send-authorized-rfq", {
       method: "POST",
@@ -746,7 +749,7 @@ async function sendAuthorizedRfq(button) {
     });
     await refresh();
     await viewWorkflow(id);
-    statusRegion.textContent = `RFQ Hilti envoyee et journalisee. Gmail ID : ${result.gmailMessageId || result.provider_message_id || "obtenu"}.`;
+    statusRegion.textContent = `RFQ ${supplier} envoyee et journalisee. Gmail ID : ${result.gmailMessageId || result.provider_message_id || "obtenu"}.`;
   } catch (error) {
     statusRegion.textContent = error.message;
     button.disabled = false;

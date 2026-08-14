@@ -195,11 +195,24 @@ async function run() {
   assert.equal(withQuotation.rfqs[0].status, "COTATION RECUE");
   assert.deepEqual(withQuotation.pricing.marginScenarios, []);
 
-  const authorized = authorizeSupplierRfq(cycle, cycle.rfqs[0].id, "admin@lilotopsarl.com");
-  assert.equal(authorized.rfqs[0].status, "AUTORISEE PAR LE DG - ENVOI NON DECLENCHE");
-  assert.equal(authorized.rfqs[0].emailSent, false);
-  assert.equal(authorized.rfqs[0].sentAt, null);
+  const authorizedTargetIndex = cycle.rfqs.findIndex((rfq) => rfq.sendRecommendation === "OUI");
+  assert.ok(authorizedTargetIndex >= 0);
+  const authorizedTarget = cycle.rfqs[authorizedTargetIndex];
+  const authorized = authorizeSupplierRfq(cycle, authorizedTarget.id, "admin@lilotopsarl.com");
+  assert.equal(authorized.rfqs[authorizedTargetIndex].status, "AUTORISEE PAR LE DG - ENVOI NON DECLENCHE");
+  assert.equal(authorized.rfqs[authorizedTargetIndex].emailSent, false);
+  assert.equal(authorized.rfqs[authorizedTargetIndex].sentAt, null);
   assert.equal(authorized.counts.sent, 0);
+
+  assert.throws(() => authorizeSupplierRfq({
+    ...cycle,
+    rfqs: cycle.rfqs.map((rfq, index) => index === authorizedTargetIndex ? { ...rfq, sentAt: "2026-08-14T21:25:22.000Z", emailSent: true } : rfq)
+  }, authorizedTarget.id, "admin@lilotopsarl.com"), /deja ete envoyee/);
+
+  assert.throws(() => authorizeSupplierRfq({
+    ...cycle,
+    rfqs: cycle.rfqs.map((rfq, index) => index === authorizedTargetIndex ? { ...rfq, sendRecommendation: "NON", directEmailVerified: false } : rfq)
+  }, authorizedTarget.id, "admin@lilotopsarl.com"), /coordonnees et la couverture/);
 
   console.log("UNOPS Malawi RFQ supplier-cycle tests passed.");
 }
