@@ -738,7 +738,7 @@ async function sendAuthorizedRfq(button) {
   if (!id || !rfqId) return;
   const card = button.closest("[data-rfq-card]");
   const supplier = card?.querySelector("h4")?.textContent?.trim() || rfqId;
-  const recipient = card?.querySelector(".rfq-meta-grid strong")?.textContent?.trim() || "destinataire verifie";
+  const recipient = card?.querySelectorAll(".rfq-meta-grid strong")?.[1]?.textContent?.trim() || "destinataire verifie";
   const summary = document.getElementById("rfq-send-summary");
   pendingAuthorizedRfqSend = { button, id, rfqId, supplier, recipient };
   summary.innerHTML = [
