@@ -234,7 +234,7 @@ function hiltiPilotMarkup(pilot) {
     <div class="pilot-control-grid">
       <article><h4>Piece jointe limitee aux 6 lignes</h4>${(pilot.attachments || []).map((item) => `<p><a class="button button-secondary button-inline" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">OUVRIR ${escapeHtml(item.name)}</a></p>`).join("")}</article>
       <article><h4>Test technique sans envoi</h4><p>Expediteur : ${escapeHtml(pilot.dryRun?.sender)}</p><p>Journalisation : ${pilot.dryRun?.deliveryLoggingReady ? "OK" : "NON"}</p><p>Message-ID : ${pilot.dryRun?.messageIdCaptureReady ? "CAPTURE PREVUE" : "NON"}</p><p>Erreurs API : ${pilot.dryRun?.apiErrorHandlingReady ? "GEREES" : "NON"}</p></article>
-      <article><h4>Reponses fournisseurs</h4><p><strong id="gmail-response-status">${escapeHtml(pilot.responseTracking?.authorizationStatus || "NON CONFIGURE")}</strong></p><p id="gmail-response-detail">${pilot.responseTracking?.operational ? "Detection automatique configuree." : escapeHtml(pilot.responseTracking?.blocker)}</p>${pilot.responseTracking?.oauthConfigured ? '<p><a class="button button-secondary button-inline" href="/api/nexus-gmail?action=authorize">AUTORISER GMAIL (DG)</a></p><p><button class="button button-secondary button-inline" type="button" data-internal-gmail-send-test>TEST INTERNE GMAIL</button></p>' : ""}<p>Saisie avec message/document source : ${pilot.responseTracking?.manualEvidenceIntakeReady ? "DISPONIBLE" : "NON"}</p></article>
+      <article><h4>Reponses fournisseurs</h4><p><strong id="gmail-response-status">${escapeHtml(pilot.responseTracking?.authorizationStatus || "NON CONFIGURE")}</strong></p><p id="gmail-response-detail">${pilot.responseTracking?.operational ? "Detection automatique configuree." : escapeHtml(pilot.responseTracking?.blocker)}</p>${pilot.responseTracking?.oauthConfigured ? '<p><a class="button button-secondary button-inline" href="/api/nexus-gmail?action=authorize">AUTORISER GMAIL (DG)</a></p>' : ""}<p>Saisie avec message/document source : ${pilot.responseTracking?.manualEvidenceIntakeReady ? "DISPONIBLE" : "NON"}</p></article>
     </div>
     <h4>Objet</h4><p>${escapeHtml(pilot.subject)}</p>
     <h4>Corps exact prepare</h4><pre class="rfq-email-preview">${escapeHtml(pilot.emailBody)}</pre>
@@ -257,7 +257,7 @@ function supplierCycleMarkup(cycle, workflow) {
     ? "EN ATTENTE"
     : `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(value)} ${currency || ""}`.trim();
   return `<article id="supplier-rfq-cycle" class="validation-rfqs supplier-cycle">
-    <div class="section-heading-inline"><div><p class="section-kicker">Cycle fournisseurs UNOPS</p><h3>RFQ FOURNISSEURS</h3></div><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-internal-gmail-test-status>VERIFIER TEST GMAIL</button><button class="button button-secondary" type="button" data-prepare-unops-cycle>REVALIDER LES RFQ</button><span class="status status-paused">${escapeHtml(cycle.status)}</span></div></div>
+    <div class="section-heading-inline"><div><p class="section-kicker">Cycle fournisseurs UNOPS</p><h3>RFQ FOURNISSEURS</h3></div><div class="rfq-card-actions"><button class="button button-secondary" type="button" data-prepare-unops-cycle>REVALIDER LES RFQ</button><span class="status status-paused">${escapeHtml(cycle.status)}</span></div></div>
     <div class="supplier-cycle-stats">
       <div><span>Lots retenus</span><strong>${escapeHtml(cycle.counts.lots)}</strong></div>
       <div><span>Lignes DAO</span><strong>${escapeHtml(cycle.counts.products)}</strong></div>
@@ -721,49 +721,6 @@ async function confirmRfqAuthorization() {
   statusRegion.textContent = "Autorisation DG enregistree. Aucun e-mail n'a ete envoye.";
 }
 
-async function runInternalGmailSendTest(button) {
-  button.disabled = true;
-  statusRegion.textContent = "Test interne Gmail en cours. Aucun fournisseur ne sera contacte.";
-  try {
-    await api("/api/nexus-gmail?action=authorize-internal-send-test", { method: "POST" });
-    await api("/api/nexus-gmail?action=send-internal-test", { method: "POST" });
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    await syncGmailInbound({ silent: false });
-    statusRegion.textContent = "Test interne Gmail termine. Aucun e-mail fournisseur n'a ete envoye.";
-  } catch (error) {
-    statusRegion.textContent = error.message;
-    statusRegion.classList.add("has-error");
-  } finally {
-    button.disabled = false;
-  }
-}
-
-async function showInternalGmailTestStatus(button) {
-  button.disabled = true;
-  try {
-    const result = await api("/api/nexus-gmail?action=internal-send-test-status");
-    const inbound = result.inbound || {};
-    const authorization = result.authorization || {};
-    const sent = result.sent || {};
-    statusRegion.textContent = [
-      `Envoi: ${authorization.status || "ABSENT"}`,
-      `Message-ID: ${authorization.provider_message_id ? "OBTENU" : "ABSENT"}`,
-      `Reception: ${inbound.gmail_message_id ? "OK" : "ABSENTE"}`,
-      `From: ${sent.from || inbound.sender || "ABSENT"}`,
-      `Reply-To: ${sent.replyTo || inbound.reply_to || "ABSENT"}`,
-      `Rattachement: ${inbound.matching_status || "ABSENT"}`,
-      `Pieces jointes: ${(inbound.attachments || []).length}`,
-      `Devise: ${inbound.extraction?.currency || "ABSENTE"}`,
-      `Total: ${inbound.extraction?.totalPrice ?? "ABSENT"}`
-    ].join(" | ");
-  } catch (error) {
-    statusRegion.textContent = error.message;
-    statusRegion.classList.add("has-error");
-  } finally {
-    button.disabled = false;
-  }
-}
-
 async function submitEoiConfirmation(button) {
   const section = document.getElementById("validation-sheet");
   const id = section.dataset.workflowId;
@@ -1005,10 +962,6 @@ document.getElementById("validation-content").addEventListener("click", (event) 
   }
   const authorizeButton = event.target.closest("[data-request-rfq-authorization]");
   if (authorizeButton) openRfqAuthorization(authorizeButton);
-  const gmailTestButton = event.target.closest("[data-internal-gmail-send-test]");
-  if (gmailTestButton) runInternalGmailSendTest(gmailTestButton);
-  const gmailTestStatusButton = event.target.closest("[data-internal-gmail-test-status]");
-  if (gmailTestStatusButton) showInternalGmailTestStatus(gmailTestStatusButton);
   const editButton = event.target.closest("[data-edit-rfq]");
   if (editButton) {
     const detail = document.getElementById(editButton.dataset.editRfq);
