@@ -287,7 +287,7 @@ function supplierCycleMarkup(cycle, workflow) {
       <p><a href="${escapeHtml(rfq.contact.catalogSource || rfq.contact.website)}" target="_blank" rel="noopener noreferrer">Source officielle de couverture produit</a></p>
       <div class="rfq-card-actions">
         <button class="button button-secondary" type="button" data-toggle-rfq="${escapeHtml(rfq.id)}">VOIR RFQ</button>
-        <button class="button button-primary" type="button"
+        ${rfq.authorizedAt && !rfq.sentAt ? `<button class="button button-primary" type="button" data-send-authorized-rfq="${escapeHtml(rfq.id)}">ENVOYER LA RFQ AUTORISEE</button>` : rfq.sentAt ? "" : `<button class="button button-primary" type="button"
           data-request-rfq-authorization="${escapeHtml(rfq.id)}"
           data-rfq-supplier="${escapeHtml(rfq.supplier)}"
           data-rfq-recipient="${escapeHtml(rfq.contact.email || rfq.contact.contactForm)}"
@@ -296,7 +296,7 @@ function supplierCycleMarkup(cycle, workflow) {
           data-rfq-attachments="${escapeHtml((rfq.attachments || []).join(", "))}"
           data-rfq-deadline="${escapeHtml(rfq.responseDeadline)}"
           data-rfq-pilot="${rfq.id === "UNOPS-62389-L1-HILTI" ? "true" : "false"}"
-          ${rfq.readyForDgReview ? "" : "disabled"}>${rfq.id === "UNOPS-62389-L1-HILTI" ? "AUTORISER L'ENVOI PILOTE" : "AUTORISER L'ENVOI"}</button>
+          ${rfq.readyForDgReview ? "" : "disabled"}>${rfq.id === "UNOPS-62389-L1-HILTI" ? "AUTORISER L'ENVOI PILOTE" : "AUTORISER L'ENVOI"}</button>`}
       </div>
       <div id="${escapeHtml(rfq.id)}" class="rfq-detail" hidden>
         <p><strong>Objet :</strong> ${escapeHtml(rfq.subject)}</p>
@@ -721,6 +721,28 @@ async function confirmRfqAuthorization() {
   statusRegion.textContent = "Autorisation DG enregistree. Aucun e-mail n'a ete envoye.";
 }
 
+async function sendAuthorizedRfq(button) {
+  const id = document.getElementById("validation-sheet").dataset.workflowId;
+  const rfqId = button.dataset.sendAuthorizedRfq;
+  if (!id || !rfqId) return;
+  const confirmed = window.confirm("Confirmation finale : envoyer uniquement la RFQ Hilti Lot 1 autorisee a Customercare.za@hilti.com ?");
+  if (!confirmed) return;
+  button.disabled = true;
+  statusRegion.textContent = "Envoi de l'unique RFQ autorisee via Gmail API...";
+  try {
+    const result = await api("/api/nexus-gmail?action=send-authorized-rfq", {
+      method: "POST",
+      body: JSON.stringify({ workflowId: id, rfqId })
+    });
+    await refresh();
+    await viewWorkflow(id);
+    statusRegion.textContent = `RFQ Hilti envoyee et journalisee. Gmail ID : ${result.gmailMessageId || result.provider_message_id || "obtenu"}.`;
+  } catch (error) {
+    statusRegion.textContent = error.message;
+    button.disabled = false;
+  }
+}
+
 async function submitEoiConfirmation(button) {
   const section = document.getElementById("validation-sheet");
   const id = section.dataset.workflowId;
@@ -962,6 +984,8 @@ document.getElementById("validation-content").addEventListener("click", (event) 
   }
   const authorizeButton = event.target.closest("[data-request-rfq-authorization]");
   if (authorizeButton) openRfqAuthorization(authorizeButton);
+  const sendButton = event.target.closest("[data-send-authorized-rfq]");
+  if (sendButton) sendAuthorizedRfq(sendButton);
   const editButton = event.target.closest("[data-edit-rfq]");
   if (editButton) {
     const detail = document.getElementById(editButton.dataset.editRfq);
