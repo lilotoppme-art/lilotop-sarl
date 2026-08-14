@@ -282,6 +282,9 @@ function supplierCycleMarkup(cycle, workflow) {
         <p><span>Couverture</span><strong>${escapeHtml(rfq.coverageStatus)}</strong></p>
         <p><span>Date de preparation</span><strong>${escapeHtml(new Date(rfq.preparedAt).toLocaleString("fr-FR"))}</strong></p>
         <p><span>Date limite de reponse</span><strong>${escapeHtml(rfq.responseDeadlineLabel || rfq.responseDeadline || "A FIXER PAR LE DG")}</strong></p>
+        ${rfq.sentAt ? `<p><span>Date d'envoi</span><strong>${escapeHtml(new Date(rfq.sentAt).toLocaleString("fr-FR"))}</strong></p>` : ""}
+        ${rfq.gmailMessageId ? `<p><span>Gmail ID</span><strong>${escapeHtml(rfq.gmailMessageId)}</strong></p>` : ""}
+        ${rfq.messageIdHeader ? `<p><span>Gmail Message-ID</span><strong>${escapeHtml(rfq.messageIdHeader)}</strong></p>` : ""}
       </div>
       <p><a href="${escapeHtml(rfq.contact.source)}" target="_blank" rel="noopener noreferrer">Source officielle des coordonnees</a></p>
       <p><a href="${escapeHtml(rfq.contact.catalogSource || rfq.contact.website)}" target="_blank" rel="noopener noreferrer">Source officielle de couverture produit</a></p>

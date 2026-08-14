@@ -193,6 +193,7 @@ function testInterfaceAndRoutes() {
   assert.match(client, /AUTORISER L'ENVOI PILOTE/);
   assert.match(client, /ENVOYER LA RFQ AUTORISEE/);
   assert.match(client, /send-authorized-rfq/);
+  assert.match(client, /Gmail Message-ID/);
   assert.match(client, /rfq-pilot-final-confirmation-dialog/);
   assert.match(html, /Deuxieme confirmation obligatoire/);
   assert.match(html, /CONFIRMER L'AUTORISATION PILOTE/);
