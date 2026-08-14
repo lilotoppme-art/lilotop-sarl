@@ -88,6 +88,8 @@ function run() {
   const orchestratorStoreSource = fs.readFileSync(path.join(__dirname, "..", "lib", "nexus", "orchestrator-store.js"), "utf8");
   assert.match(handlerSource, /in:inbox -in:sent newer_than:30d/);
   assert.match(handlerSource, /excludeOutboundMessages/);
+  assert.match(handlerSource, /excludeInternalMessages/);
+  assert.match(handlerSource, /internalMailboxes\.includes\(senderMailbox\)/);
   assert.match(orchestratorStoreSource, /rfq_id <> 'NEXUS-INTERNAL-EMAIL-ROUTING-TEST'/);
   assert.match(handlerSource, /includes\("SENT"\)/);
 
