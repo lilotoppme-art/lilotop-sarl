@@ -163,12 +163,18 @@ async function run() {
     assert.equal(officialCycle.counts.priorityA, 9);
     assert.equal(officialCycle.counts.priorityB, 6);
     assert.equal(officialCycle.counts.priorityC, 1);
-    assert.equal(officialCycle.counts.recommended, 13);
+    assert.equal(officialCycle.counts.recommended, 15);
     assert.ok(officialCycle.rfqs.filter((rfq) => rfq.sendRecommendation === "OUI").every((rfq) => rfq.rfqPdfReady));
     const replacements = officialCycle.rfqs.filter((rfq) => rfq.priority === "REMPLACEMENT");
     assert.equal(replacements.length, 4);
-    assert.ok(replacements.every((rfq) => rfq.sendRecommendation === "NON - NOUVELLE AUTORISATION DG REQUISE"));
-    assert.ok(replacements.every((rfq) => rfq.authorizationConfirmation.blockedUntilNewDgAuthorization));
+    assert.deepEqual(
+      replacements.filter((rfq) => rfq.sendRecommendation === "OUI").map((rfq) => rfq.supplier).sort(),
+      ["Enerpac Official Enquiry", "Mundo Ladders"]
+    );
+    assert.deepEqual(
+      replacements.filter((rfq) => rfq.authorizationConfirmation.blockedUntilNewDgAuthorization).map((rfq) => rfq.supplier).sort(),
+      ["SAIVS Tools", "Walch Engineering"]
+    );
     assert.deepEqual(replacements.find((rfq) => rfq.supplier === "Mundo Ladders").products.map((item) => [item.itemNumber, item.quantity]), [[3, 5], [5, 51], [6, 5]]);
     assert.equal(replacements.find((rfq) => rfq.supplier === "Enerpac Official Enquiry").contact.email, "info@enerpac.com");
   }
