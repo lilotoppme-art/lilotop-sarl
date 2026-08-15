@@ -50,16 +50,22 @@
           <h1>Coffre documentaire</h1>
           <p>Centralisez les pièces administratives et techniques utilisées pour contrôler la conformité des appels d'offres.</p>
         </div>
-        <span class="agent-status">Accès privé</span>
+        <div class="vault-heading-actions">
+          <span class="agent-status">Accès privé</span>
+          <a class="button button-primary" href="#vault-upload-form">+ AJOUTER UN DOCUMENT</a>
+        </div>
       </section>
 
       <p class="global-status" id="vault-status" role="status" aria-live="polite"></p>
 
       <section class="vault-summary" aria-label="État du coffre">
-        <article><span>Documents</span><strong id="vault-total">0</strong></article>
-        <article><span>Valides</span><strong id="vault-valid">0</strong></article>
-        <article><span>À renouveler</span><strong id="vault-expiring">0</strong></article>
+        <article><span>Documents totaux</span><strong id="vault-total">0</strong></article>
+        <article><span>Documents valides</span><strong id="vault-valid">0</strong></article>
+        <article><span>À vérifier</span><strong id="vault-review">0</strong></article>
+        <article><span>Expirant bientôt</span><strong id="vault-expiring">0</strong></article>
         <article><span>Expirés</span><strong id="vault-expired">0</strong></article>
+        <article><span>Expériences</span><strong id="vault-experiences">0</strong></article>
+        <article><span>AO utilisant le coffre</span><strong id="vault-tenders">0</strong></article>
       </section>
 
       <section class="workspace-panel vault-upload-panel">
@@ -74,26 +80,45 @@
           <input id="vault-document-id" name="documentId" type="hidden">
           <div class="vault-form-grid">
             <label class="file-drop" for="vault-file">
-              <strong>PDF, DOCX, XLSX ou ZIP</strong>
+              <strong>PDF, DOCX, XLSX, JPG, JPEG ou PNG</strong>
               <span>Un fichier, 3 Mo maximum.</span>
-              <input id="vault-file" name="vaultFile" type="file" accept=".pdf,.docx,.xlsx,.zip" required>
+              <input id="vault-file" name="vaultFile" type="file" accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png" required>
               <span class="selected-file" id="vault-selected-file">Aucun fichier sélectionné</span>
             </label>
             <div class="vault-fields">
               <label>Titre du document
                 <input id="vault-title" name="title" maxlength="240" required>
               </label>
-              <label>Catégorie
-                <select id="vault-category" name="category" required>
-                  <option value="administrative">Administratif</option>
-                  <option value="legal">Juridique</option>
-                  <option value="fiscal">Fiscal</option>
-                  <option value="hse">HSE</option>
-                  <option value="technical">Technique</option>
-                  <option value="financial">Financier</option>
-                  <option value="certification">Certification</option>
-                  <option value="reference">Référence</option>
-                  <option value="other">Autre</option>
+              <label>Catégorie proposée
+                <select id="vault-category" name="categoryCode">
+                  <option value="">Analyse automatique</option>
+                  <option value="01-legal-identity">01 — Identité légale</option>
+                  <option value="02-compliance">02 — Conformité</option>
+                  <option value="03-bank-finance">03 — Banque &amp; finance</option>
+                  <option value="04-experience-references">04 — Expériences &amp; références</option>
+                  <option value="05-lilotop-organization">05 — Organisation LILOTOP</option>
+                  <option value="06-suppliers-partners">06 — Fournisseurs / OEM / partenaires</option>
+                  <option value="07-other">07 — Autres documents</option>
+                </select>
+              </label>
+              <label>Type documentaire
+                <input id="vault-document-type" name="documentType" maxlength="120" placeholder="Détecté automatiquement">
+              </label>
+              <label>Référence / numéro
+                <input id="vault-reference" name="reference" maxlength="240" placeholder="À confirmer si absent">
+              </label>
+              <label>Autorité / client
+                <input id="vault-authority" name="issuingAuthority" maxlength="240" placeholder="À confirmer si absent">
+              </label>
+              <label>Source
+                <input id="vault-source" name="source" maxlength="240" value="Import DG">
+              </label>
+              <label>Statut
+                <select id="vault-lifecycle" name="lifecycleStatus">
+                  <option value="needs_review">À vérifier</option>
+                  <option value="valid">Valide</option>
+                  <option value="incomplete">Incomplet</option>
+                  <option value="archived">Archivé</option>
                 </select>
               </label>
               <label>Version
@@ -137,26 +162,40 @@
             </label>
             <select id="vault-category-filter" aria-label="Filtrer par catégorie">
               <option value="">Toutes les catégories</option>
-              <option value="administrative">Administratif</option>
-              <option value="legal">Juridique</option>
-              <option value="fiscal">Fiscal</option>
-              <option value="hse">HSE</option>
-              <option value="technical">Technique</option>
-              <option value="financial">Financier</option>
-              <option value="certification">Certification</option>
-              <option value="reference">Référence</option>
-              <option value="other">Autre</option>
+              <option value="01-legal-identity">01 — Identité légale</option>
+              <option value="02-compliance">02 — Conformité</option>
+              <option value="03-bank-finance">03 — Banque &amp; finance</option>
+              <option value="04-experience-references">04 — Expériences &amp; références</option>
+              <option value="05-lilotop-organization">05 — Organisation LILOTOP</option>
+              <option value="06-suppliers-partners">06 — Fournisseurs / OEM / partenaires</option>
+              <option value="07-other">07 — Autres documents</option>
             </select>
             <select id="vault-status-filter" aria-label="Filtrer par statut">
               <option value="">Tous les statuts</option>
               <option value="valid">Valides</option>
+              <option value="needs_review">À vérifier</option>
+              <option value="expiring">Expirant bientôt</option>
               <option value="expired">Expirés</option>
+              <option value="incomplete">Incomplets</option>
+              <option value="archived">Archivés</option>
             </select>
           </div>
         </div>
         <div class="vault-list" id="vault-list">
           <p class="empty-message">Aucun document enregistré.</p>
         </div>
+      </section>
+
+      <section class="workspace-panel vault-list-panel" id="vault-experience-audit">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Expériences &amp; références</p>
+            <h2>Contrôle UNOPS ITB/2026/62389</h2>
+          </div>
+          <span class="vault-badge">2 PO/contrats par lot · 2021-2025</span>
+        </div>
+        <p>Seuls les fichiers réels validés par le DG et prouvant une livraison réussie peuvent devenir conformes.</p>
+        <div id="vault-unops-audit"><p class="empty-message">Chargement du contrôle des expériences.</p></div>
       </section>
 
       <dialog id="vault-preview-dialog">
@@ -182,6 +221,32 @@
           <button class="icon-button" id="vault-history-close" type="button" aria-label="Fermer">×</button>
         </div>
         <div class="vault-history" id="vault-history"></div>
+      </dialog>
+
+      <dialog id="vault-experience-dialog">
+        <div class="vault-dialog-header">
+          <div><p class="eyebrow">Validation humaine</p><h2 id="vault-experience-title">Expérience LILOTOP</h2></div>
+          <button class="icon-button" id="vault-experience-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <form id="vault-experience-form" class="vault-experience-form">
+          <input id="experience-document-id" type="hidden">
+          <label>Client<input id="experience-client" maxlength="240"></label>
+          <label>Objet<input id="experience-subject" maxlength="500"></label>
+          <label>Secteur<input id="experience-sector" maxlength="240"></label>
+          <label>Produits / services<textarea id="experience-products" rows="2" maxlength="1000"></textarea></label>
+          <label>Numéro contrat / PO<input id="experience-contract-number" maxlength="240"></label>
+          <label>Date<input id="experience-date" type="date"></label>
+          <label>Période d'exécution<input id="experience-period" maxlength="240"></label>
+          <label>Valeur<input id="experience-value" maxlength="120"></label>
+          <label>Devise<input id="experience-currency" maxlength="12"></label>
+          <label>Pays<input id="experience-country" maxlength="120"></label>
+          <label>Statut d'exécution<input id="experience-status" maxlength="240"></label>
+          <label>Contact client<textarea id="experience-contact" rows="2" maxlength="500"></textarea></label>
+          <label class="vault-check"><input id="experience-delivery-proof" type="checkbox"> Preuve de livraison disponible</label>
+          <label class="vault-check"><input id="experience-performance-proof" type="checkbox"> Certificat de bonne exécution disponible</label>
+          <label class="vault-check"><input id="experience-dg-validated" type="checkbox"> Je confirme que ces informations correspondent au document réel</label>
+          <div class="vault-dialog-actions"><button class="button button-primary" type="submit">Enregistrer la validation DG</button></div>
+        </form>
       </dialog>
     </main>
   </div>

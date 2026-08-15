@@ -5,7 +5,8 @@ const fs = require("fs");
 const path = require("path");
 const AdmZip = require("adm-zip");
 const ExcelJS = require("exceljs");
-const { prepareVaultFile } = require("../lib/nexus/document-vault-files");
+const { analyzeVaultDocument, prepareVaultFile } = require("../lib/nexus/document-vault-files");
+const { buildUnopsExperienceAudit } = require("../lib/nexus/document-vault-matching");
 
 const root = path.resolve(__dirname, "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
@@ -38,8 +39,35 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(archive.previewText.includes("RCCM.pdf"));
   assert.ok(archive.previewText.includes("politique.docx"));
 
+  const image = await prepareVaultFile({
+    filename: "preuve-livraison.jpg",
+    contentType: "image/jpeg",
+    buffer: Buffer.from([0xff, 0xd8, 0xff, 0xd9])
+  });
+  assert.strictEqual(image.extension, "jpg");
+  const analysis = analyzeVaultDocument({
+    ...image,
+    sourceFilename: "PO-2024-client-minier.jpg",
+    previewText: "Client: Mine Example\nObjet: Fourniture de câbles électriques\nDate: 2024-04-12"
+  });
+  assert.strictEqual(analysis.categoryCode, "04-experience-references");
+  assert.strictEqual(analysis.experience.client, "Mine Example");
+  assert.strictEqual(analysis.experience.value, "");
+
+  const audit = buildUnopsExperienceAudit([{
+    id: "experience-1", title: "PO câbles", description: "Fourniture électrique",
+    categoryCode: "04-experience-references", filePresent: true, previewText: "livré avec succès",
+    sourceFilename: "po.pdf", experience: {
+      subject: "Fourniture de câbles électriques", contract_date: "2024-04-12",
+      execution_status: "Livré avec succès", dg_validated: false
+    }
+  }]);
+  assert.strictEqual(audit.rows[0].lots[2].status, "À CONFIRMER");
+  assert.strictEqual(audit.lots[1].confirmed, 0);
+
   const migration = read("db/migrations/011_document_vault.sql");
   const inventoryMigration = read("db/migrations/016_document_vault_inventory.sql");
+  const permanentMigration = read("db/migrations/018_document_vault_permanent.sql");
   assert.ok(migration.includes("CREATE TABLE IF NOT EXISTS document_vault_documents"));
   assert.ok(migration.includes("CREATE TABLE IF NOT EXISTS document_vault_versions"));
   assert.ok(migration.includes("file_data bytea NOT NULL"));
@@ -50,6 +78,8 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(inventoryMigration.includes("organization_name"));
   assert.ok(!inventoryMigration.includes("DROP TABLE"));
   assert.ok(!inventoryMigration.includes("DELETE FROM"));
+  assert.ok(permanentMigration.includes("document_vault_experiences"));
+  assert.ok(permanentMigration.includes("document_vault_tender_links"));
   const profileStore = read("lib/nexus/organization-profile-store.js");
   assert.ok(profileStore.includes("nexus_organization_credentials"));
   assert.ok(profileStore.includes("confirmation_source"));
@@ -68,10 +98,15 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(handler.includes('action === "preview"'));
   assert.ok(handler.includes('action === "file"'));
   assert.ok(handler.includes('action === "inventory"'));
+  assert.ok(handler.includes('action === "unops-experience-audit"'));
+  assert.ok(handler.includes('action !== "validate-experience"'));
+  assert.ok(handler.includes('req.method === "PATCH"'));
   assert.ok(!handler.includes("DELETE FROM"));
 
   const shell = read("admin/document-vault-shell.html");
-  assert.ok(shell.includes('accept=".pdf,.docx,.xlsx,.zip"'));
+  assert.ok(shell.includes('accept=".pdf,.docx,.xlsx,.jpg,.jpeg,.png"'));
+  assert.ok(shell.includes("04 — Expériences &amp; références"));
+  assert.ok(read("admin/document-vault.js").includes("Finalisé pour soumission"));
   assert.ok(shell.includes("Date de délivrance"));
   assert.ok(shell.includes("Date d'expiration"));
   assert.ok(shell.includes("Historique des versions"));

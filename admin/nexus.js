@@ -268,6 +268,39 @@ async function loadOrchestratorDashboard() {
   }
 }
 
+async function loadDocumentVaultDashboard() {
+  const target = document.getElementById("vault-dashboard-content");
+  const status = document.getElementById("vault-dashboard-status");
+  try {
+    const response = await fetch(`/api/document-vault?action=dashboard&_=${Date.now()}`, { cache: "no-store" });
+    const payload = await response.json();
+    if (!response.ok || !payload.ok) throw new Error(payload.error || "Coffre indisponible");
+    const summary = payload.data;
+    status.textContent = "Opérationnel";
+    status.className = "status status-active";
+    target.innerHTML = `
+      <div class="commercial-dashboard-stats">
+        <div><span>Documents totaux</span><strong>${escapeHtml(summary.total)}</strong></div>
+        <div><span>Valides</span><strong>${escapeHtml(summary.valid)}</strong></div>
+        <div><span>À vérifier</span><strong>${escapeHtml(summary.needsReview)}</strong></div>
+        <div><span>Expirant bientôt</span><strong>${escapeHtml(summary.expiring)}</strong></div>
+        <div><span>Expirés</span><strong>${escapeHtml(summary.expired)}</strong></div>
+        <div><span>Expériences</span><strong>${escapeHtml(summary.experiences)}</strong></div>
+        <div><span>AO utilisant le coffre</span><strong>${escapeHtml(summary.tendersUsingVault)}</strong></div>
+      </div>
+      <div class="vault-dashboard-actions">
+        <a class="button button-primary button-inline" href="/admin/nexus/document-vault#vault-upload-form">+ AJOUTER UN DOCUMENT</a>
+        <a class="button button-secondary button-inline" href="/admin/nexus/document-vault">VOIR LE COFFRE</a>
+        <a class="button button-secondary button-inline" href="/admin/nexus/document-vault?category=04-experience-references">EXPÉRIENCES</a>
+        <a class="button button-secondary button-inline" href="/admin/nexus/document-vault?status=expiring">DOCUMENTS EXPIRANTS</a>
+      </div>`;
+  } catch (error) {
+    status.textContent = "Indisponible";
+    status.className = "status status-coming";
+    target.innerHTML = `<p>${escapeHtml(error.message)}</p>`;
+  }
+}
+
 async function loadCrmDashboard() {
   try {
     const response = await fetch(`/api/crm?action=dashboard&_=${Date.now()}`, { cache: "no-store" });
@@ -468,6 +501,7 @@ async function authenticate(event) {
     loadOrchestratorDashboard();
     loadCrmDashboard();
     loadEmailDeliveryJournal();
+    loadDocumentVaultDashboard();
   } catch (error) {
     loginStatus.textContent = error.message;
   }
@@ -495,6 +529,7 @@ if (body.dataset.authenticated === "true") {
   loadOrchestratorDashboard();
   loadCrmDashboard();
   loadEmailDeliveryJournal();
+  loadDocumentVaultDashboard();
 }
 
 loginForm.addEventListener("submit", authenticate);

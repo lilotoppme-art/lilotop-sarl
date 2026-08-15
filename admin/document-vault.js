@@ -10,15 +10,18 @@ const uploadForm = document.getElementById("vault-upload-form");
 const state = { documents: [], selected: null };
 
 const categoryLabels = {
-  administrative: "Administratif",
-  legal: "Juridique",
-  fiscal: "Fiscal",
-  hse: "HSE",
-  technical: "Technique",
-  financial: "Financier",
-  certification: "Certification",
-  reference: "Référence",
-  other: "Autre"
+  "01-legal-identity": "01 — Identité légale",
+  "02-compliance": "02 — Conformité",
+  "03-bank-finance": "03 — Banque & finance",
+  "04-experience-references": "04 — Expériences & références",
+  "05-lilotop-organization": "05 — Organisation LILOTOP",
+  "06-suppliers-partners": "06 — Fournisseurs / OEM / partenaires",
+  "07-other": "07 — Autres documents"
+};
+
+const statusLabels = {
+  valid: "Valide", needs_review: "À vérifier", expiring: "Expire bientôt",
+  expired: "Expiré", incomplete: "Incomplet", archived: "Archivé"
 };
 
 function escapeHtml(value) {
@@ -53,7 +56,8 @@ function formatBytes(value) {
 async function api(action, options = {}) {
   const response = await fetch(`/api/document-vault?action=${encodeURIComponent(action)}${options.query || ""}`, {
     method: options.method || "GET",
-    body: options.body
+    body: options.body,
+    headers: options.headers
   });
   if (options.raw) {
     if (!response.ok) throw new Error("Téléchargement impossible");
@@ -68,19 +72,31 @@ async function api(action, options = {}) {
   return payload.data;
 }
 
-function updateSummary() {
-  const valid = state.documents.filter((item) => item.status === "valid").length;
-  const today = Date.now();
-  const sixtyDays = 60 * 24 * 60 * 60 * 1000;
-  const expiring = state.documents.filter((item) => {
-    const expires = item.expiresOn ? new Date(item.expiresOn).getTime() : 0;
-    return expires >= today && expires - today <= sixtyDays;
-  }).length;
-  document.getElementById("vault-total").textContent = state.documents.length;
-  document.getElementById("vault-valid").textContent = valid;
-  document.getElementById("vault-expiring").textContent = expiring;
-  document.getElementById("vault-expired").textContent =
-    state.documents.filter((item) => item.status === "expired").length;
+function updateSummary(summary) {
+  document.getElementById("vault-total").textContent = summary.total;
+  document.getElementById("vault-valid").textContent = summary.valid;
+  document.getElementById("vault-review").textContent = summary.needsReview;
+  document.getElementById("vault-expiring").textContent = summary.expiring;
+  document.getElementById("vault-expired").textContent = summary.expired;
+  document.getElementById("vault-experiences").textContent = summary.experiences;
+  document.getElementById("vault-tenders").textContent = summary.tendersUsingVault;
+}
+
+function confirmation(value) {
+  return value ? escapeHtml(value) : "À CONFIRMER";
+}
+
+function experienceDetails(item) {
+  if (!item.experience) return "";
+  const experience = item.experience;
+  return `<div class="vault-experience">
+    <strong>Expérience extraite — validation DG requise</strong>
+    <span>Client : ${confirmation(experience.client_name)}</span>
+    <span>Objet : ${confirmation(experience.subject)}</span>
+    <span>Contrat / PO : ${confirmation(experience.contract_number)}</span>
+    <span>Valeur : ${confirmation(experience.contract_value)} ${confirmation(experience.currency)}</span>
+    <span>Statut : ${experience.dg_validated ? "Validée par le DG" : "À confirmer par le DG"}</span>
+  </div>`;
 }
 
 function renderDocuments() {
@@ -89,29 +105,35 @@ function renderDocuments() {
     <article class="vault-document ${item.status === "expired" ? "is-expired" : ""} ${item.usableInTenders ? "is-usable" : "is-unusable"}">
       <div>
         <h3>${escapeHtml(item.title)}</h3>
-        <p>${escapeHtml(categoryLabels[item.category] || item.category)} · ${escapeHtml(item.sourceFilename)}</p>
+        <p>${escapeHtml(categoryLabels[item.categoryCode] || item.categoryCode)} · ${escapeHtml(item.sourceFilename)}</p>
         <small>${escapeHtml(item.description || "Aucune description")}</small>
         <div class="vault-proof">
-          <span>Fichier réel : <strong>${item.filePresent ? "Oui" : "Non"}</strong></span>
+          <span>Disponible : <strong>${item.filePresent ? "OUI" : "NON"}</strong></span>
+          <span>Conforme au DAO : <strong>${item.tenderUses?.some((use) => use.compliance === "compliant") ? "OUI" : "À VÉRIFIER"}</strong></span>
+          <span>Finalisé pour soumission : <strong>${item.tenderUses?.some((use) => use.finalization === "finalized") ? "OUI" : "NON"}</strong></span>
           <span>Organisation : <strong>${escapeHtml(item.organizationName || "Non associée")}</strong></span>
-          <span>Emplacement : <strong>${escapeHtml(item.storageLocation || "Non renseigné")}</strong></span>
+          <span>Référence : <strong>${confirmation(item.reference)}</strong></span>
+          <span>Autorité / client : <strong>${confirmation(item.issuingAuthority)}</strong></span>
+          <span>Source : <strong>${confirmation(item.source)}</strong></span>
           <span>Utilisable AO : <strong>${item.usableInTenders ? "Oui" : "Non"}</strong></span>
         </div>
+        ${experienceDetails(item)}
       </div>
       <div class="vault-meta"><span>Version</span><strong>${escapeHtml(item.version)}</strong></div>
       <div class="vault-meta"><span>Délivré</span><strong>${escapeHtml(item.issuedOn ? formatDate(item.issuedOn) : "Non renseigné")}</strong></div>
       <div class="vault-meta">
-        <span>Expiration</span>
-        <strong class="vault-status ${escapeHtml(item.status)}">${escapeHtml(item.expiresOn ? formatDate(item.expiresOn) : "Sans expiration")}</strong>
+        <span>Statut / expiration</span>
+        <strong class="vault-status ${escapeHtml(item.status)}">${escapeHtml(statusLabels[item.status] || item.status)}</strong>
+        <small>${escapeHtml(item.expiresOn ? formatDate(item.expiresOn) : "Sans expiration")}</small>
       </div>
       <div class="vault-actions">
         <button type="button" data-preview="${escapeHtml(item.versionId)}">Aperçu</button>
         <button type="button" data-history="${escapeHtml(item.id)}">Historique</button>
         <button type="button" data-replace="${escapeHtml(item.id)}">Remplacer</button>
+        ${item.experience ? `<button type="button" data-experience="${escapeHtml(item.id)}">Corriger / valider l'expérience</button>` : ""}
       </div>
     </article>
   `).join("") : '<p class="empty-message">Aucun document enregistré.</p>';
-  updateSummary();
 }
 
 async function loadDocuments() {
@@ -120,8 +142,30 @@ async function loadDocuments() {
     category: document.getElementById("vault-category-filter").value,
     status: document.getElementById("vault-status-filter").value
   });
-  state.documents = await api("list", { query: `&${params}` });
+  const [documents, summary, unopsAudit] = await Promise.all([
+    api("list", { query: `&${params}` }),
+    api("dashboard"),
+    api("unops-experience-audit")
+  ]);
+  state.documents = documents;
   renderDocuments();
+  updateSummary(summary);
+  renderUnopsAudit(unopsAudit);
+}
+
+function renderUnopsAudit(audit) {
+  const target = document.getElementById("vault-unops-audit");
+  const lotSummary = audit.lots.map((lot) => `
+    <article><span>Lot ${escapeHtml(lot.lot)} · ${escapeHtml(lot.label)}</span>
+      <strong>${escapeHtml(lot.confirmed)}/${escapeHtml(lot.required)}</strong>
+      <small>${lot.compliant ? "CONFORME" : "PREUVES MANQUANTES"}</small></article>`).join("");
+  const rows = audit.rows.length ? `<div class="vault-audit-table"><table>
+    <thead><tr><th>Expérience réelle</th><th>Lot 1</th><th>Lot 2</th><th>Lot 10</th><th>Justification</th></tr></thead>
+    <tbody>${audit.rows.map((row) => `<tr><td>${escapeHtml(row.experience)}<small>${escapeHtml(row.sourceFilename)}</small></td>
+      <td>${escapeHtml(row.lots[1].status)}</td><td>${escapeHtml(row.lots[2].status)}</td><td>${escapeHtml(row.lots[10].status)}</td>
+      <td>${escapeHtml([row.lots[1], row.lots[2], row.lots[10]].map((item) => item.justification).filter((value, index, values) => values.indexOf(value) === index).join(" | "))}</td></tr>`).join("")}</tbody>
+  </table></div>` : '<p class="empty-message">Aucun contrat ou PO réel n’est actuellement enregistré dans le Coffre.</p>';
+  target.innerHTML = `<div class="vault-audit-lots">${lotSummary}</div>${rows}`;
 }
 
 function resetReplacement() {
@@ -139,7 +183,13 @@ function startReplacement(documentId) {
   state.selected = item;
   document.getElementById("vault-document-id").value = item.id;
   document.getElementById("vault-title").value = item.title;
-  document.getElementById("vault-category").value = item.category;
+  document.getElementById("vault-category").value = item.categoryCode;
+  document.getElementById("vault-document-type").value = item.documentType || "";
+  document.getElementById("vault-reference").value = item.reference || "";
+  document.getElementById("vault-authority").value = item.issuingAuthority || "";
+  document.getElementById("vault-source").value = item.source || "Import DG";
+  document.getElementById("vault-lifecycle").value = ["expiring", "expired"].includes(item.status)
+    ? "needs_review" : item.status;
   document.getElementById("vault-description").value = item.description || "";
   document.getElementById("vault-version").value = "";
   document.getElementById("vault-issued-on").value = item.issuedOn ? String(item.issuedOn).slice(0, 10) : "";
@@ -160,7 +210,9 @@ async function showPreview(versionId) {
   const content = document.getElementById("vault-preview-content");
   content.innerHTML = item.extension === "pdf"
     ? `<iframe title="Aperçu PDF de ${escapeHtml(item.title)}" src="/api/document-vault?action=file&disposition=inline&version=${encodeURIComponent(versionId)}"></iframe>`
-    : `<pre>${escapeHtml(item.previewText || "Aucun aperçu textuel disponible. Téléchargez le fichier pour le consulter.")}</pre>`;
+    : ["jpg", "jpeg", "png"].includes(item.extension)
+      ? `<img class="vault-image-preview" alt="Aperçu de ${escapeHtml(item.title)}" src="/api/document-vault?action=file&disposition=inline&version=${encodeURIComponent(versionId)}">`
+      : `<pre>${escapeHtml(item.previewText || "Aucun aperçu textuel disponible. Téléchargez le fichier pour le consulter.")}</pre>`;
   dialog.showModal();
 }
 
@@ -178,6 +230,60 @@ async function showHistory(documentId) {
     </article>
   `).join("");
   dialog.showModal();
+}
+
+function editExperience(documentId) {
+  const item = state.documents.find((document) => document.id === documentId);
+  if (!item?.experience) return;
+  const value = item.experience;
+  document.getElementById("vault-experience-title").textContent = `Expérience · ${item.title}`;
+  document.getElementById("experience-document-id").value = item.id;
+  document.getElementById("experience-client").value = value.client_name || "";
+  document.getElementById("experience-subject").value = value.subject || "";
+  document.getElementById("experience-sector").value = value.sector || "";
+  document.getElementById("experience-products").value = value.products_services || "";
+  document.getElementById("experience-contract-number").value = value.contract_number || "";
+  document.getElementById("experience-date").value = value.contract_date ? String(value.contract_date).slice(0, 10) : "";
+  document.getElementById("experience-period").value = value.execution_period || "";
+  document.getElementById("experience-value").value = value.contract_value || "";
+  document.getElementById("experience-currency").value = value.currency || "";
+  document.getElementById("experience-country").value = value.country || "";
+  document.getElementById("experience-status").value = value.execution_status || "";
+  document.getElementById("experience-contact").value = value.client_contact || "";
+  document.getElementById("experience-delivery-proof").checked = Boolean(value.delivery_proof_available);
+  document.getElementById("experience-performance-proof").checked = Boolean(value.performance_certificate_available);
+  document.getElementById("experience-dg-validated").checked = Boolean(value.dg_validated);
+  document.getElementById("vault-experience-dialog").showModal();
+}
+
+async function saveExperience(event) {
+  event.preventDefault();
+  const field = (id) => document.getElementById(id).value;
+  setStatus("Enregistrement de la validation de l'expérience…");
+  try {
+    await api("validate-experience", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        documentId: field("experience-document-id"), clientName: field("experience-client"),
+        subject: field("experience-subject"), sector: field("experience-sector"),
+        productsServices: field("experience-products"), contractNumber: field("experience-contract-number"),
+        contractDate: field("experience-date"), executionPeriod: field("experience-period"),
+        contractValue: field("experience-value"), currency: field("experience-currency"),
+        country: field("experience-country"), executionStatus: field("experience-status"),
+        clientContact: field("experience-contact"),
+        deliveryProofAvailable: document.getElementById("experience-delivery-proof").checked,
+        performanceCertificateAvailable: document.getElementById("experience-performance-proof").checked,
+        dgValidated: document.getElementById("experience-dg-validated").checked
+      })
+    });
+    document.getElementById("vault-experience-dialog").close();
+    await loadDocuments();
+    setStatus("Expérience mise à jour. Le fichier original n'a pas été modifié.");
+    body.classList.remove("is-busy");
+  } catch (error) {
+    body.classList.remove("is-busy");
+    setStatus(error.message, true);
+  }
 }
 
 async function uploadDocument(event) {
@@ -230,18 +336,25 @@ document.getElementById("vault-file").addEventListener("change", (event) => {
   const file = event.target.files[0];
   document.getElementById("vault-selected-file").textContent =
     file ? `${file.name} · ${formatBytes(file.size)}` : "Aucun fichier sélectionné";
+  if (file && !document.getElementById("vault-title").value) {
+    document.getElementById("vault-title").value = file.name.replace(/\.[^.]+$/, "");
+  }
 });
 document.getElementById("vault-list").addEventListener("click", (event) => {
   const preview = event.target.closest("[data-preview]");
   const history = event.target.closest("[data-history]");
   const replace = event.target.closest("[data-replace]");
+  const experience = event.target.closest("[data-experience]");
   if (preview) showPreview(preview.dataset.preview).catch((error) => setStatus(error.message, true));
   if (history) showHistory(history.dataset.history).catch((error) => setStatus(error.message, true));
   if (replace) startReplacement(replace.dataset.replace);
+  if (experience) editExperience(experience.dataset.experience);
 });
 document.getElementById("vault-cancel-replacement").addEventListener("click", resetReplacement);
 document.getElementById("vault-preview-close").addEventListener("click", () => document.getElementById("vault-preview-dialog").close());
 document.getElementById("vault-history-close").addEventListener("click", () => document.getElementById("vault-history-dialog").close());
+document.getElementById("vault-experience-close").addEventListener("click", () => document.getElementById("vault-experience-dialog").close());
+document.getElementById("vault-experience-form").addEventListener("submit", saveExperience);
 document.getElementById("vault-logout").addEventListener("click", async () => {
   await fetch("/api/business-radar-auth", { method: "DELETE" });
   setAuthenticated(false);
@@ -251,4 +364,9 @@ uploadForm.addEventListener("submit", uploadDocument);
 
 const initiallyAuthenticated = body.dataset.authenticated === "true";
 setAuthenticated(initiallyAuthenticated);
-if (initiallyAuthenticated) loadDocuments().catch((error) => setStatus(error.message, true));
+if (initiallyAuthenticated) {
+  const params = new URLSearchParams(location.search);
+  if (params.get("category")) document.getElementById("vault-category-filter").value = params.get("category");
+  if (params.get("status")) document.getElementById("vault-status-filter").value = params.get("status");
+  loadDocuments().catch((error) => setStatus(error.message, true));
+}
