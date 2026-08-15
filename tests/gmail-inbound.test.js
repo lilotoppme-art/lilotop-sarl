@@ -62,6 +62,7 @@ function run() {
   assert.equal(classifiedQuote.category, "A. COTATION RECUE");
   assert.equal(classifiedQuote.quotationExploitable, true);
   assert.equal(gmail.classifySupplierResponse({ from: "mailer-daemon@example.test", subject: "Delivery Status Notification", bodyText: "Undeliverable" }).category, "F. MESSAGE AUTOMATIQUE");
+  assert.equal(gmail.classifySupplierResponse({ from: "support@example.test", subject: "Case Reference # 125", bodyText: "Thank you for contacting us. We have received your request and you should expect a response." }).category, "B. ACCUSE DE RECEPTION");
 
   const uncertain = gmail.processSupplierReply({
     gmailMessageId: "gmail-test-2", from: "unknown@example.test", subject: "Quotation", bodyText: "Thank you"
