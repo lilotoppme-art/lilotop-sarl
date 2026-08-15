@@ -71,6 +71,29 @@ function run() {
   assert.equal(enerpacBounce.recommendedAction, "CHERCHER FOURNISSEUR ALTERNATIF");
   assert.equal(gmail.classifySupplierResponse({ from: "support@example.test", subject: "Case Reference # 125", bodyText: "Thank you for contacting us. We have received your request and you should expect a response." }).category, "B. ACCUSE DE RECEPTION");
 
+  const reconciliation = gmail.reconcileRfqTracking([{
+    id: "rfq-old-enerpac", supplier: "Enerpac Africa", sentAt: "2026-08-14T22:41:24Z", deliveryStatus: "FAILED"
+  }, {
+    id: "rfq-new-enerpac", supplier: "Enerpac Official Enquiry", replacementFor: "Enerpac Africa", sentAt: "2026-08-15T01:56:38Z"
+  }, {
+    id: "rfq-schneider", supplier: "Schneider Electric", sentAt: "2026-08-14T22:41:59Z"
+  }], [{
+    rfqId: "rfq-old-enerpac", responseType: "F. MESSAGE AUTOMATIQUE", recommendedAction: "CHERCHER FOURNISSEUR ALTERNATIF"
+  }, {
+    rfqId: "rfq-schneider", responseType: "B. ACCUSE DE RECEPTION", quotationExploitable: false
+  }]);
+  assert.equal(reconciliation.stats.sendAttempts, 3);
+  assert.equal(reconciliation.stats.uniqueRfqs, 2);
+  assert.equal(reconciliation.stats.activeRfqs, 2);
+  assert.equal(reconciliation.stats.noBounceDetected, 2);
+  assert.equal(reconciliation.stats.deliveryFailed, 1);
+  assert.equal(reconciliation.stats.acknowledged, 1);
+  assert.equal(reconciliation.stats.responsesReceived, 0);
+  assert.equal(reconciliation.stats.quotationsReceived, 0);
+  assert.equal(reconciliation.rfqs.find((rfq) => rfq.id === "rfq-old-enerpac").trackingStatus, "DELIVERY FAILED");
+  assert.equal(reconciliation.rfqs.find((rfq) => rfq.id === "rfq-new-enerpac").trackingStatus, "NO BOUNCE DETECTED");
+  assert.equal(reconciliation.rfqs.find((rfq) => rfq.id === "rfq-schneider").trackingStatus, "ACKNOWLEDGED");
+
   const uncertain = gmail.processSupplierReply({
     gmailMessageId: "gmail-test-2", from: "unknown@example.test", subject: "Quotation", bodyText: "Thank you"
   }, rfqs);
