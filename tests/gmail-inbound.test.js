@@ -62,6 +62,13 @@ function run() {
   assert.equal(classifiedQuote.category, "A. COTATION RECUE");
   assert.equal(classifiedQuote.quotationExploitable, true);
   assert.equal(gmail.classifySupplierResponse({ from: "mailer-daemon@example.test", subject: "Delivery Status Notification", bodyText: "Undeliverable" }).category, "F. MESSAGE AUTOMATIQUE");
+  const enerpacBounce = gmail.classifySupplierResponse({
+    from: "postmaster@actuant.onmicrosoft.com",
+    subject: "Undeliverable: RFQ Enerpac",
+    bodyText: "550 5.7.133 RESOLVER.RST.SenderNotAuthenticatedForGroup"
+  });
+  assert.equal(enerpacBounce.category, "F. MESSAGE AUTOMATIQUE");
+  assert.equal(enerpacBounce.recommendedAction, "CHERCHER FOURNISSEUR ALTERNATIF");
   assert.equal(gmail.classifySupplierResponse({ from: "support@example.test", subject: "Case Reference # 125", bodyText: "Thank you for contacting us. We have received your request and you should expect a response." }).category, "B. ACCUSE DE RECEPTION");
 
   const uncertain = gmail.processSupplierReply({

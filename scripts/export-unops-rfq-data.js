@@ -10,7 +10,7 @@ async function main() {
   if (!fs.existsSync(source)) throw new Error("Official UNOPS Schedule of Requirements is unavailable");
   const extracted = await extractTenderTableDocument({ filename: path.basename(source), buffer: fs.readFileSync(source) });
   const cycle = buildSupplierCycle(extracted.text, {}, new Date());
-  const selected = cycle.rfqs.filter((rfq) => rfq.sendRecommendation === "OUI");
+  const selected = cycle.rfqs.filter((rfq) => rfq.sendRecommendation === "OUI" || rfq.priority === "REMPLACEMENT");
   process.stdout.write(JSON.stringify(selected));
 }
 

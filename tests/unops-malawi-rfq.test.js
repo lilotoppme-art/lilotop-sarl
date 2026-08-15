@@ -139,8 +139,8 @@ async function run() {
     const officialCycle = buildSupplierCycle(official.text, {}, new Date("2026-08-13T12:00:00.000Z"));
     assert.deepEqual(officialCycle.lots.map((lot) => lot.products.length), [20, 54, 9]);
     assert.equal(officialCycle.counts.products, 83);
-    assert.equal(officialCycle.counts.prepared, 17);
-    assert.equal(officialCycle.counts.readyForDgReview, 17);
+    assert.equal(officialCycle.counts.prepared, 21);
+    assert.equal(officialCycle.counts.readyForDgReview, 21);
     assert.equal(officialCycle.counts.sent, 0);
     assert.equal(officialCycle.counts.received, 0);
     assert.equal(officialCycle.pilot.lineCount, 6);
@@ -165,6 +165,12 @@ async function run() {
     assert.equal(officialCycle.counts.priorityC, 1);
     assert.equal(officialCycle.counts.recommended, 13);
     assert.ok(officialCycle.rfqs.filter((rfq) => rfq.sendRecommendation === "OUI").every((rfq) => rfq.rfqPdfReady));
+    const replacements = officialCycle.rfqs.filter((rfq) => rfq.priority === "REMPLACEMENT");
+    assert.equal(replacements.length, 4);
+    assert.ok(replacements.every((rfq) => rfq.sendRecommendation === "NON - NOUVELLE AUTORISATION DG REQUISE"));
+    assert.ok(replacements.every((rfq) => rfq.authorizationConfirmation.blockedUntilNewDgAuthorization));
+    assert.deepEqual(replacements.find((rfq) => rfq.supplier === "Mundo Ladders").products.map((item) => [item.itemNumber, item.quantity]), [[3, 5], [5, 51], [6, 5]]);
+    assert.equal(replacements.find((rfq) => rfq.supplier === "Enerpac Official Enquiry").contact.email, "info@enerpac.com");
   }
 
   assert.throws(() => recordSupplierQuotation(cycle, {
@@ -213,6 +219,24 @@ async function run() {
     ...cycle,
     rfqs: cycle.rfqs.map((rfq, index) => index === authorizedTargetIndex ? { ...rfq, sendRecommendation: "NON", directEmailVerified: false } : rfq)
   }, authorizedTarget.id, "admin@lilotopsarl.com"), /coordonnees et la couverture/);
+
+  const sentEvidenceCycle = buildSupplierCycle(schedule, {
+    rfqs: cycle.rfqs.map((rfq, index) => index === authorizedTargetIndex ? {
+      ...rfq,
+      sentAt: "2026-08-14T21:25:22.000Z",
+      emailSent: true,
+      gmailMessageId: "gmail-123",
+      messageIdHeader: "<rfq@example.test>",
+      deliveryStatus: "FAILED",
+      deliveryFailure: { code: "550 5.7.133" }
+    } : rfq)
+  }, new Date("2026-08-15T12:00:00.000Z"));
+  const preserved = sentEvidenceCycle.rfqs.find((rfq) => rfq.id === authorizedTarget.id);
+  assert.equal(preserved.emailSent, true);
+  assert.equal(preserved.gmailMessageId, "gmail-123");
+  assert.equal(preserved.messageIdHeader, "<rfq@example.test>");
+  assert.equal(preserved.deliveryStatus, "FAILED");
+  assert.equal(preserved.deliveryFailure.code, "550 5.7.133");
 
   console.log("UNOPS Malawi RFQ supplier-cycle tests passed.");
 }
