@@ -66,3 +66,24 @@ CREATE TABLE IF NOT EXISTS document_vault_experiences (
 
 CREATE INDEX IF NOT EXISTS document_vault_tender_links_reference_idx
   ON document_vault_tender_links(tender_reference, compliance_status);
+
+WITH latest AS (
+  SELECT DISTINCT ON (v.document_id) v.document_id,
+    lower(d.title || ' ' || d.description || ' ' || v.preview_text) AS content
+  FROM document_vault_versions v
+  JOIN document_vault_documents d ON d.id = v.document_id
+  ORDER BY v.document_id, v.created_at DESC, v.id DESC
+)
+UPDATE document_vault_documents d SET category_code = CASE
+  WHEN latest.content ~ '(rccm|id[[:space:]]*nat|identification nationale|nif|statuts?)' THEN '01-legal-identity'
+  WHEN latest.content ~ '(organigramme|profil société|company profile|curriculum|délégation|pouvoir du signataire)' THEN '05-lilotop-organization'
+  WHEN latest.content ~ '(contrat|purchase order|bon de commande|preuve de livraison|bonne exécution|facture|référence client)' THEN '04-experience-references'
+  WHEN latest.content ~ '(arsp|fiscal|cnss|inpp|hse|attestation|licence|agrément)' THEN '02-compliance'
+  WHEN latest.content ~ '(banque|bancaire|états financiers|capacité financière|garantie)' THEN '03-bank-finance'
+  WHEN latest.content ~ '(oem|fabricant|distributeur|partenariat|catalogue|datasheet|fiche technique)' THEN '06-suppliers-partners'
+  ELSE '07-other' END
+FROM latest WHERE d.id = latest.document_id AND d.category_code = '07-other';
+
+UPDATE document_vault_documents
+SET lifecycle_status='archived', usable_for_tenders=false, updated_at=now()
+WHERE title ILIKE 'DOCUMENT TEST COFFRE%';
