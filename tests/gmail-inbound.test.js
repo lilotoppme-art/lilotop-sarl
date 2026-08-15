@@ -56,6 +56,12 @@ function run() {
   assert.equal(result.extraction.unitPrice, 125.5);
   assert.equal(result.extraction.totalPrice, 753);
   assert.equal(result.extraction.incoterm, "DAP Lilongwe");
+  const classifiedQuote = gmail.classifySupplierResponse({
+    from: "sales@example.test", subject: "Quotation", bodyText: "Currency: USD\nTotal price: 753.00", attachments: [], extraction: result.extraction
+  });
+  assert.equal(classifiedQuote.category, "A. COTATION RECUE");
+  assert.equal(classifiedQuote.quotationExploitable, true);
+  assert.equal(gmail.classifySupplierResponse({ from: "mailer-daemon@example.test", subject: "Delivery Status Notification", bodyText: "Undeliverable" }).category, "F. MESSAGE AUTOMATIQUE");
 
   const uncertain = gmail.processSupplierReply({
     gmailMessageId: "gmail-test-2", from: "unknown@example.test", subject: "Quotation", bodyText: "Thank you"
@@ -90,6 +96,8 @@ function run() {
   assert.match(handlerSource, /excludeOutboundMessages/);
   assert.match(handlerSource, /excludeInternalMessages/);
   assert.match(handlerSource, /internalMailboxes\.includes\(senderMailbox\)/);
+  assert.match(handlerSource, /listMatchedInbound/);
+  assert.match(handlerSource, /sync-supplier-replies/);
   assert.match(orchestratorStoreSource, /rfq_id <> 'NEXUS-INTERNAL-EMAIL-ROUTING-TEST'/);
   assert.match(handlerSource, /includes\("SENT"\)/);
 
