@@ -55,6 +55,17 @@ function redirectToStablePreview(req, res, targetPath) {
   return true;
 }
 
+const PRIVATE_PAGE_PATHS = Object.freeze({
+  "": "/admin/nexus",
+  "crm-page": "/admin/nexus/crm",
+  "document-vault-page": "/admin/nexus/document-vault",
+  "mining-page": "/admin/nexus/mining-watch",
+  "orchestrator-page": "/admin/nexus/orchestrator",
+  "supplier-page": "/admin/nexus/supplier-ai",
+  "tender-page": "/admin/nexus/tender-ai",
+  "tender-response-page": "/admin/nexus/tender-response-ai"
+});
+
 function sendPrivateHtml(res, templateName, authenticated, title, bootstrap = null) {
   const template = fs.readFileSync(path.join(process.cwd(), "admin", templateName), "utf8");
   let html = template
@@ -118,8 +129,8 @@ module.exports = async function handler(req, res) {
     return res.end("Method not allowed");
   }
 
-  if (delegatedHandler === "orchestrator-page"
-      && redirectToStablePreview(req, res, "/admin/nexus/orchestrator")) {
+  const privatePagePath = PRIVATE_PAGE_PATHS[delegatedHandler || ""];
+  if (privatePagePath && redirectToStablePreview(req, res, privatePagePath)) {
     return;
   }
 
@@ -165,3 +176,4 @@ module.exports.config = {
 
 module.exports.previewBranchHost = previewBranchHost;
 module.exports.redirectToStablePreview = redirectToStablePreview;
+module.exports.PRIVATE_PAGE_PATHS = PRIVATE_PAGE_PATHS;

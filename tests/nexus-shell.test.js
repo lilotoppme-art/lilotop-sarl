@@ -133,10 +133,14 @@ assert.ok(pageRoute.includes('require("../lib/business-radar/auth")'));
 assert.ok(pageRoute.includes('"X-Robots-Tag", "noindex, nofollow, noarchive"'));
 assert.ok(pageRoute.includes('delegatedHandler === "admin-password-reset-api"'));
 assert.ok(pageRoute.includes("VERCEL_BRANCH_URL"));
-assert.ok(pageRoute.includes('redirectToStablePreview(req, res, "/admin/nexus/orchestrator")'));
+assert.ok(pageRoute.includes("PRIVATE_PAGE_PATHS"));
 assert.ok(vercelConfig.rewrites.some(({ source }) => source === "/admin/nexus/reset-password"));
 
 const pageHandler = require("../api/nexus-page");
+assert.equal(pageHandler.PRIVATE_PAGE_PATHS[""], "/admin/nexus");
+assert.equal(pageHandler.PRIVATE_PAGE_PATHS["document-vault-page"], "/admin/nexus/document-vault");
+assert.equal(pageHandler.PRIVATE_PAGE_PATHS["orchestrator-page"], "/admin/nexus/orchestrator");
+assert.equal(pageHandler.PRIVATE_PAGE_PATHS["supplier-page"], "/admin/nexus/supplier-ai");
 const previousVercelEnv = process.env.VERCEL_ENV;
 const previousBranchUrl = process.env.VERCEL_BRANCH_URL;
 process.env.VERCEL_ENV = "preview";
