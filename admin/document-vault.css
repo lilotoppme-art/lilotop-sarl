@@ -201,6 +201,11 @@ dialog::backdrop { background: rgb(3 17 35 / 68%); }
 #vault-preview-content iframe { width: 100%; min-height: 620px; border: 1px solid var(--steel-200); }
 #vault-preview-content pre { margin: 0; white-space: pre-wrap; font: 13px/1.6 "Segoe UI", Arial, sans-serif; }
 .vault-dialog-actions { display: flex; justify-content: flex-end; padding: 0 20px 20px; }
+.vault-analysis-notice { margin: 16px 0 0; padding: 12px 14px; border-left: 3px solid var(--gold); background: #fff8e6; color: var(--steel-700); }
+.vault-experience-import { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0; padding: 14px; border: 1px solid var(--steel-200); }
+.vault-experience-import[hidden] { display: none; }
+.vault-experience-import legend { padding: 0 6px; font-weight: 700; }
+.vault-experience-import label { display: grid; gap: 6px; }
 .vault-history { display: grid; gap: 10px; padding: 20px; }
 .vault-history-entry { padding: 14px; border: 1px solid var(--steel-200); background: #f8fafb; }
 .vault-history-entry strong, .vault-history-entry span { display: block; }

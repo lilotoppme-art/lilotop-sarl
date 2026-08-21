@@ -7,7 +7,7 @@ const loginForm = document.getElementById("vault-login-form");
 const loginStatus = document.getElementById("vault-login-status");
 const statusBox = document.getElementById("vault-status");
 const uploadForm = document.getElementById("vault-upload-form");
-const state = { documents: [], selected: null };
+const state = { documents: [], selected: null, analysisReady: false };
 
 const categoryLabels = {
   "01-legal-identity": "01 — Identité légale",
@@ -174,7 +174,11 @@ function resetReplacement() {
   document.getElementById("vault-form-title").textContent = "Ajouter un document";
   document.getElementById("vault-cancel-replacement").hidden = true;
   document.getElementById("vault-selected-file").textContent = "Aucun fichier sélectionné";
+  document.getElementById("vault-analysis-notice").hidden = true;
+  document.getElementById("vault-experience-import").hidden = true;
+  document.getElementById("vault-save").disabled = false;
   state.selected = null;
+  state.analysisReady = false;
 }
 
 function startReplacement(documentId) {
@@ -291,6 +295,7 @@ async function uploadDocument(event) {
   const file = document.getElementById("vault-file").files[0];
   if (!file) return setStatus("Sélectionnez un fichier.", true);
   if (file.size > 3 * 1024 * 1024) return setStatus("Le fichier dépasse la limite de 3 Mo.", true);
+  if (!state.analysisReady) return setStatus("L'analyse préalable du document doit réussir avant l'enregistrement.", true);
   setStatus("Enregistrement et indexation du document…");
   try {
     await api("upload", { method: "POST", body: new FormData(uploadForm) });
@@ -301,6 +306,61 @@ async function uploadDocument(event) {
   } catch (error) {
     body.classList.remove("is-busy");
     setStatus(error.message, true);
+  }
+}
+
+function fillDetected(id, value) {
+  const element = document.getElementById(id);
+  if (element && value) element.value = value;
+}
+
+function applyImportAnalysis(analysis) {
+  fillDetected("vault-title", analysis.title);
+  fillDetected("vault-category", analysis.categoryCode);
+  fillDetected("vault-document-type", analysis.documentType);
+  fillDetected("vault-reference", analysis.reference);
+  fillDetected("vault-authority", analysis.issuingAuthority);
+  fillDetected("vault-version", analysis.version);
+  fillDetected("vault-issued-on", analysis.issuedOn);
+  fillDetected("vault-expires-on", analysis.expiresOn);
+  fillDetected("vault-description", analysis.description);
+  fillDetected("vault-notes", analysis.notes);
+  const experience = analysis.experience;
+  document.getElementById("vault-experience-import").hidden = !experience;
+  if (experience) {
+    fillDetected("vault-experience-client", experience.client);
+    fillDetected("vault-experience-subject", experience.subject);
+    fillDetected("vault-experience-products", experience.productsServices);
+    fillDetected("vault-experience-quantities", experience.quantities);
+    fillDetected("vault-experience-value", experience.value);
+    fillDetected("vault-experience-currency", experience.currency);
+    fillDetected("vault-experience-country", experience.country);
+    fillDetected("vault-experience-delivery-place", experience.deliveryPlace);
+    fillDetected("vault-experience-incoterm", experience.incoterm);
+    fillDetected("vault-experience-lead-time", experience.leadTime);
+    fillDetected("vault-experience-client-reference", experience.clientReference);
+    fillDetected("vault-experience-group-reference", experience.groupReference);
+  }
+  document.getElementById("vault-analysis-notice").hidden = false;
+}
+
+async function analyzeSelectedFile(file) {
+  state.analysisReady = false;
+  document.getElementById("vault-save").disabled = true;
+  document.getElementById("vault-analysis-notice").hidden = true;
+  setStatus("Analyse automatique du document en cours…");
+  const data = new FormData();
+  data.append("vaultFile", file);
+  try {
+    const analysis = await api("analyze", { method: "POST", body: data });
+    applyImportAnalysis(analysis);
+    state.analysisReady = true;
+    setStatus("Informations détectées automatiquement — veuillez vérifier avant enregistrement.");
+    body.classList.remove("is-busy");
+  } catch (error) {
+    setStatus(error.message, true);
+  } finally {
+    document.getElementById("vault-save").disabled = !state.analysisReady;
   }
 }
 
@@ -336,9 +396,8 @@ document.getElementById("vault-file").addEventListener("change", (event) => {
   const file = event.target.files[0];
   document.getElementById("vault-selected-file").textContent =
     file ? `${file.name} · ${formatBytes(file.size)}` : "Aucun fichier sélectionné";
-  if (file && !document.getElementById("vault-title").value) {
-    document.getElementById("vault-title").value = file.name.replace(/\.[^.]+$/, "");
-  }
+  if (file) analyzeSelectedFile(file);
+  else state.analysisReady = false;
 });
 document.getElementById("vault-list").addEventListener("click", (event) => {
   const preview = event.target.closest("[data-preview]");

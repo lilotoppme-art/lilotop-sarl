@@ -54,6 +54,27 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.strictEqual(analysis.experience.client, "Mine Example");
   assert.strictEqual(analysis.experience.value, "");
 
+  const original = Buffer.from("untouched-original");
+  const originalCopy = Buffer.from(original);
+  const poAnalysis = analyzeVaultDocument({
+    sourceFilename: "RM-1202060.pdf", extension: "pdf", buffer: original,
+    previewText: [
+      "PURCHASE ORDER", "Client: GECAMINES", "PO No: RM 1202060",
+      "Issue date: 2024-05-17", "Subject: Fourniture de câbles électriques",
+      "Products: Câbles industriels", "Quantity: 24 bobines", "Amount: 12500 USD",
+      "Country: RDC", "Delivery place: Lubumbashi", "Incoterm: DAP",
+      "Delivery period: 30 jours", "Client reference: GCM-ELEC-24", "Version: 2"
+    ].join("\n")
+  });
+  assert.strictEqual(poAnalysis.categoryCode, "04-experience-references");
+  assert.strictEqual(poAnalysis.title, "Fourniture de câbles électriques");
+  assert.strictEqual(poAnalysis.version, "2");
+  assert.strictEqual(poAnalysis.experience.client, "GECAMINES");
+  assert.strictEqual(poAnalysis.experience.quantities, "24 bobines");
+  assert.strictEqual(poAnalysis.experience.incoterm, "DAP");
+  assert.strictEqual(poAnalysis.experience.groupReference, "RM 1202060");
+  assert.deepStrictEqual(original, originalCopy);
+
   const audit = buildUnopsExperienceAudit([{
     id: "experience-1", title: "PO câbles", description: "Fourniture électrique",
     categoryCode: "04-experience-references", filePresent: true, previewText: "livré avec succès",
@@ -100,6 +121,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(handler.includes('action === "file"'));
   assert.ok(handler.includes('action === "inventory"'));
   assert.ok(handler.includes('action === "unops-experience-audit"'));
+  assert.ok(handler.includes('["analyze", "upload"]'));
   assert.ok(handler.includes('action !== "validate-experience"'));
   assert.ok(handler.includes('req.method === "PATCH"'));
   assert.ok(!handler.includes("DELETE FROM"));
@@ -112,6 +134,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(shell.includes("Date d'expiration"));
   assert.ok(shell.includes("Historique des versions"));
   assert.ok(shell.includes("Document officiel LILOTOP SARL utilisable"));
+  assert.ok(shell.includes("Informations détectées automatiquement"));
 
   const tenderHandler = read("lib/nexus/tender-response-handler.js");
   assert.ok(tenderHandler.includes("documentVaultStore.listDocuments()"));

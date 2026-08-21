@@ -136,15 +136,57 @@
               <label class="wide">Notes internes
                 <textarea id="vault-notes" name="notes" rows="2" maxlength="2000"></textarea>
               </label>
+              <fieldset class="wide vault-experience-import" id="vault-experience-import" hidden>
+                <legend>Métadonnées de l'expérience LILOTOP</legend>
+                <label>Client
+                  <input id="vault-experience-client" name="experienceClient" maxlength="240">
+                </label>
+                <label>Objet
+                  <input id="vault-experience-subject" name="experienceSubject" maxlength="500">
+                </label>
+                <label>Produits / services
+                  <textarea id="vault-experience-products" name="experienceProducts" rows="2" maxlength="1000"></textarea>
+                </label>
+                <label>Quantités
+                  <input id="vault-experience-quantities" name="experienceQuantities" maxlength="500">
+                </label>
+                <label>Montant documenté
+                  <input id="vault-experience-value" name="experienceValue" maxlength="120">
+                </label>
+                <label>Devise
+                  <input id="vault-experience-currency" name="experienceCurrency" maxlength="12">
+                </label>
+                <label>Pays
+                  <input id="vault-experience-country" name="experienceCountry" maxlength="120">
+                </label>
+                <label>Lieu de livraison
+                  <input id="vault-experience-delivery-place" name="experienceDeliveryPlace" maxlength="240">
+                </label>
+                <label>Incoterm
+                  <input id="vault-experience-incoterm" name="experienceIncoterm" maxlength="20">
+                </label>
+                <label>Délai
+                  <input id="vault-experience-lead-time" name="experienceLeadTime" maxlength="240">
+                </label>
+                <label>Référence client
+                  <input id="vault-experience-client-reference" name="experienceClientReference" maxlength="240">
+                </label>
+                <label>Regroupement de l'expérience
+                  <input id="vault-experience-group-reference" name="experienceGroupReference" maxlength="240" placeholder="N° contrat / PO commun aux pièces liées">
+                </label>
+              </fieldset>
               <label class="wide vault-usable-field">
                 <input id="vault-usable" name="usableForTenders" type="checkbox" value="true">
                 <span>Document officiel LILOTOP SARL utilisable dans les appels d'offres</span>
               </label>
             </div>
           </div>
+          <p class="vault-analysis-notice" id="vault-analysis-notice" hidden>
+            Informations détectées automatiquement — veuillez vérifier avant enregistrement.
+          </p>
           <div class="vault-form-actions">
             <button class="button button-secondary" id="vault-cancel-replacement" type="button" hidden>Annuler le remplacement</button>
-            <button class="button button-primary" type="submit">Enregistrer la version</button>
+            <button class="button button-primary" id="vault-save" type="submit">Enregistrer la version</button>
           </div>
         </form>
       </section>
