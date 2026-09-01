@@ -5,7 +5,9 @@ const fs = require("fs");
 const path = require("path");
 const AdmZip = require("adm-zip");
 const ExcelJS = require("exceljs");
-const { analyzeVaultDocument, prepareVaultFile } = require("../lib/nexus/document-vault-files");
+const {
+  analyzePreparedVaultFile, analyzeVaultDocument, prepareVaultFile
+} = require("../lib/nexus/document-vault-files");
 const { buildUnopsExperienceAudit } = require("../lib/nexus/document-vault-matching");
 
 const root = path.resolve(__dirname, "..");
@@ -74,6 +76,44 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.strictEqual(poAnalysis.experience.incoterm, "DAP");
   assert.strictEqual(poAnalysis.experience.groupReference, "RM 1202060");
   assert.deepStrictEqual(original, originalCopy);
+  assert.strictEqual(poAnalysis.documentType, "BON DE COMMANDE / PURCHASE ORDER");
+  assert.strictEqual(poAnalysis.fileFormat, "PDF");
+
+  const scannedPdf = {
+    sourceFilename: "copie-document-test.pdf", extension: "pdf",
+    mimeType: "application/pdf", buffer: Buffer.from("fixture-pdf-sans-texte"),
+    previewText: ""
+  };
+  let ocrRequest;
+  const scannedAnalysis = await analyzePreparedVaultFile(scannedPdf, {}, {
+    openaiApiKey: "test-key-never-sent",
+    openaiModel: "test-model",
+    fetchImpl: async (url, options) => {
+      ocrRequest = { url, body: JSON.parse(options.body) };
+      return {
+        ok: true,
+        json: async () => ({ output_text: JSON.stringify({
+          documentType: "PURCHASE ORDER", clientAuthority: "Client industriel",
+          reference: "PO-2024-001", date: "2024-05-17",
+          subject: "Fourniture d'équipements électriques", supplier: "Fournisseur test",
+          products: "Équipements électriques", quantities: "24 unités", amount: "12500",
+          currency: "USD", deliveryPlace: "Site industriel", incoterm: "DAP",
+          leadTime: "30 jours", signaturesOrStamps: "Signature et cachet visibles"
+        }) })
+      };
+    }
+  });
+  assert.strictEqual(ocrRequest.url, "https://api.openai.com/v1/responses");
+  assert.ok(ocrRequest.body.input[0].content.some((item) => item.type === "input_file"));
+  assert.strictEqual(scannedAnalysis.documentType, "PURCHASE ORDER");
+  assert.strictEqual(scannedAnalysis.fileFormat, "PDF");
+  assert.strictEqual(scannedAnalysis.issuingAuthority, "Client industriel");
+  assert.strictEqual(scannedAnalysis.reference, "PO-2024-001");
+  assert.strictEqual(scannedAnalysis.issuedOn, "2024-05-17");
+  assert.strictEqual(scannedAnalysis.experience.subject, "Fourniture d'équipements électriques");
+  assert.strictEqual(scannedAnalysis.experience.value, "12500");
+  assert.strictEqual(scannedAnalysis.experience.currency, "USD");
+  assert.strictEqual(scannedAnalysis.categoryCode, "04-experience-references");
 
   const audit = buildUnopsExperienceAudit([{
     id: "experience-1", title: "PO câbles", description: "Fourniture électrique",
