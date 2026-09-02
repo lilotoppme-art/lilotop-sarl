@@ -7,7 +7,7 @@ const loginForm = document.getElementById("vault-login-form");
 const loginStatus = document.getElementById("vault-login-status");
 const statusBox = document.getElementById("vault-status");
 const uploadForm = document.getElementById("vault-upload-form");
-const state = { documents: [], selected: null, analysisReady: false };
+const state = { documents: [], selected: null, analysisReady: false, correction: null };
 
 const categoryLabels = {
   "01-legal-identity": "01 — Identité légale",
@@ -129,6 +129,7 @@ function renderDocuments() {
       <div class="vault-actions">
         <button type="button" data-preview="${escapeHtml(item.versionId)}">Aperçu</button>
         <button type="button" data-history="${escapeHtml(item.id)}">Historique</button>
+        <button type="button" data-correct="${escapeHtml(item.versionId)}">Corriger les métadonnées</button>
         <button type="button" data-replace="${escapeHtml(item.id)}">Remplacer</button>
         ${item.experience ? `<button type="button" data-experience="${escapeHtml(item.id)}">Corriger / valider l'expérience</button>` : ""}
       </div>
@@ -176,6 +177,7 @@ function resetReplacement() {
   document.getElementById("vault-selected-file").textContent = "Aucun fichier sélectionné";
   document.getElementById("vault-analysis-notice").hidden = true;
   document.getElementById("vault-experience-import").hidden = true;
+  document.getElementById("vault-experience-association").hidden = true;
   document.getElementById("vault-save").disabled = false;
   state.selected = null;
   state.analysisReady = false;
@@ -260,6 +262,94 @@ function editExperience(documentId) {
   document.getElementById("vault-experience-dialog").showModal();
 }
 
+function comparisonValue(value) {
+  return value ? String(value) : "À confirmer";
+}
+
+function renderCorrectionComparison(current, proposed) {
+  const currentExperience = current.experience || {};
+  const proposedExperience = proposed.experience || {};
+  const rows = [
+    ["Catégorie", categoryLabels[current.categoryCode] || current.categoryCode, categoryLabels[proposed.categoryCode] || proposed.categoryCode],
+    ["Type documentaire", current.documentType, proposed.documentType],
+    ["Client / autorité", current.issuingAuthority, proposed.issuingAuthority],
+    ["Référence PO / contrat", current.reference, proposed.reference],
+    ["Date de livraison", current.issuedOn ? String(current.issuedOn).slice(0, 10) : "", proposed.issuedOn],
+    ["Produits livrés", currentExperience.products_services, proposedExperience.productsServices],
+    ["Quantités livrées", current.extractedMetadata?.experience?.quantities, proposedExperience.quantities],
+    ["Expérience associée proposée", "Aucune association validée", proposed.experienceAssociation?.reference || "Aucune"]
+  ];
+  document.getElementById("vault-correction-comparison").innerHTML = `<table>
+    <thead><tr><th>Métadonnée</th><th>Ancienne valeur</th><th>Nouvelle valeur proposée</th></tr></thead>
+    <tbody>${rows.map(([label, oldValue, newValue]) => `<tr>
+      <th>${escapeHtml(label)}</th><td>${escapeHtml(comparisonValue(oldValue))}</td>
+      <td>${escapeHtml(comparisonValue(newValue))}</td></tr>`).join("")}</tbody></table>`;
+}
+
+async function showMetadataCorrection(versionId) {
+  setStatus("Nouvelle analyse du document original en cours…");
+  try {
+    const result = await api("reanalyze", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ versionId })
+    });
+    state.correction = { versionId, ...result };
+    renderCorrectionComparison(result.current, result.proposed);
+    const associationRow = document.getElementById("vault-association-confirm-row");
+    associationRow.hidden = !result.proposed.experienceAssociation;
+    document.getElementById("vault-association-confirm").checked = false;
+    document.getElementById("vault-correction-confirm").checked = false;
+    document.getElementById("vault-correction-dialog").showModal();
+    setStatus("Correction proposée — validation DG requise avant toute modification.");
+    body.classList.remove("is-busy");
+  } catch (error) {
+    body.classList.remove("is-busy");
+    setStatus(error.message, true);
+  }
+}
+
+async function applyMetadataCorrection(event) {
+  event.preventDefault();
+  if (!state.correction || !document.getElementById("vault-correction-confirm").checked) return;
+  const { current, proposed, versionId } = state.correction;
+  const experience = proposed.experience || {};
+  setStatus("Application de la correction validée par le DG…");
+  try {
+    await api("correct-metadata", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        documentId: current.id, versionId,
+        proposed: {
+          categoryCode: proposed.categoryCode, documentType: proposed.documentType,
+          reference: proposed.reference, issuingAuthority: proposed.issuingAuthority,
+          issuedOn: proposed.issuedOn, description: proposed.description,
+          extractedMetadata: proposed,
+          experience: {
+            clientName: experience.client, subject: experience.subject,
+            sector: experience.sector, productsServices: experience.productsServices,
+            contractNumber: experience.contractNumber, contractDate: experience.date,
+            executionPeriod: experience.executionPeriod, contractValue: experience.value,
+            currency: experience.currency, country: experience.country,
+            executionStatus: experience.executionStatus, clientContact: experience.clientContact,
+            deliveryProofAvailable: experience.deliveryProofAvailable,
+            performanceCertificateAvailable: Boolean(current.experience?.performance_certificate_available)
+          },
+          confirmAssociation: document.getElementById("vault-association-confirm").checked,
+          associationDocumentId: proposed.experienceAssociation?.documentId || ""
+        }
+      })
+    });
+    document.getElementById("vault-correction-dialog").close();
+    state.correction = null;
+    await loadDocuments();
+    setStatus("Métadonnées corrigées. Le fichier original et son historique sont conservés.");
+    body.classList.remove("is-busy");
+  } catch (error) {
+    body.classList.remove("is-busy");
+    setStatus(error.message, true);
+  }
+}
+
 async function saveExperience(event) {
   event.preventDefault();
   const field = (id) => document.getElementById(id).value;
@@ -327,6 +417,12 @@ function applyImportAnalysis(analysis) {
   fillDetected("vault-notes", analysis.notes);
   const experience = analysis.experience;
   document.getElementById("vault-experience-import").hidden = !experience;
+  const association = analysis.experienceAssociation;
+  const associationNotice = document.getElementById("vault-experience-association");
+  associationNotice.hidden = !association;
+  associationNotice.textContent = association
+    ? `Expérience associée proposée : ${association.reference} · Confiance : ${association.confidence} · Validation DG obligatoire`
+    : "";
   if (experience) {
     fillDetected("vault-experience-client", experience.client);
     fillDetected("vault-experience-subject", experience.subject);
@@ -403,15 +499,19 @@ document.getElementById("vault-list").addEventListener("click", (event) => {
   const preview = event.target.closest("[data-preview]");
   const history = event.target.closest("[data-history]");
   const replace = event.target.closest("[data-replace]");
+  const correct = event.target.closest("[data-correct]");
   const experience = event.target.closest("[data-experience]");
   if (preview) showPreview(preview.dataset.preview).catch((error) => setStatus(error.message, true));
   if (history) showHistory(history.dataset.history).catch((error) => setStatus(error.message, true));
   if (replace) startReplacement(replace.dataset.replace);
+  if (correct) showMetadataCorrection(correct.dataset.correct).catch((error) => setStatus(error.message, true));
   if (experience) editExperience(experience.dataset.experience);
 });
 document.getElementById("vault-cancel-replacement").addEventListener("click", resetReplacement);
 document.getElementById("vault-preview-close").addEventListener("click", () => document.getElementById("vault-preview-dialog").close());
 document.getElementById("vault-history-close").addEventListener("click", () => document.getElementById("vault-history-dialog").close());
+document.getElementById("vault-correction-close").addEventListener("click", () => document.getElementById("vault-correction-dialog").close());
+document.getElementById("vault-correction-form").addEventListener("submit", applyMetadataCorrection);
 document.getElementById("vault-experience-close").addEventListener("click", () => document.getElementById("vault-experience-dialog").close());
 document.getElementById("vault-experience-form").addEventListener("submit", saveExperience);
 document.getElementById("vault-logout").addEventListener("click", async () => {

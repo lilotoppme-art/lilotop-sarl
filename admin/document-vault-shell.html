@@ -138,6 +138,7 @@
               </label>
               <fieldset class="wide vault-experience-import" id="vault-experience-import" hidden>
                 <legend>Métadonnées de l'expérience LILOTOP</legend>
+                <p class="wide vault-analysis-notice" id="vault-experience-association" hidden></p>
                 <label>Client
                   <input id="vault-experience-client" name="experienceClient" maxlength="240">
                 </label>
@@ -263,6 +264,27 @@
           <button class="icon-button" id="vault-history-close" type="button" aria-label="Fermer">×</button>
         </div>
         <div class="vault-history" id="vault-history"></div>
+      </dialog>
+
+      <dialog id="vault-correction-dialog">
+        <div class="vault-dialog-header">
+          <div><p class="eyebrow">Validation humaine</p><h2>Correction proposée</h2></div>
+          <button class="icon-button" id="vault-correction-close" type="button" aria-label="Fermer">×</button>
+        </div>
+        <div class="vault-audit-table" id="vault-correction-comparison"></div>
+        <form id="vault-correction-form" class="vault-experience-form">
+          <label class="vault-check">
+            <input id="vault-correction-confirm" type="checkbox" required>
+            Je valide le remplacement des anciennes métadonnées par les valeurs proposées.
+          </label>
+          <label class="vault-check" id="vault-association-confirm-row" hidden>
+            <input id="vault-association-confirm" type="checkbox">
+            Je valide aussi le rattachement à l'expérience proposée et la preuve de livraison.
+          </label>
+          <div class="vault-dialog-actions">
+            <button class="button button-primary" type="submit">Valider la correction</button>
+          </div>
+        </form>
       </dialog>
 
       <dialog id="vault-experience-dialog">

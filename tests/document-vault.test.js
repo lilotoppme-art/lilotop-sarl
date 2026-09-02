@@ -6,7 +6,7 @@ const path = require("path");
 const AdmZip = require("adm-zip");
 const ExcelJS = require("exceljs");
 const {
-  analyzePreparedVaultFile, analyzeVaultDocument, prepareVaultFile
+  analyzePreparedVaultFile, analyzeVaultDocument, prepareVaultFile, proposeExperienceAssociation
 } = require("../lib/nexus/document-vault-files");
 const { buildUnopsExperienceAudit } = require("../lib/nexus/document-vault-matching");
 
@@ -105,7 +105,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   });
   assert.strictEqual(ocrRequest.url, "https://api.openai.com/v1/responses");
   assert.ok(ocrRequest.body.input[0].content.some((item) => item.type === "input_file"));
-  assert.strictEqual(scannedAnalysis.documentType, "PURCHASE ORDER");
+  assert.strictEqual(scannedAnalysis.documentType, "BON DE COMMANDE / PURCHASE ORDER");
   assert.strictEqual(scannedAnalysis.fileFormat, "PDF");
   assert.strictEqual(scannedAnalysis.issuingAuthority, "Client industriel");
   assert.strictEqual(scannedAnalysis.reference, "PO-2024-001");
@@ -114,6 +114,38 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.strictEqual(scannedAnalysis.experience.value, "12500");
   assert.strictEqual(scannedAnalysis.experience.currency, "USD");
   assert.strictEqual(scannedAnalysis.categoryCode, "04-experience-references");
+
+  const deliveryAnalysis = analyzeVaultDocument({
+    sourceFilename: "preuve-livraison-equipement.pdf", extension: "pdf",
+    previewText: [
+      "LILOTOP SARL", "RCCM: CD/TEST/001", "Impôt: A0000000A",
+      "BON DE LIVRAISON", "N° Bon de commande Client Mining SA : PO-2024-077",
+      "Date de livraison: 2024-06-10", "Client Mining SA", "Site industriel",
+      "DESIGNATION", "UNITE", "QUANTITE", "OBSERVATIONS ET RESERVES DU CLIENT",
+      "1", "Banc d'essais électrique 15 kW", "PCE", "2",
+      "Signature et cachet du client", "Réceptionné sans réserve"
+    ].join("\n")
+  });
+  assert.strictEqual(deliveryAnalysis.categoryCode, "04-experience-references");
+  assert.strictEqual(deliveryAnalysis.documentType, "BON DE LIVRAISON");
+  assert.strictEqual(deliveryAnalysis.issuingAuthority, "Client Mining SA");
+  assert.strictEqual(deliveryAnalysis.reference, "PO-2024-077");
+  assert.strictEqual(deliveryAnalysis.issuedOn, "2024-06-10");
+  assert.strictEqual(deliveryAnalysis.experience.productsServices, "Banc d'essais électrique 15 kW");
+  assert.strictEqual(deliveryAnalysis.experience.quantities, "2");
+  assert.strictEqual(deliveryAnalysis.experience.deliveryProofAvailable, true);
+  assert.strictEqual(deliveryAnalysis.experience.performanceCertificateAvailable, false);
+  const association = proposeExperienceAssociation(deliveryAnalysis, [{
+    id: "existing-po", title: "Commande équipement", reference: "PO-2024-077",
+    issuingAuthority: "Client Mining SA", description: "Banc d'essais électrique",
+    experience: {
+      contract_number: "PO-2024-077", client_name: "Client Mining SA",
+      products_services: "Banc d'essais électrique 15 kW"
+    }
+  }]);
+  assert.strictEqual(association.reference, "PO-2024-077");
+  assert.strictEqual(association.confidence, "ÉLEVÉE");
+  assert.strictEqual(association.validationRequired, true);
 
   const audit = buildUnopsExperienceAudit([{
     id: "experience-1", title: "PO câbles", description: "Fourniture électrique",
@@ -161,6 +193,8 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(handler.includes('action === "file"'));
   assert.ok(handler.includes('action === "inventory"'));
   assert.ok(handler.includes('action === "unops-experience-audit"'));
+  assert.ok(handler.includes('action === "reanalyze"'));
+  assert.ok(handler.includes('action === "correct-metadata"'));
   assert.ok(handler.includes('["analyze", "upload"]'));
   assert.ok(handler.includes('action !== "validate-experience"'));
   assert.ok(handler.includes('req.method === "PATCH"'));
@@ -175,6 +209,14 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(shell.includes("Historique des versions"));
   assert.ok(shell.includes("Document officiel LILOTOP SARL utilisable"));
   assert.ok(shell.includes("Informations détectées automatiquement"));
+  assert.ok(shell.includes('id="vault-experience-association"'));
+  assert.ok(shell.includes("Correction proposée"));
+  assert.ok(shell.includes('id="vault-correction-confirm"'));
+
+  assert.ok(store.includes("correctMetadata"));
+  assert.ok(store.includes("correctionHistory"));
+  assert.ok(store.includes("delivery_proof_available=true"));
+  assert.ok(!store.includes("performance_certificate_available=true"));
 
   const tenderHandler = read("lib/nexus/tender-response-handler.js");
   assert.ok(tenderHandler.includes("documentVaultStore.listDocuments()"));
