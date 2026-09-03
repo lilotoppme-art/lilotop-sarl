@@ -158,6 +158,29 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.strictEqual(audit.rows[0].lots[2].status, "À CONFIRMER");
   assert.strictEqual(audit.lots[1].confirmed, 0);
 
+  const linkedProofAudit = buildUnopsExperienceAudit([{
+    id: "po-with-proof", title: "PO outillage", description: "Fourniture d'outillage",
+    documentType: "BON DE COMMANDE / PURCHASE ORDER",
+    categoryCode: "04-experience-references", filePresent: true, previewText: "",
+    sourceFilename: "po-outillage.pdf", experience: {
+      subject: "Fourniture de perceuses", contract_date: "2023-03-10",
+      execution_status: "", delivery_proof_available: true, dg_validated: true
+    }
+  }, {
+    id: "delivery-proof", title: "Bon de livraison", description: "Livraison de perceuses",
+    documentType: "BON DE LIVRAISON", categoryCode: "04-experience-references",
+    filePresent: true, previewText: "BON DE LIVRAISON", sourceFilename: "bl.pdf",
+    extractedMetadata: { experience: { documentRole: "delivery_note" } },
+    experience: {
+      subject: "Livraison de perceuses", contract_date: "2023-03-15",
+      execution_status: "Réceptionné", delivery_proof_available: true, dg_validated: false
+    }
+  }]);
+  assert.strictEqual(linkedProofAudit.rows.length, 1);
+  assert.strictEqual(linkedProofAudit.rows[0].documentId, "po-with-proof");
+  assert.strictEqual(linkedProofAudit.rows[0].lots[1].status, "OUI");
+  assert.ok(!linkedProofAudit.rows[0].lots[1].justification.includes("livraison réussie non prouvée"));
+
   const migration = read("db/migrations/011_document_vault.sql");
   const inventoryMigration = read("db/migrations/016_document_vault_inventory.sql");
   const permanentMigration = read("db/migrations/018_document_vault_permanent.sql");
@@ -216,6 +239,8 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.ok(store.includes("correctMetadata"));
   assert.ok(store.includes("correctionHistory"));
   assert.ok(store.includes("delivery_proof_available=true"));
+  assert.ok(store.includes("associatedEvidence"));
+  assert.ok(store.includes("DELETE FROM document_vault_experiences WHERE document_id=$1"));
   assert.ok(!store.includes("performance_certificate_available=true"));
 
   const tenderHandler = read("lib/nexus/tender-response-handler.js");
