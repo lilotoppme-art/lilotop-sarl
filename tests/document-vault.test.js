@@ -147,6 +147,43 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
   assert.strictEqual(association.confidence, "ÉLEVÉE");
   assert.strictEqual(association.validationRequired, true);
 
+  const gecaminesExperiences = [{
+    id: "rm-1202060", title: "RM 1202060 Q", reference: "RM 1202060 Q",
+    issuingAuthority: "GECAMINES S.A.", experience: {
+      contract_number: "ACH/OPA/01106/2021", client_name: "GECAMINES S.A.",
+      products_services: "Équipement industriel"
+    }
+  }, {
+    id: "rm-1202061", title: "RM 1202061 Q", reference: "RM 1202061 Q",
+    issuingAuthority: "GECAMINES S.A.", experience: {
+      contract_number: "ACH/OPA/01105/2021", client_name: "GECAMINES S.A.",
+      products_services: "Appareil pour mesures électriques SVERKER 780"
+    }
+  }];
+  const proofFor = (reference, productsServices) => ({
+    reference,
+    experience: {
+      documentRole: "delivery_note", groupReference: reference,
+      client: "GECAMINES SA", productsServices
+    }
+  });
+  const association2061 = proposeExperienceAssociation(
+    proofFor("RM 1202061 Q", "SVERKER 780"), gecaminesExperiences
+  );
+  assert.strictEqual(association2061.documentId, "rm-1202061");
+  assert.strictEqual(association2061.reference, "RM 1202061 Q");
+  const association2060 = proposeExperienceAssociation(
+    proofFor("RM 1202060 Q", "SVERKER 780"), gecaminesExperiences
+  );
+  assert.strictEqual(association2060.documentId, "rm-1202060");
+  assert.strictEqual(association2060.reference, "RM 1202060 Q");
+  const ambiguousAssociation = proposeExperienceAssociation(
+    proofFor("RÉFÉRENCE INCONNUE", ""), gecaminesExperiences
+  );
+  assert.strictEqual(ambiguousAssociation.ambiguous, true);
+  assert.strictEqual(ambiguousAssociation.documentId, "");
+  assert.strictEqual(ambiguousAssociation.reference, "ASSOCIATION À CONFIRMER PAR LE DG");
+
   const audit = buildUnopsExperienceAudit([{
     id: "experience-1", title: "PO câbles", description: "Fourniture électrique",
     categoryCode: "04-experience-references", filePresent: true, previewText: "livré avec succès",
