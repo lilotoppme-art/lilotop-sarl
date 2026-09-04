@@ -193,7 +193,26 @@ const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
     }
   }]);
   assert.strictEqual(audit.rows[0].lots[2].status, "À CONFIRMER");
+  assert.ok(audit.rows[0].lots[2].justification.includes("métadonnées non validées par le DG"));
+  assert.ok(!audit.rows[0].lots[2].justification.includes("métadonnées validées par le DG"));
   assert.strictEqual(audit.lots[1].confirmed, 0);
+
+  const validatedSverkerAudit = buildUnopsExperienceAudit([{
+    id: "sverker-experience", title: "RM 1202061 Q",
+    description: "APPAREIL POUR MESURES ELECTRIQUES / SVERKER 780",
+    documentType: "BON DE COMMANDE / PURCHASE ORDER",
+    categoryCode: "04-experience-references", filePresent: true, previewText: "",
+    sourceFilename: "rm-1202061.pdf", validatedBy: "admin@example.test",
+    validatedAt: "2026-09-04T09:00:00.000Z", experience: {
+      subject: "APPAREIL POUR MESURES ELECTRIQUES / SVERKER 780",
+      contract_date: "2021-06-15", execution_status: "",
+      delivery_proof_available: true, dg_validated: false
+    }
+  }]);
+  const sverkerLot2 = validatedSverkerAudit.rows[0].lots[2];
+  assert.strictEqual(sverkerLot2.status, "NON");
+  assert.ok(!sverkerLot2.justification.includes("métadonnées non validées par le DG"));
+  assert.ok(sverkerLot2.justification.includes("appareil de mesure ou de test"));
 
   const linkedProofAudit = buildUnopsExperienceAudit([{
     id: "po-with-proof", title: "PO outillage", description: "Fourniture d'outillage",
