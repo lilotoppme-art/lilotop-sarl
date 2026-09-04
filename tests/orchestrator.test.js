@@ -538,6 +538,27 @@ function testCommercialAnalysisBridge() {
   assert.equal(result.model, "gpt-test");
 }
 
+function testGoNoGoBeforeSourcing() {
+  const { buildGoNoGoAssessment } = require("../lib/nexus/orchestrator-service");
+  const result = buildGoNoGoAssessment({ deadlineAt: "2026-09-15T23:59:59+01:00" }, {
+    lilotopFit: true,
+    opportunityScore: 78,
+    deadline: "2026-09-15T23:59:59+01:00",
+    requiredDocuments: ["Références de contrats HVAC similaires"],
+    requirements: ["Relations avec des partenaires experts et sous-traitance spécialisée"],
+    risks: []
+  }, [], new Date("2026-09-04T12:00:00+01:00"));
+  assert.equal(result.decision, "B");
+  assert.equal(result.stopCostlyWorkflow, false);
+  assert.equal(result.externalActionPerformed, false);
+  const expired = buildGoNoGoAssessment({ deadlineAt: "2026-08-01" }, {
+    lilotopFit: true, opportunityScore: 90, deadline: "2026-08-01",
+    requiredDocuments: [], requirements: [], risks: []
+  }, [], new Date("2026-09-04"));
+  assert.equal(expired.decision, "NO-GO");
+  assert.equal(expired.stopCostlyWorkflow, true);
+}
+
 function testOfficialAttachmentFlow() {
   const service = read("lib/nexus/orchestrator-service.js");
   const handler = read("lib/nexus/orchestrator-handler.js");
@@ -560,6 +581,7 @@ function testOfficialAttachmentFlow() {
 (async () => {
   testArchitecture();
   testCommercialAnalysisBridge();
+  testGoNoGoBeforeSourcing();
   testOfficialAttachmentFlow();
   testInterfaceAndRoutes();
   testUnecaItbMonitoring();
