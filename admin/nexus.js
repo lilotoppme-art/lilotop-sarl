@@ -27,6 +27,38 @@ function formatDateTime(value) {
   }).format(new Date(value));
 }
 
+function pipelineRows(items, emptyText) {
+  if (!items?.length) return `<p>${escapeHtml(emptyText)}</p>`;
+  return `<div class="pipeline-list">${items.map((item, index) => `
+    <div class="pipeline-row">
+      <strong>${index + 1}. ${escapeHtml(item.title)}</strong>
+      <span>${escapeHtml(item.reference || "Sans référence")} · ${escapeHtml(item.country || "Pays à confirmer")}</span>
+      <span>${escapeHtml(item.decision)} · ${escapeHtml(item.priorityScore)}/100 · progression ${escapeHtml(item.progress)}%</span>
+      <span>${item.deadline.remainingHours === null ? "Échéance à confirmer" : `${escapeHtml(item.deadline.remainingHours)} h restantes`}</span>
+      <span>${escapeHtml(item.actionDg)}</span>
+    </div>`).join("")}</div>`;
+}
+
+function renderPipelineBoard(pipeline) {
+  const target = document.getElementById("pipeline-board");
+  const health = document.getElementById("pipeline-health");
+  if (!target || !health || !pipeline) return;
+  health.textContent = pipeline.urgent72h?.length ? `${pipeline.urgent72h.length} urgence(s) <72h` : "Sous contrôle";
+  health.className = `status ${pipeline.urgent72h?.length ? "status-coming" : "status-active"}`;
+  target.innerHTML = `
+    <div class="pipeline-summary">
+      <strong>Nouveaux AO RDC : ${escapeHtml(pipeline.newRdc?.length || 0)}</strong>
+      <strong>En attente priorisée : ${escapeHtml(pipeline.waitingPrioritized?.length || 0)}</strong>
+      <strong>Ready to submit : ${escapeHtml(pipeline.readyToSubmit?.length || 0)}</strong>
+      <strong>No-Go : ${escapeHtml(pipeline.noGo?.length || 0)}</strong>
+    </div>
+    <h3>TOP 3 actifs</h3>
+    ${pipelineRows(pipeline.top3, "Aucun dossier éligible au traitement intensif.")}
+    <h3>Action DG aujourd'hui</h3>
+    ${pipelineRows(pipeline.actionToday, "Aucune action DG urgente.")}
+  `;
+}
+
 function setAuthenticated(authenticated) {
   body.dataset.authenticated = String(authenticated);
   loginScreen.hidden = authenticated;
@@ -209,6 +241,7 @@ async function loadOrchestratorDashboard() {
     const payload = await response.json();
     if (!payload.ok) return;
     const summary = payload.data;
+    renderPipelineBoard(summary.pipeline);
     const values = {
       "orchestrator-active": [summary.activeWorkflows, "Workflows en cours ou à reprendre"],
       "orchestrator-opportunities": [summary.opportunitiesInProgress, "Opportunités prises en charge"],

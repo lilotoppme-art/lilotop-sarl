@@ -513,6 +513,37 @@ a {
   margin-top: 5px;
 }
 
+.pipeline-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pipeline-summary strong,
+.pipeline-row {
+  padding: 12px;
+  border: 1px solid var(--steel-200);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.pipeline-list {
+  display: grid;
+  gap: 8px;
+}
+
+.pipeline-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+  align-items: center;
+  font-size: 12px;
+}
+
+.pipeline-row strong {
+  font-size: 13px;
+}
+
 .surface {
   padding: 26px;
 }
@@ -752,7 +783,9 @@ a {
   .content-grid,
   .executive-grid,
   .module-grid,
-  .role-grid {
+  .role-grid,
+  .pipeline-summary,
+  .pipeline-row {
     grid-template-columns: 1fr;
   }
 
